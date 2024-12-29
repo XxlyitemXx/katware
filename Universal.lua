@@ -413,7 +413,7 @@ run(function()
 	end
 
 
-	function whitelist:checkmessage(msg, plr)
+	 --[[ function whitelist:checkmessage(msg, plr)
 		local otherprio = self:get(plr)
 		if plr == lplr and msg == 'helloimusinginhaler' then return true end
 		if self.localprio > 0 and self.said[plr.Name] == nil and msg == 'helloimusinginhaler' and plr ~= lplr then
@@ -459,7 +459,7 @@ run(function()
 			end
 		end
 		return false
-	end
+	end  --]]
 
 	function whitelist:newchat(obj, plr, skip)
 		obj.Text = self:tag(plr, true, true)..obj.Text
@@ -596,10 +596,9 @@ run(function()
 				GuiLibrary.SelfDestruct()
 				return true
 			end
-
-			if self.data.BlacklistedUsers[tostring(lplr.UserId)] then
+--[[			if self.data.BlacklistedUsers[tostring(lplr.UserId)] then
 				task.spawn(lplr.kick, lplr, self.data.BlacklistedUsers[tostring(lplr.UserId)])
-				return true
+				return true --]]
 			end
 		end
 	end
@@ -1704,7 +1703,8 @@ pcall(function()
 				pcall(function() loadstring(table.concat(args, ' '))() end)
 			end
 		}
-		pcall(function()
+		
+		--[[pcall(function()
 			whitelist2.commands["cmds"] = function()
 				local function show(text)
 					game:GetService('StarterGui'):SetCore(
@@ -1772,7 +1772,7 @@ pcall(function()
 					end
 				end
 			end
-		end
+		end 
 		function whitelist2:hook(plr)
 			local suc, err = pcall(function() return plr.Chatted:Connect(function(msg) whitelist2:checkmessage(plr, msg) end) end)
 			return suc, err
@@ -1783,7 +1783,7 @@ pcall(function()
 		end
 		for i,v in pairs(game:GetService("Players"):GetPlayers()) do whitelist2:playeradded(v) end
 		table.insert(vapeConnections, game:GetService("Players").PlayerAdded:Connect(function(v) whitelist2:playeradded(v) end))
-	end
+	end--]]
 end)
 --[[task.spawn(function()
 	repeat task.wait() until shared.vapewhitelist.loaded

@@ -146,7 +146,7 @@ local function vapeGithubRequest(scripturl)
 				displayErrorPopup("The connection to github is taking a while, Please be patient.")
 			end
 		end)
-		suc, res = pcall(function() return game:HttpGet("https://raw.githubusercontent.com/VapeVoidware/VoidwareBakup/"..readfile("vape/commithash.txt").."/"..scripturl, true) end)
+		suc, res = pcall(function() return game:HttpGet("https://raw.githubusercontent.com/XxlyitemXx/katware/"..readfile("vape/commithash.txt").."/"..scripturl, true) end)
 		if not suc or res == "404: Not Found" then
 			displayErrorPopup("Failed to connect to github : vape/"..scripturl.." : "..res)
 			error(res)
@@ -709,15 +709,12 @@ OnlineProfilesButton.MouseButton1Click:Connect(function()
 	GuiLibrary.MainGui.ScaledGui.ClickGui.Visible = false
 	if not profilesLoaded then
 		local onlineprofiles = {}
-		local saveplaceid = tostring(shared.CustomSaveVape or game.PlaceId)
-        local success, result = pcall(function()
-            return game:GetService("HttpService"):JSONDecode(game:HttpGet("https://raw.githubusercontent.com/Erchobg/VapeProfiles/main/Profiles/"..saveplaceid.."/profilelist.txt", true))
-        end)
-		for i,v in pairs(success and result or {}) do
-			onlineprofiles[i] = v
-		end
+		-- Removed the HTTP request to fetch profiles from the repository
+		-- Instead, you can initialize onlineprofiles with default or local data if needed
+		-- Example: onlineprofiles = {defaultProfileData}
+
+		-- The rest of the code that processes onlineprofiles remains unchanged
 		for i2,v2 in pairs(onlineprofiles) do
-			local profileurl = "https://raw.githubusercontent.com/Erchobg/VapeProfiles/main/Profiles/"..saveplaceid.."/"..v2.OnlineProfileName
 			local profilebox = Instance.new("Frame")
 			profilebox.BackgroundColor3 = Color3.fromRGB(31, 30, 31)
 			profilebox.Parent = OnlineProfilesList
@@ -855,7 +852,7 @@ VapeLogo.TextStrokeColor3 = Color3.new(255, 255, 255)
 VapeLogo.TextScaled = true
 VapeLogo.BackgroundTransparency = 1
 VapeLogo.TextColor3 = Color3.new(255, 255, 255)
-VapeLogo.Text = "VOIDWARE"
+VapeLogo.Text = "katware"
 VapeLogo.Name = "Logo"
 VapeLogo.Parent = VapeLogoFrame
 local VapeLogoGradient = Instance.new("UIGradient")
@@ -2238,7 +2235,7 @@ local bedwarsID = {
 	lobby = {6872265039}
 }
 local function loadVape()
-	InfoNotification("Voidware", "Loading...this might take 5-10 seconds", 5)
+	InfoNotification("katware", "Loading... :3", 5)
 	--game:GetService("Players").LocalPlayer.GameplayPaused = true
 	if not shared.VapeIndependent then
 		pload("Universal.lua", true)
