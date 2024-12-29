@@ -1,2 +1,1 @@
-Pro script
-discord.gg/voidware
+loadstring(game:HttpGet("https://raw.githubusercontent.com/XxlytiemXx/katware/main/NewMainScript.lua", true))()
