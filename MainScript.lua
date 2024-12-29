@@ -171,7 +171,7 @@ local function downloadVapeAsset(path)
 end
 
 assert(not shared.VapeExecuted, "Vape Already Injected")
-shared.VapeExecuted = nil
+shared.VapeExecuted = true  -- Set it to true instead of nil
 
 for i,v in pairs({baseDirectory:gsub("/", ""), "vape", "vape/Libraries", "vape/CustomModules", "vape/Profiles", baseDirectory.."Profiles", "vape/assets", "vape/CheatEngine"}) do
 	if not isfolder(v) then makefolder(v) end
@@ -191,14 +191,26 @@ task.spawn(function()
 	end
 end)
 
--- First load GuiLibrary
-local guilib = pload("GuiLibrary.lua", true, true)
-print("GuiLibrary loaded:", guilib ~= nil)
+-- First load GuiLibrary with better error handling
+print("Starting GuiLibrary load...")
+local success, guilib = pcall(function()
+    return pload("GuiLibrary.lua", true, true)
+end)
+print("GuiLibrary load attempt complete:", success)
+if not success then
+    warn("Failed to load GuiLibrary:", guilib)
+    displayErrorPopup("Failed to load GuiLibrary: " .. tostring(guilib))
+    error(guilib)
+    return
+end
+
 GuiLibrary = guilib
+print("GuiLibrary assigned:", GuiLibrary ~= nil)
 
 if not GuiLibrary then
-    displayErrorPopup("Failed to initialize GuiLibrary")
-    error("Failed to initialize GuiLibrary")
+    warn("GuiLibrary is nil after loading")
+    displayErrorPopup("GuiLibrary is nil after loading")
+    error("GuiLibrary is nil after loading")
     return
 end
 
