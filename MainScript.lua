@@ -170,8 +170,21 @@ local function downloadVapeAsset(path)
 	return getcustomasset(path)
 end
 
-assert(not shared.VapeExecuted, "Vape Already Injected")
-shared.VapeExecuted = true  -- Set it to true instead of nil
+-- Add these debug prints at the start of the script
+print("Initial VapeExecuted state:", shared.VapeExecuted)
+
+-- Then modify the assertion section
+if shared.VapeExecuted then
+    print("Attempting to clean up previous injection...")
+    shared.VapeExecuted = nil
+    -- Give it a moment to clean up
+    task.wait(1)
+end
+
+-- Now set it to true
+shared.VapeExecuted = true
+
+print("VapeExecuted state after setup:", shared.VapeExecuted)
 
 for i,v in pairs({baseDirectory:gsub("/", ""), "vape", "vape/Libraries", "vape/CustomModules", "vape/Profiles", baseDirectory.."Profiles", "vape/assets", "vape/CheatEngine"}) do
 	if not isfolder(v) then makefolder(v) end
