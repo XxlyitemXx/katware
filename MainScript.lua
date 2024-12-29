@@ -158,36 +158,16 @@ local function vapeGithubRequest(scripturl)
 end
 
 local function downloadVapeAsset(path)
-	local executor = (identifyexecutor and identifyexecutor() or "Unknown")
-	if string.find(string.lower(executor), "wave") or shared.CheatEngineMode then
-		return vapeAssetTable[path] or ""
-	else
-		if customassetcheck then
-			if not isfile(path) then
-				task.spawn(function()
-					local textlabel = Instance.new("TextLabel")
-					textlabel.Size = UDim2.new(1, 0, 0, 36)
-					textlabel.Text = "Downloading "..path
-					textlabel.BackgroundTransparency = 1
-					textlabel.TextStrokeTransparency = 0
-					textlabel.TextSize = 30
-					textlabel.Font = Enum.Font.SourceSans
-					textlabel.TextColor3 = Color3.new(1, 1, 1)
-					textlabel.Position = UDim2.new(0, 0, 0, -36)
-					textlabel.Parent = GuiLibrary.MainGui
-					task.wait(0.1)
-					textlabel:Destroy()
-				end)
-				local suc, req = pcall(function() return vapeGithubRequest(path:gsub("vape/assets", "assets")) end)
-				if suc and req then
-					writefile(path, req)
-				else
-					return ""
-				end
-			end
+	if not isfile(path) then
+		local assetName = path:gsub("vape/assets/", "")
+		if vapeAssetTable[path] then
+			return vapeAssetTable[path]
+		else
+			warn("Missing asset:", path)
+			return ""
 		end
-		return getcustomasset(path)
 	end
+	return getcustomasset(path)
 end
 
 assert(not shared.VapeExecuted, "Vape Already Injected")
@@ -216,10 +196,29 @@ local guilib = pload("GuiLibrary.lua", true, true)
 print("GuiLibrary loaded:", guilib ~= nil)
 GuiLibrary = guilib
 
+if not GuiLibrary then
+    displayErrorPopup("Failed to initialize GuiLibrary")
+    error("Failed to initialize GuiLibrary")
+    return
+end
+
+-- Create MainGui if it doesn't exist
+if not GuiLibrary.MainGui then
+    GuiLibrary.MainGui = Instance.new("ScreenGui")
+    GuiLibrary.MainGui.Name = "VapeGui"
+    GuiLibrary.MainGui.Parent = game:GetService("CoreGui")
+end
+
 -- Then load VoidwareFunctions
 local vwfunc = pload("Libraries/VoidwareFunctions.lua", true, true)
 print("VWFunctions loaded:", vwfunc ~= nil)
 VWFunctions = vwfunc
+
+if not VWFunctions then
+    displayErrorPopup("Failed to initialize VoidwareFunctions")
+    error("Failed to initialize VoidwareFunctions")
+    return
+end
 
 -- Add proper initialization check and error handling
 if GuiLibrary then
