@@ -191,7 +191,7 @@ local function downloadVapeAsset(path)
 end
 
 assert(not shared.VapeExecuted, "Vape Already Injected")
-shared.VapeExecuted = true
+shared.VapeExecuted = nil
 
 for i,v in pairs({baseDirectory:gsub("/", ""), "vape", "vape/Libraries", "vape/CustomModules", "vape/Profiles", baseDirectory.."Profiles", "vape/assets", "vape/CheatEngine"}) do
 	if not isfolder(v) then makefolder(v) end
