@@ -19,7 +19,7 @@ end
 local delfile = delfile or function(file) writefile(file, "") end
 if not isfolder(baseDirectory) then makefolder(baseDirectory) end
 
-local url = shared.RiseMode and "https://github.com/XxlyitemXx/katware/" or "https://github.com/XxlyitemXx/katware"
+local url = shared.RiseMode and "https://github.com/XxlyitemXx/katware/"
 if not shared.VapeDeveloper then 
 	local commit = "main"
 	if commit then
@@ -36,23 +36,23 @@ if not shared.VapeDeveloper then
 end
 
 local function vapeGithubRequest(scripturl, isImportant)
+    print("Attempting to load: " .. scripturl)
     if isfile(baseDirectory..scripturl) then
-        if not shared.VoidDev then
-            pcall(function() delfile(baseDirectory..scripturl) end)
-        else
-            return readfile(baseDirectory..scripturl) 
-        end
+        print("File exists locally")
+        return readfile(baseDirectory..scripturl)
     end
     local suc, res
-    local url = (scripturl == "MainScript.lua" or scripturl == "GuiLibrary.lua") and shared.RiseMode and "https://raw.githubusercontent.com/XxlyitemXx/katware/" or "https://raw.githubusercontent.com/XxlyitemXx/katware/"
-    suc, res = pcall(function() return game:HttpGet(url..readfile(baseDirectory.."commithash2.txt").."/"..scripturl, true) end)
+    local url = "https://raw.githubusercontent.com/XxlyitemXx/katware/main/"
+    print("Requesting from URL:", url..scripturl)
+    suc, res = pcall(function() 
+        return game:HttpGet(url..scripturl, true) 
+    end)
     if not suc or res == "404: Not Found" then
+        print("Failed to fetch file:", res)
         if isImportant then
-            game:GetService("Players").LocalPlayer:Kick("Failed to connect to github : "..baseDirectory..scripturl.." : "..res)
+            warn("Failed to connect to github:", baseDirectory..scripturl, res)
         end
-        warn(baseDirectory..scripturl, res)
     end
-    if scripturl:find(".lua") then res = "--This watermark is used to delete the file if its cached, remove it to make the file persist after commits.\n"..res end
     return res
 end
 
@@ -87,4 +87,5 @@ end
 
 shared.pload = pload
 getgenv().pload = pload
+print("finished test 1")
 return pload("MainScript.lua", true)
