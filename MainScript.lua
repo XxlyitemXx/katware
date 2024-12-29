@@ -211,11 +211,37 @@ task.spawn(function()
 	end
 end)
 
-GuiLibrary = pload("GuiLibrary.lua", true, true)
-VWFunctions = pload("Libraries/VoidwareFunctions.lua", true, true)
+-- First load GuiLibrary
+local guilib = pload("GuiLibrary.lua", true, true)
+print("GuiLibrary loaded:", guilib ~= nil)
+GuiLibrary = guilib
 
-GuiLibrary.SelfDestructEvent.Event:Connect(function() VWFunctions.SelfDestructEvent:Fire() end)
+-- Then load VoidwareFunctions
+local vwfunc = pload("Libraries/VoidwareFunctions.lua", true, true)
+print("VWFunctions loaded:", vwfunc ~= nil)
+VWFunctions = vwfunc
 
+-- Add proper initialization check and error handling
+if GuiLibrary then
+    -- Create SelfDestructEvent if it doesn't exist
+    GuiLibrary.SelfDestructEvent = GuiLibrary.SelfDestructEvent or Instance.new("BindableEvent")
+    
+    -- Now connect the events with proper checks
+    if VWFunctions and VWFunctions.SelfDestructEvent then
+        GuiLibrary.SelfDestructEvent.Event:Connect(function() 
+            if VWFunctions and VWFunctions.SelfDestructEvent then
+                VWFunctions.SelfDestructEvent:Fire() 
+            end
+        end)
+        print("Successfully connected SelfDestructEvent")
+    else
+        warn("VWFunctions or SelfDestructEvent not properly initialized")
+    end
+else
+    warn("GuiLibrary not properly initialized")
+end
+
+-- Continue with the rest of your existing code
 VWFunctions.GlobaliseObject("GuiLibrary", GuiLibrary)
 VWFunctions.GlobaliseObject("VoidwareFunctions", VWFunctions)
 VWFunctions.GlobaliseObject("VWFunctions", VWFunctions)
