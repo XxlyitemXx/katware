@@ -32,7 +32,7 @@ local function  downloadFile(path, func)
     local fullPath = rootFolder .. path
     if not isfile(fullPath) then
         local suc, res = pcall(function()
-            return game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware/refs/heads/main/'..select(1, path), true)
+            return game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware/refs/heads/main/'..path, true)
         end)
         if not suc or res == "404: Not Found" then
             error(res)
@@ -98,17 +98,17 @@ shared.vape = vape
 
 if not shared.VapeIndependent then
 	loadstring(downloadFile('games/universal.lua'), 'universal')()
-	local gameSpecificPath = 'games/'..game.PlaceId..'.lua'
-	if isfile(gameSpecificPath) then
-		loadstring(readfile(gameSpecificPath), tostring(game.PlaceId))(...)
-	else
+    local gameSpecificPath = 'games/'..game.PlaceId..'.lua'
+	if isfile(rootFolder..gameSpecificPath) then
+		loadstring(readfile(rootFolder..gameSpecificPath), tostring(game.PlaceId))(...)
+    else
 		if not shared.VapeDeveloper then
 			local suc, res = pcall(function()
 				return game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware'..'/games/'..game.PlaceId..'.lua', true)
 			end)
 			if suc and res ~= '404: Not Found' then
                 downloadFile(gameSpecificPath)
-				loadstring(readfile(gameSpecificPath), tostring(game.PlaceId))(...)
+				loadstring(readfile(rootFolder..gameSpecificPath), tostring(game.PlaceId))(...)
 			end
 		end
 	end
