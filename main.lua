@@ -28,7 +28,7 @@ local playersService = cloneref(game:GetService('Players'))
 local function  downloadFile(path, func)
     if not isfile(path) then
         local suc, res = pcall(function()
-            return game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware/refs/heads/main'..select(1, path:gsub('katware/', '')), true)
+            return game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware/refs/heads/main/'..select(1, path:gsub('katware/', '')), true)
         end)
         if not suc or res == "404: Not Found" then
             error(res)
@@ -87,17 +87,17 @@ local gui = readfile('katware/profiles/gui.txt')
 if not isfolder('katware/assets/'..gui) then
 	makefolder('katware/assets/'..gui)
 end
-vape = loadstring(downloadFile('katware/guis/'..gui..'.lua'), 'gui')()
+vape = loadstring(downloadFile('guis/'..gui..'.lua'), 'gui')()
 shared.vape = vape
 
 if not shared.VapeIndependent then
-	loadstring(downloadFile('katware/games/universal.lua'), 'universal')()
-	if isfile('katware/games/'..game.PlaceId..'.lua') then
-		loadstring(readfile('katware/games/'..game.PlaceId..'.lua'), tostring(game.PlaceId))(...)
+	loadstring(downloadFile('games/universal.lua'), 'universal')()
+	if isfile('/games/'..game.PlaceId..'.lua') then
+		loadstring(readfile('games/'..game.PlaceId..'.lua'), tostring(game.PlaceId))(...)
 	else
 		if not shared.VapeDeveloper then
 			local suc, res = pcall(function()
-				return game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/VapeV4'..'/games/'..game.PlaceId..'.lua', true)
+				return game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware'..'/games/'..game.PlaceId..'.lua', true)
 			end)
 			if suc and res ~= '404: Not Found' then
 				loadstring(downloadFile('katware/games/'..game.PlaceId..'.lua'), tostring(game.PlaceId))(...)
