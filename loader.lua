@@ -15,9 +15,6 @@ local function  downloadFile(path, func)
         if not suc or res == "404: Not Found" then
             error(res)
         end
-        if path:find(".lua") then
-            res = "-- nn"
-        end
         writefile(path, res)
     end
     return (func or readfile)(path)
