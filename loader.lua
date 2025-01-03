@@ -38,4 +38,4 @@ for _, folder in {"katware", "katware/games", "katware/profile", "katware/assets
         makefolder(folder)
     end
 end
-loadstring(downloadFile("katware/main.lua"))()
+loadstring(downloadFile("/main.lua"))()
