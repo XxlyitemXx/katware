@@ -10,7 +10,7 @@ end
 local function  downloadFile(path, func)
     if not isfile(path) then
         local suc, res = pcall(function()
-            return game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware/main'..select(1, path:gsub('katware/', '')), true)
+            return game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware/refs/heads/main/'..select(1, path:gsub('katware/', '')), true)
         end)
         if not suc or res == "404: Not Found" then
             error(res)
