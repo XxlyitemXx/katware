@@ -87,7 +87,7 @@ local gui = readfile('katware/profiles/gui.txt')
 if not isfolder('katware/assets/'..gui) then
 	makefolder('katware/assets/'..gui)
 end
-vape = loadstring(downloadFile('katware/guis/'..gui..'.lua'), 'gui')()
+vape = loadstring(downloadFile('guis/'..gui..'.lua'), 'gui')()
 shared.vape = vape
 
 if not shared.VapeIndependent then
