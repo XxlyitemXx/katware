@@ -87,7 +87,7 @@ local gui = readfile('katware/profiles/gui.txt')
 if not isfolder('katware/assets/'..gui) then
 	makefolder('katware/assets/'..gui)
 end
-vape = loadstring(downloadFile('guis/'..gui..'.lua'), 'gui')()
+vape = loadstring(downloadFile('katware/guis/'..gui..'.lua'), 'gui')()
 shared.vape = vape
 
 if not shared.VapeIndependent then
@@ -100,7 +100,7 @@ if not shared.VapeIndependent then
 				return game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware'..'/games/'..game.PlaceId..'.lua', true)
 			end)
 			if suc and res ~= '404: Not Found' then
-				loadstring(downloadFile('katware/games/'..game.PlaceId..'.lua'), tostring(game.PlaceId))(...)
+				loadstring(downloadFile('games/'..game.PlaceId..'.lua'), tostring(game.PlaceId))(...)
 			end
 		end
 	end
