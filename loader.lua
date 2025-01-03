@@ -16,7 +16,7 @@ local function  downloadFile(path, func)
             error(res)
         end
         if path:find(".lua") then
-            res = "nn"
+            res = "-- nn"
         end
         writefile(path, res)
     end
