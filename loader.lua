@@ -34,17 +34,17 @@ local function downloadFile(url, path)
   end
   
   -- URL of the repository
-  local repoUrl = "https://api.github.com/repos/XxlyitemXx/katware/contents"
+local repoUrl = "https://api.github.com/repos/XxlyitemXx/katware/contents"
   
   -- Get the list of files in the repository
-  local files = getRepoFiles(repoUrl)
+local files = getRepoFiles(repoUrl)
   
   -- Download each file
-  for _, file in ipairs(files) do
+for _, file in ipairs(files) do
 	local url = "https://raw.githubusercontent.com/XxlyitemXx/katware/main/" .. file
 	local path = "katware/" .. file
 	downloadFile(url, path)
-  end
-  
-  print("Finished downloading all files.")
-  loadfile('katware/main.lua')()
+end
+
+print("Finished downloading all files.")
+loadfile('katware/main.lua')()

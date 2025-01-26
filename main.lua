@@ -3,120 +3,58 @@ if shared.vape then shared.vape:Uninject() end
 print("Injecting Katware | BIG THANKS TO 7GrandDadPGN! Check out his work vapeV4!")
 print("https://github.com/7GrandDadPGN/VapeV4ForRoblox")
 
-local vape
-local loadstring = function(...)
-	local res, err = loadstring(...)
-	if err and vape then
-		vape:CreateNotification('Katware', 'Failed to load : '..err, 30, 'alert')
-	end
-	return res
-end
-local queue_on_teleport = queue_on_teleport or function() end
-local isfile = isfile or function(file)
-	local suc, res = pcall(function()
-		return readfile(file)
-	end)
-	return suc and res ~= nil and res ~= ''
-end
-local cloneref = cloneref or function(obj)
-	return obj
-end
-local playersService = cloneref(game:GetService('Players'))
+local baseurl = "https://raw.githubusercontent.com/XxlyitemXx/katware/main/" -- Base URL for the repository
 
-local function downloadFile(path, func)
-	if not isfile(path) then
-		local suc, res = pcall(function()
-			return game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware'..readfile('katware/profiles/commit.txt')..'/'..select(1, path:gsub('katware/', '')), true)
-		end)
-		if not suc or res == '404: Not Found' then
-			error(res)
-		end
-		if path:find('.lua') then
-			res = '--This watermark is used to delete the file if its cached, remove it to make the file persist after vape updates.\n'..res
-		end
-		writefile(path, res)
-	end
-	return (func or readfile)(path)
-end
+local function download_files(dir)
+    local path = dir:gsub("/", "/").."/"
+    local full_url = baseurl .. path
 
-local function finishLoading()
-	vape.Init = nil
-	vape:Load()
-	task.spawn(function()
-		repeat
-			vape:Save()
-			task.wait(10)
-		until not vape.Loaded
-	end)
+    local success, result = pcall(function()
+        return game:HttpGet(full_url)
+    end)
+    if not success then
+        print("Failed to request file list at " .. full_url)
+        return
+    end
 
-	local teleportedServers
-	vape:Clean(playersService.LocalPlayer.OnTeleport:Connect(function()
-		if (not teleportedServers) and (not shared.VapeIndependent) then
-			teleportedServers = true
-			local teleportScript = [[
-				shared.vapereload = true
-				if shared.VapeDeveloper then
-					loadstring(readfile('katware/loader.lua'), 'loader')()
-				else
-					loadstring(game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware'..readfile('katware/profiles/commit.txt')..'/loader.lua', true), 'loader')()
-				end
-			]]
-			if shared.VapeDeveloper then
-				teleportScript = 'shared.VapeDeveloper = true\n'..teleportScript
-			end
-			if shared.VapeCustomProfile then
-				teleportScript = 'shared.VapeCustomProfile = "'..shared.VapeCustomProfile..'"\n'..teleportScript
-			end
-			vape:Save()
-			queue_on_teleport(teleportScript)
-		end
-	end))
+    for _, v in pairs(game:GetService('HttpService'):JSONDecode(result)) do
+        local file_type = v.type
+        local file_path = path .. v.name
+        local file_url = baseurl .. file_path
 
-	if not shared.vapereload then
-		if not vape.Categories then return end
-		if vape.Categories.Main.Options['GUI bind indicator'].Enabled then
-			vape:CreateNotification('Katware Finished Loading', vape.VapeButton and 'Press the button in the top right to open GUI' or 'Press '..table.concat(vape.Keybind, ' + '):upper()..' to open GUI', 5)
-		end
-	end
+        if file_type == "file" then
+            local file_success, file_result = pcall(function()
+                return game:HttpGet(file_url)
+            end)
+            if file_success then
+                local local_path = "katware/" .. file_path
+                local folder = string.match(local_path, "(.+)/.+")
+                if folder then
+                    if not isfolder(folder) then
+                        makefolder(folder)
+                    end
+                end
+                if not isfile(local_path) then
+                    writefile(local_path, file_result)
+                    print("Downloaded: " .. file_path)
+                else
+                     print("File already exists: " .. file_path)
+                end
+            else
+                print("Failed to download: " .. file_path)
+            end
+        elseif file_type == "dir" then
+            download_files(file_path:gsub("katware/", ""))
+        end
+    end
 end
 
-if not isfile('katware/profiles/gui.txt') then
-	writefile('katware/profiles/gui.txt', 'new')
-end
-local gui = readfile('katware/profiles/gui.txt')
-
-if not isfolder('katware/assets/'..gui) then
-	makefolder('katware/assets/'..gui)
+if not isfolder("katware") then
+    makefolder("katware")
 end
 
-if not isfile('katware/profiles/gui.txt') then
-	writefile('katware/profiles/gui.txt', 'new')
-end
-local gui = readfile('katware/profiles/gui.txt')
-
-if not isfolder('katware/assets/'..gui) then
-	makefolder('katware/assets/'..gui)
-end
-vape = loadstring(downloadFile('katware/guis/'..gui..'.lua'), 'gui')()
-shared.vape = vape
-loadfile('katware/detector.lua')()
-vape:CreateNotification('Katware Finished Loading', vape.VapeButton and 'Press the button in the top right to open GUI (whatever i did)' or 'Press '..table.concat(vape.Keybind, ' + '):upper()..' to open GUI', 5)
-if not shared.VapeIndependent then
-	loadstring(downloadFile('katware/games/universal.lua'), 'universal')()
-	if isfile('katware/games/'..game.PlaceId..'.lua') then
-		loadstring(readfile('katware/games/'..game.PlaceId..'.lua'), tostring(game.PlaceId))(...)
-	else
-		if not shared.VapeDeveloper then
-			local suc, res = pcall(function()
-				return game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware'..'/games/'..game.PlaceId..'.lua', true)
-			end)
-			if suc and res ~= '404: Not Found' then
-				loadstring(downloadFile('katware/games/'..game.PlaceId..'.lua'), tostring(game.PlaceId))(...)
-			end
-		end
-	end
-	finishLoading()
-else
-	vape.Init = finishLoading
-	return vape
-end
+download_files("games")
+download_files("assets")
+download_files("libraries")
+download_files("guis")
+print("Finished downloading necessary files.")
