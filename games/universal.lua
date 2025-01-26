@@ -16,7 +16,7 @@ end
 local function downloadFile(path, func)
 	if not isfile(path) then
 		local suc, res = pcall(function()
-			return game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware'..'/'..select(1, path:gsub('katware/', '')), true)
+			return game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware'..readfile('katware/profiles/commit.txt')..'/'..select(1, path:gsub('katware/', '')), true)
 		end)
 		if not suc or res == '404: Not Found' then
 			error(res)
@@ -548,12 +548,12 @@ run(function()
 	function whitelist:update(first)
 		local suc = pcall(function()
 			local _, subbed = pcall(function()
-				return game:HttpGet('https://github.com/7GrandDadPGN/whitelists')
+				return game:HttpGet('https://github.com/XxlyitemXx/wl')
 			end)
 			local commit = subbed:find('currentOid')
 			commit = commit and subbed:sub(commit + 13, commit + 52) or nil
 			commit = commit and #commit == 40 and commit or 'main'
-			whitelist.textdata = game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/wl/PlayerWhitelist.json', true)
+			whitelist.textdata = game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/wl/refs/heads/main/PlayerWhitelist.json', true)
 		end)
 		if not suc or not hash or not whitelist.get then return true end
 		whitelist.loaded = true
@@ -6937,7 +6937,7 @@ run(function()
 					decal:Play()
 				else
 					local decal = Instance.new('ImageLabel')
-					decal.Image = Texture.Value ~= '' and (Texture.Value:find('rbxasset') and Texture.Value or assetfunction(Texture.Value)) or 'rbxassetid://130692101766232'
+					decal.Image = Texture.Value ~= '' and (Texture.Value:find('rbxasset') and Texture.Value or assetfunction(Texture.Value)) or 'rbxassetid://119061648067787'
 					decal.Size = UDim2.fromScale(1, 1)
 					decal.BackgroundTransparency = 1
 					decal.Parent = capesurface
@@ -7711,7 +7711,30 @@ run(function()
 		Suffix = '%'
 	})
 end)
-	
+--[[run(function()
+	local FullBright
+	FullBright = vape.Legit:CreateModule({
+		Name = 'Full Bright',
+		Function = function(callback)
+			if callback then
+				local enabled = true
+				game:GetService("Lighting").Ambient = Color3.fromRGB(255, 255, 255)
+				game:GetService("Lighting").OutdoorAmbient = Color3.fromRGB(255, 255, 255)
+				game:GetService("Lighting").Brightness = 10
+				game:GetService("Lighting").GlobalShadows = false
+				game:GetService("Lighting").FogEnd = 100000
+			end
+			if enabled.false then
+				game:GetService("Lighting").Ambient = Color3.fromRGB(0, 0, 0)
+				game:GetService("Lighting").OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+				game:GetService("Lighting").Brightness = 2
+				game:GetService("Lighting").GlobalShadows = true
+				game:GetService("Lighting").FogEnd = 1000
+			end
+		end,
+		Tooltip = 'Makes the game brighter'
+	})
+end) ]]--
 run(function()
 	local Speedmeter
 	local label
@@ -7792,4 +7815,21 @@ run(function()
 	})
 	
 end)
-print('loaded univeral.lua')
+
+run(function()
+	Infinityyield = vape.Categories.Utility:CreateModule(
+		{
+			Name = 'Infinity Yield',
+			Function = function(callback)
+				if callback then
+					loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
+				end
+			end,
+			Tooltip = 'Runs the infamous Infinity Yield script'
+		}
+	)
+
+end)
+
+
+print('Loaded univeral.lua')

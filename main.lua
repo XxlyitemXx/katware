@@ -1,9 +1,7 @@
 repeat task.wait() until game:IsLoaded()
 if shared.vape then shared.vape:Uninject() end
-
-if identifyexecutor and ({identifyexecutor()})[1] == 'Argon' then
-	getgenv().setthreadidentity = nil
-end
+print("Injecting Katware | BIG THANKS TO 7GrandDadPGN! Check out his work vapeV4!")
+print("https://github.com/7GrandDadPGN/VapeV4ForRoblox")
 
 local vape
 local loadstring = function(...)
@@ -28,7 +26,7 @@ local playersService = cloneref(game:GetService('Players'))
 local function downloadFile(path, func)
 	if not isfile(path) then
 		local suc, res = pcall(function()
-			return game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware'..select(1, path:gsub('katware/', '')), true)
+			return game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware'..readfile('katware/profiles/commit.txt')..'/'..select(1, path:gsub('katware/', '')), true)
 		end)
 		if not suc or res == '404: Not Found' then
 			error(res)
@@ -60,7 +58,7 @@ local function finishLoading()
 				if shared.VapeDeveloper then
 					loadstring(readfile('katware/loader.lua'), 'loader')()
 				else
-					loadstring(game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware'..'/loader.lua', true), 'loader')()
+					loadstring(game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware'..readfile('katware/profiles/commit.txt')..'/loader.lua', true), 'loader')()
 				end
 			]]
 			if shared.VapeDeveloper then
@@ -77,7 +75,7 @@ local function finishLoading()
 	if not shared.vapereload then
 		if not vape.Categories then return end
 		if vape.Categories.Main.Options['GUI bind indicator'].Enabled then
-			vape:CreateNotification('Kittykat Finished Loading', vape.VapeButton and 'Press the button in the top right to open GUI (whatever i did)' or 'Press '..table.concat(vape.Keybind, ' + '):upper()..' to open GUI', 5)
+			vape:CreateNotification('Katware Finished Loading', vape.VapeButton and 'Press the button in the top right to open GUI' or 'Press '..table.concat(vape.Keybind, ' + '):upper()..' to open GUI', 5)
 		end
 	end
 end
@@ -90,9 +88,19 @@ local gui = readfile('katware/profiles/gui.txt')
 if not isfolder('katware/assets/'..gui) then
 	makefolder('katware/assets/'..gui)
 end
+
+if not isfile('katware/profiles/gui.txt') then
+	writefile('katware/profiles/gui.txt', 'new')
+end
+local gui = readfile('katware/profiles/gui.txt')
+
+if not isfolder('katware/assets/'..gui) then
+	makefolder('katware/assets/'..gui)
+end
 vape = loadstring(downloadFile('katware/guis/'..gui..'.lua'), 'gui')()
 shared.vape = vape
-
+loadfile('katware/detector.lua')()
+vape:CreateNotification('Katware Finished Loading', vape.VapeButton and 'Press the button in the top right to open GUI (whatever i did)' or 'Press '..table.concat(vape.Keybind, ' + '):upper()..' to open GUI', 5)
 if not shared.VapeIndependent then
 	loadstring(downloadFile('katware/games/universal.lua'), 'universal')()
 	if isfile('katware/games/'..game.PlaceId..'.lua') then

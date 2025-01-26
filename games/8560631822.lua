@@ -2,7 +2,7 @@ local vape = shared.vape
 local loadstring = function(...)
 	local res, err = loadstring(...)
 	if err and vape then 
-		vape:CreateNotification('Vape', 'Failed to load : '..err, 30, 'alert') 
+		vape:CreateNotification('Katware', 'Failed to load : '..err, 30, 'alert') 
 	end
 	return res
 end
@@ -15,7 +15,7 @@ end
 local function downloadFile(path, func)
 	if not isfile(path) then
 		local suc, res = pcall(function() 
-			return game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware'..'/'..select(1, path:gsub('katware/', '')), true) 
+			return game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware'..readfile('katware/profiles/commit.txt')..'/'..select(1, path:gsub('katware/', '')), true) 
 		end)
 		if not suc or res == '404: Not Found' then 
 			error(res) 
@@ -34,7 +34,7 @@ if isfile('katware/games/'..vape.Place..'.lua') then
 else
 	if not shared.VapeDeveloper then
 		local suc, res = pcall(function() 
-			return game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware'..'/games/'..vape.Place..'.lua', true) 
+			return game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware'..readfile('katware/profiles/commit.txt')..'/games/'..vape.Place..'.lua', true) 
 		end)
 		if suc and res ~= '404: Not Found' then
 			loadstring(downloadFile('katware/games/'..vape.Place..'.lua'), 'bedwars')()

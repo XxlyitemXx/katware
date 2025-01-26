@@ -1,5 +1,5 @@
 
-print('start load [gameid].lua')
+print('Starting script... (Bedwars) | @rinnnaaaa_ Big Thanks to 7GrandDadPGN')
 local run = function(func)
 	func()
 end
@@ -12,6 +12,7 @@ local vapeEvents = setmetatable({}, {
 		return self[index]
 	end
 })
+local vapeInjected = true
 
 local playersService = cloneref(game:GetService('Players'))
 local replicatedStorage = cloneref(game:GetService('ReplicatedStorage'))
@@ -538,7 +539,7 @@ run(function()
 							end)
 						end
 
-						task.delay(0.1, function()
+						task.delay(0.6, function()
 							if bedwars.getInventory then
 								store.inventories[plr] = bedwars.getInventory(plr)
 							end
@@ -691,7 +692,6 @@ run(function()
 		CannonLaunch = debug.getconstants(Knit.Controllers.CannonHandController.launchSelf),
 		ConsumeItem = debug.getconstants(debug.getproto(Knit.Controllers.ConsumeController.onEnable, 1)),
 		ConsumeSoul = debug.getconstants(Knit.Controllers.GrimReaperController.consumeSoul),
-		ConsumeTreeOrb = debug.getconstants(debug.getproto(debug.getproto(Knit.Controllers.BigmanController.KnitStart, 1), 2)),
 		DepositPinata = debug.getconstants(debug.getproto(debug.getproto(Knit.Controllers.PiggyBankController.KnitStart, 2), 5)),
 		DragonBreath = debug.getconstants(debug.getproto(Knit.Controllers.VoidDragonController.KnitStart, 4)),
 		DragonEndFly = debug.getconstants(debug.getproto(Knit.Controllers.VoidDragonController.flapWings, 1)),
@@ -710,7 +710,7 @@ run(function()
 		ReportPlayer = debug.getconstants(require(lplr.PlayerScripts.TS.controllers.global.report['report-controller']).default.reportPlayer),
 		ResetCharacter = debug.getconstants(debug.getproto(Knit.Controllers.ResetController.createBindable, 1)),
 		SpawnRaven = debug.getconstants(Knit.Controllers.RavenController.spawnRaven),
-		SummonerClawAttack = debug.getconstants(Knit.Controllers.SummonerClawController.attack)
+		SummonerClawAttack = debug.getconstants(Knit.Controllers.SummonerClawController.attack),		
 	}
 
 	local function dumpRemote(tab)
@@ -727,7 +727,7 @@ run(function()
 	for i, v in remoteNames do
 		local remote = dumpRemote(v)
 		if remote == '' then
-			notif('Vape', 'Failed to grab remote ('..i..')', 10, 'alert')
+			notif('Katware', 'Failed to grab remote ('..i..')', 10, 'alert')
 		end
 		remotes[i] = remote
 	end
@@ -1567,63 +1567,68 @@ run(function()
         if plr.Character:FindFirstChild("Humanoid").Health < 0.11 then return false end
         return true
     end
-    local GodMode = {Enabled = false, isTeleporting = false, lastPosition = nil}
-    GodMode = vape.Categories.Blatant:CreateModule({
-        Name = "AntiHit/Godmode",
-        Function = function(callback)
-            if callback then
-                task.spawn(function()
-                    repeat task.wait()
-                        if GodMode.Enabled and not vape.Modules.InfiniteFly.Enabled and not vape.Module.Fly.Api.Enabled and IsAlive(lplr) and not GodMode.isTeleporting then
-                            for _, v in ipairs(Players:GetPlayers()) do
-                                if v ~= lplr and v.Team ~= lplr.Team and IsAlive(v) and IsAlive(lplr) then
-                                    local targetDistance = lplr:DistanceFromCharacter(v.Character.HumanoidRootPart.Position)
-                                    if targetDistance < 25 then
-                                        GodMode.isTeleporting = true
-                                        GodMode.lastPosition = lplr.Character.HumanoidRootPart.Position
-                                        
-                                        local Clone = lplr.Character:Clone()
-                                        Clone.Parent = workspace
-                                        camera.CameraSubject = Clone:FindFirstChild("Humanoid")
-                                        
-                                        for i,v in pairs(Clone:GetChildren()) do
-                                            if string.lower(v.ClassName):find("part") and v.Name ~= "HumanoidRootPart" then
-                                                v.Transparency = 1
-                                            end
-                                            if v:IsA("Accessory") then
-                                                v:FindFirstChild("Handle").Transparency = 1
-                                            end
-                                        end
-                                        
-                                        local startPosition = lplr.Character.HumanoidRootPart.Position
-                                        local upPosition = Vector3.new(startPosition.X, 1000, startPosition.Z)
-                                        lplr.Character.HumanoidRootPart.CFrame = lplr.Character.HumanoidRootPart.CFrame + Vector3.new(0, 1000, 0) -- moving main char up
-
-                                        RunService.RenderStepped:Connect(function()
-                                            if Clone ~= nil and Clone:FindFirstChild("HumanoidRootPart") then
-                                                Clone.HumanoidRootPart.Position = Vector3.new(lplr.Character.HumanoidRootPart.Position.X, Clone.HumanoidRootPart.Position.Y, lplr.Character.HumanoidRootPart.Position.Z) --sync X, Z pos
-                                            end
-                                        end)
-                                        
-										task.wait(0.2)
-
-                                        lplr.Character.HumanoidRootPart.CFrame = CFrame.new(GodMode.lastPosition, lplr.Character.HumanoidRootPart.CFrame.LookVector) --revert the main character
-
-                                        camera.CameraSubject = lplr.Character:FindFirstChild("Humanoid")
-
-                                        Clone:Destroy()
-                                        GodMode.isTeleporting = false
-                                        break
-                                    end
-                                end
-                            end
-                        end
-                    until not GodMode.Enabled
-                end)
-            end
-        end
-    })
+	local GodMode = {Enabled = false}
+	GodMode = vape.Categories.Blatant:CreateModule({
+		Name = "Godmode",
+		Function = function(callback)
+			if callback then
+				task.spawn(function()
+					repeat task.wait()
+						pcall(function()
+							if (not vape.Modules.Fly.Enabled) and (not vape.Modules.InfiniteFly.Enabled) then
+								for _, v in pairs(entitylib.List) do
+									if v.Player and v.Player.Team ~= lplr.Team and IsAlive(v.Player) and IsAlive(lplr) then
+										if v and v.Player ~= lplr then
+											local TargetDistance = lplr:DistanceFromCharacter(v.Character:FindFirstChild("HumanoidRootPart").CFrame.p)
+											if TargetDistance < 25 then
+												if not lplr.Character:WaitForChild("HumanoidRootPart"):FindFirstChildOfClass("BodyVelocity") then
+													repeat task.wait() until store.matchState ~= 0
+													if not (v.Character.HumanoidRootPart.Velocity.Y < -10*5) then
+														lplr.Character.Archivable = true
+				
+														local Clone = lplr.Character:Clone()
+														Clone.Parent = game.Workspace
+														Clone.Head:ClearAllChildren()
+														gameCamera.CameraSubject = Clone:FindFirstChild("Humanoid")
+					
+														for i,v in pairs(Clone:GetChildren()) do
+															if string.lower(v.ClassName):find("part") and v.Name ~= "HumanoidRootPart" then
+																v.Transparency = 1
+															end
+															if v:IsA("Accessory") then
+																v:FindFirstChild("Handle").Transparency = 1
+															end
+														end
+					
+														lplr.Character:WaitForChild("HumanoidRootPart").CFrame = lplr.Character:WaitForChild("HumanoidRootPart").CFrame + Vector3.new(0,100000,0)
+					
+														GodMode:Clean(runService.RenderStepped:Connect(function()
+															if Clone ~= nil and Clone:FindFirstChild("HumanoidRootPart") then
+																Clone.HumanoidRootPart.Position = Vector3.new(lplr.Character:WaitForChild("HumanoidRootPart").Position.X, Clone.HumanoidRootPart.Position.Y, lplr.Character:WaitForChild("HumanoidRootPart").Position.Z)
+															end
+														end))
+					
+														task.wait(0.2)
+														lplr.Character:WaitForChild("HumanoidRootPart").Velocity = Vector3.new(lplr.Character:WaitForChild("HumanoidRootPart").Velocity.X, -1, lplr.Character:WaitForChild("HumanoidRootPart").Velocity.Z)
+														lplr.Character:WaitForChild("HumanoidRootPart").CFrame = Clone.HumanoidRootPart.CFrame
+														gameCamera.CameraSubject = lplr.Character:FindFirstChild("Humanoid")
+														Clone:Destroy()
+														task.wait(0.15)
+													end
+												end
+											end
+										end
+									end
+								end
+							end
+						end)
+					until (not GodMode.Enabled == true)
+				end)
+			end
+		end
+	})
 end)
+
 run(function()
 	local AntiFall
 	local Mode
@@ -1950,14 +1955,69 @@ run(function()
 end)
 	
 run(function()
+	local Mode
 	local Expand
+	local objects, set = {}
+	
+	local function createHitbox(ent)
+		if ent.Targetable and ent.Player then
+			local hitbox = Instance.new('Part')
+			hitbox.Size = Vector3.new(3, 6, 3) + Vector3.one * (Expand.Value / 5)
+			hitbox.Position = ent.RootPart.Position
+			hitbox.CanCollide = false
+			hitbox.Massless = true
+			hitbox.Transparency = 1
+			hitbox.Parent = ent.Character
+			local weld = Instance.new('Motor6D')
+			weld.Part0 = hitbox
+			weld.Part1 = ent.RootPart
+			weld.Parent = hitbox
+			objects[ent] = hitbox
+		end
+	end
 	
 	HitBoxes = vape.Categories.Blatant:CreateModule({
 		Name = 'HitBoxes',
 		Function = function(callback)
-			debug.setconstant(bedwars.SwordController.swingSwordInRegion, 6, callback and (Expand.Value / 3) or 3.8)
+			if callback then
+				if Mode.Value == 'Sword' then
+					debug.setconstant(bedwars.SwordController.swingSwordInRegion, 6, (Expand.Value / 3))
+					set = true
+				else
+					HitBoxes:Clean(entitylib.Events.EntityAdded:Connect(createHitbox))
+					HitBoxes:Clean(entitylib.Events.EntityRemoving:Connect(function(ent)
+						if objects[ent] then
+							objects[ent]:Destroy()
+							objects[ent] = nil
+						end
+					end))
+					for _, ent in entitylib.List do
+						createHitbox(ent)
+					end
+				end
+			else
+				if set then
+					debug.setconstant(bedwars.SwordController.swingSwordInRegion, 6, 3.8)
+					set = nil
+				end
+				for _, part in objects do
+					part:Destroy()
+				end
+				table.clear(objects)
+			end
 		end,
 		Tooltip = 'Expands attack hitbox'
+	})
+	Mode = HitBoxes:CreateDropdown({
+		Name = 'Mode',
+		List = {'Sword', 'Player'},
+		Function = function()
+			if HitBoxes.Enabled then
+				HitBoxes:Toggle()
+				HitBoxes:Toggle()
+			end
+		end,
+		Tooltip = 'Sword - Increases the range around you to hit entities\nPlayer - Increases the players hitbox'
 	})
 	Expand = HitBoxes:CreateSlider({
 		Name = 'Expand amount',
@@ -1967,15 +2027,20 @@ run(function()
 		Decimal = 10,
 		Function = function(val)
 			if HitBoxes.Enabled then
-				debug.setconstant(bedwars.SwordController.swingSwordInRegion, 6, (val / 3))
+				if Mode.Value == 'Sword' then
+					debug.setconstant(bedwars.SwordController.swingSwordInRegion, 6, (val / 3))
+				else
+					for _, part in objects do
+						part.Size = Vector3.new(3, 6, 3) + Vector3.one * (val / 5)
+					end
+				end
 			end
 		end,
-		Suffix = function(val) 
-			return val == 1 and 'stud' or 'studs' 
+		Suffix = function(val)
+			return val == 1 and 'stud' or 'studs'
 		end
 	})
 end)
-	
 run(function()
 	local Value
 	local VerticalValue
@@ -2229,6 +2294,7 @@ run(function()
 	local AnimationTween
 	local Limit
 	local LegitAura
+	local Sync
 	local Particles, Boxes = {}, {}
 	local anims, AnimDelay, AnimTween, armC0 = vape.Libraries.auraanims, tick()
 	local AttackRemote = {FireServer = function() end}
@@ -2270,7 +2336,7 @@ run(function()
 					end)
 				end
 
-				if Animation.Enabled then
+				if Animation.Enabled and not (identifyexecutor and table.find({'Argon', 'Delta'}, ({identifyexecutor()})[1])) then
 					local fake = {
 						Controllers = {
 							ViewmodelController = {
@@ -2358,7 +2424,7 @@ run(function()
 									Attacking = true
 									store.KillauraTarget = v
 									if not Swing.Enabled and AnimDelay <= tick() and not LegitAura.Enabled then
-										AnimDelay = tick() + (meta.sword.respectAttackSpeedForEffects and meta.sword.attackSpeed or 0.14)
+										AnimDelay = tick() + (meta.sword.respectAttackSpeedForEffects and meta.sword.attackSpeed or (Sync.Enabled and 0.24 or 0.14))
 										bedwars.SwordController:playSwordEffect(meta, 0)
 										if meta.displayName:find(' Scythe') then
 											bedwars.ScytheController:playLocalAnimation()
@@ -2659,6 +2725,10 @@ run(function()
 	LegitAura = Killaura:CreateToggle({
 		Name = 'Swing only',
 		Tooltip = 'Only attacks while swinging manually'
+	})
+	Sync = Killaura:CreateToggle({
+		Name = 'Synced Animation',
+		Tooltip = 'Plays animation with hit attempt'
 	})
 end)
 	
@@ -4064,6 +4134,43 @@ run(function()
 				end
 			end, 12, false)
 		end,
+		cat = function()
+			local old = bedwars.CatController.leap
+			bedwars.CatController.leap = function(...)
+				vapeEvents.CatPounce:Fire()
+				old(...)
+			end
+	
+			AutoKit:Clean(function()
+				bedwars.CatController.leap = old
+			end)
+		end,
+		davey = function()
+			local old = bedwars.CannonHandController.launchSelf
+			bedwars.CannonHandController.launchSelf = function(...)
+				local res = {old(...)}
+				local self, block = ...
+	
+				if block:GetAttribute('PlacedByUserId') == lplr.UserId and (block.Position - entitylib.character.RootPart.Position).Magnitude < 30 then
+					task.spawn(bedwars.breakBlock, block, false, nil, true)
+				end
+	
+				return unpack(res)
+			end
+	
+			AutoKit:Clean(function()
+				bedwars.CannonHandController.launchSelf = old
+			end)
+		end,
+		dragon_slayer = function()
+			kitCollection('KaliyahPunchInteraction', function(v)
+				bedwars.DragonSlayerController:deleteEmblem(v)
+				bedwars.DragonSlayerController:playPunchAnimation(Vector3.zero)
+				bedwars.Client:Get(remotes.KaliyahPunch):SendToServer({
+					target = v
+				})
+			end, 18, true)
+		end,
 		farmer_cletus = function()
 			kitCollection('HarvestableCrop', function(v)
 				if bedwars.Client:Get(remotes.HarvestCrop):CallServer({position = bedwars.BlockController:getBlockPosition(v.Position)}) then
@@ -4077,16 +4184,40 @@ run(function()
 			bedwars.FishingMinigameController.startMinigame = function(_, _, result)
 				result({win = true})
 			end
+	
 			AutoKit:Clean(function()
 				bedwars.FishingMinigameController.startMinigame = old
 			end)
 		end,
+		gingerbread_man = function()
+			local old = bedwars.LaunchPadController.attemptLaunch
+			bedwars.LaunchPadController.attemptLaunch = function(...)
+				local res = {old(...)}
+				local self, block = ...
+	
+				if (workspace:GetServerTimeNow() - self.lastLaunch) < 0.4 then
+					if block:GetAttribute('PlacedByUserId') == lplr.UserId and (block.Position - entitylib.character.RootPart.Position).Magnitude < 30 then
+						task.spawn(bedwars.breakBlock, block, false, nil, true)
+					end
+				end
+	
+				return unpack(res)
+			end
+	
+			AutoKit:Clean(function()
+				bedwars.LaunchPadController.attemptLaunch = old
+			end)
+		end,
 		hannah = function()
 			kitCollection('HannahExecuteInteraction', function(v)
-				bedwars.Client:Get(remotes.HannahKill):CallServer({
+				local billboard = bedwars.Client:Get(remotes.HannahKill):CallServer({
 					user = lplr,
 					victimEntity = v
-				})
+				}) and v:FindFirstChild('Hannah Execution Icon')
+	
+				if billboard then
+					billboard:Destroy()
+				end
 			end, 30, true)
 		end,
 		grim_reaper = function()
@@ -4118,6 +4249,7 @@ run(function()
 						healTarget = ent.Character
 					})
 				end
+	
 				task.wait(0.1)
 			until not AutoKit.Enabled
 		end,
@@ -4153,21 +4285,33 @@ run(function()
 			end, 20, false)
 		end,
 		summoner = function()
+			AutoKit:Clean(bedwars.Client:Get('SummonerClawAttackFromServer'):Connect(function(data)
+				if data.player == lplr then
+					bedwars.SummonerKitController:clawAttack(data.player, data.position, data.direction)
+				end
+			end))
+	
 			repeat
 				local plr = entitylib.EntityPosition({
-					Range = 22,
+					Range = 31,
 					Part = 'RootPart',
-					Players = true
+					Players = true,
+					Sort = sortmethods.Health
 				})
 	
 				if plr then
 					local localPosition = entitylib.character.RootPart.Position
+					local shootDir = CFrame.lookAt(localPosition, plr.RootPart.Position).LookVector
+					localPosition += shootDir * math.max((localPosition - plr.RootPart.Position).Magnitude - 16, 0)
+	
+	
 					bedwars.Client:Get(remotes.SummonerClawAttack):SendToServer({
 						position = localPosition,
-						direction = CFrame.lookAt(localPosition, plr.RootPart.Position).LookVector,
+						direction = shootDir,
 						clientTime = workspace:GetServerTimeNow()
 					})
 				end
+	
 				task.wait(0.1)
 			until not AutoKit.Enabled
 		end,
@@ -4223,6 +4367,25 @@ run(function()
 				end
 				task.wait(0.1)
 			until not AutoKit.Enabled
+		end,
+		wizard = function()
+			repeat
+				local ability = lplr:GetAttribute('WizardAbility')
+				if ability and bedwars.AbilityController:canUseAbility(ability) then
+					local plr = entitylib.EntityPosition({
+						Range = 50,
+						Part = 'RootPart',
+						Players = true,
+						Sort = sortmethods.Health
+					})
+	
+					if plr then
+						bedwars.AbilityController:useAbility(ability, newproxy(true), {target = plr.RootPart.Position})
+					end
+				end
+	
+				task.wait(0.1)
+			until not AutoKit.Enabled
 		end
 	}
 	
@@ -4246,6 +4409,7 @@ run(function()
 		})
 	end
 end)
+	
 	
 run(function()
 	local AutoPlay
@@ -4784,7 +4948,7 @@ run(function()
 	local Mode
 	local Profile
 	local Users
-	local blacklistedclans = {'gg', 'gg2', 'DV', 'DV2'}
+	local blacklistedclans = {'nnnnn'}
 	local blacklisteduserids = {1502104539, 3826146717, 4531785383, 1049767300, 4926350670, 653085195, 184655415, 2752307430, 5087196317, 5744061325, 1536265275}
 	local joined = {}
 	
@@ -8167,4 +8331,838 @@ run(function()
         Function = function(callback) end
     })
 end)
-print('finished')
+run(function()
+    local AdetundeExploit = {}
+    local AdetundeExploit_List = { Value = "Shield" }
+
+    local adetunde_remotes = {
+        ["Shield"] = function()
+            local args = { [1] = "shield" }
+            local returning = replicatedStorage
+                :WaitForChild("rbxts_include")
+                :WaitForChild("node_modules")
+                :WaitForChild("@rbxts")
+                :WaitForChild("net")
+                :WaitForChild("out")
+                :WaitForChild("_NetManaged")
+                :WaitForChild("UpgradeFrostyHammer")
+                :InvokeServer(unpack(args))
+            return returning
+        end,
+
+        ["Speed"] = function()
+            local args = { [1] = "speed" }
+            local returning = replicatedStorage
+                :WaitForChild("rbxts_include")
+                :WaitForChild("node_modules")
+                :WaitForChild("@rbxts")
+                :WaitForChild("net")
+                :WaitForChild("out")
+                :WaitForChild("_NetManaged")
+                :WaitForChild("UpgradeFrostyHammer")
+                :InvokeServer(unpack(args))
+            return returning
+        end,
+
+        ["Strength"] = function()
+            local args = { [1] = "strength" }
+            local returning = replicatedStorage
+                :WaitForChild("rbxts_include")
+                :WaitForChild("node_modules")
+                :WaitForChild("@rbxts")
+                :WaitForChild("net")
+                :WaitForChild("out")
+                :WaitForChild("_NetManaged")
+                :WaitForChild("UpgradeFrostyHammer")
+                :InvokeServer(unpack(args))
+            return returning
+        end
+    }
+
+    local current_upgrador = "Shield"
+    local hasnt_upgraded_everything = true
+    local testing = 1
+
+    AdetundeExploit = vape.Categories.Blatant:CreateModule({
+        Name = 'AdetundeExploit',
+        Function = function(calling)
+            if calling then 
+                task.spawn(function()
+                    repeat
+                        local returning_table = adetunde_remotes[current_upgrador]()
+                        
+                        if type(returning_table) == "table" then
+                            local Speed = returning_table["speed"]
+                            local Strength = returning_table["strength"]
+                            local Shield = returning_table["shield"]
+
+                            print("Speed: " .. tostring(Speed))
+                            print("Strength: " .. tostring(Strength))
+                            print("Shield: " .. tostring(Shield))
+                            print("Current Upgrador: " .. tostring(current_upgrador))
+
+                            if returning_table[string.lower(current_upgrador)] == 3 then
+                                if Strength and Shield and Speed then
+                                    if Strength == 3 or Speed == 3 or Shield == 3 then
+                                        if (Strength == 3 and Speed == 2 and Shield == 2) or
+                                           (Strength == 2 and Speed == 3 and Shield == 2) or
+                                           (Strength == 2 and Speed == 2 and Shield == 3) then
+                                            notif("Katware AdetundeExploit", "Fully upgraded everything possible!", 7)
+                                            hasnt_upgraded_everything = false
+                                        else
+                                            local things = {}
+                                            for i, v in pairs(adetunde_remotes) do
+                                                table.insert(things, i)
+                                            end
+                                            for i, v in pairs(things) do
+                                                if things[i] == current_upgrador then
+                                                    table.remove(things, i)
+                                                end
+                                            end
+                                            local random = things[math.random(1, #things)]
+                                            current_upgrador = random
+                                        end
+                                    end
+                                end
+                            end
+                        else
+                            local things = {}
+                            for i, v in pairs(adetunde_remotes) do
+                                table.insert(things, i)
+                            end
+                            for i, v in pairs(things) do
+                                if things[i] == current_upgrador then
+                                    table.remove(things, i)
+                                end
+                            end
+                            local random = things[math.random(1, #things)]
+                            current_upgrador = random
+                        end
+                        task.wait(0.1)
+                    until not AdetundeExploit.Enabled or not hasnt_upgraded_everything
+                end)
+            end
+        end
+    })
+
+    local real_list = {}
+    for i, v in pairs(adetunde_remotes) do
+        table.insert(real_list, i)
+    end
+
+    AdetundeExploit_List = AdetundeExploit:CreateDropdown({
+        Name = 'Preferred Upgrade',
+        List = real_list,
+        Function = function() end,
+        Default = "Shield"
+    })
+end)
+
+
+local label = Instance.new("TextLabel")
+label.Size = UDim2.new(1, 0, 0, 36)
+label.Position = UDim2.new(0, 200, 1, 200) 
+label.BackgroundTransparency = 1
+label.Text = "Make with love by @rinnnaaaa_"
+label.TextColor3 = Color3.new(1,1,1)
+label.ZIndex = 10
+label.TextSize = 18
+label.TextStrokeTransparency = 0.5
+label.TextScaled = true
+label.Parent = vape.gui
+local function GetMagnitudeOf2Objects(part, part2, bypass)
+	local magnitude, partcount = 0, 0
+	if not bypass then 
+		local suc, res = pcall(function() return part.Position end)
+		partcount = suc and partcount + 1 or partcount
+		suc, res = pcall(function() return part2.Position end)
+		partcount = suc and partcount + 1 or partcount
+	end
+	if partcount > 1 or bypass then 
+		magnitude = bypass and (part - part2).Magnitude or (part.Position - part2.Position).Magnitude
+	end
+	return magnitude
+end
+
+local function FindEnemyBed(maxdistance, highest)
+	local target = nil
+	local distance = maxdistance or math.huge
+	local whitelistuserteams = {}
+	local badbeds = {}
+	if not lplr:GetAttribute("Team") then return nil end
+	for i, v in pairs(playersService:GetPlayers()) do
+		if v ~= lplr then
+			if not select(2, whitelist:get(v)) then
+				whitelistuserteams[v:GetAttribute("Team")] = true
+			end
+		end
+	end
+	for i, v in pairs(collectionService:GetTagged("bed")) do
+			local bedteamstring = string.split(v:GetAttribute("id"), "_")[1]
+			if whitelistuserteams[bedteamstring] ~= nil then
+			   badbeds[v] = true
+			end
+		end
+	for i, v in pairs(collectionService:GetTagged("bed")) do
+		if v:GetAttribute("id") and v:GetAttribute("id") ~= lplr:GetAttribute("Team").."_bed" and badbeds[v] == nil and lplr.Character and lplr.Character.PrimaryPart then
+			if v:GetAttribute("NoBreak") or v:GetAttribute("PlacedByUserId") and v:GetAttribute("PlacedByUserId") ~= 0 then continue end
+			local magdist = GetMagnitudeOf2Objects(lplr.Character.PrimaryPart, v)
+			if magdist < distance then
+				target = v
+				distance = magdist
+			end
+		end
+	end
+	local coveredblock = highest and target and GetTopBlock(target.Position, true)
+	if coveredblock then
+		target = coveredblock.Instance
+	end
+	return target
+end
+
+local function GetTopBlock(position, smart, raycast, customvector)
+	position = position or IsAlive(lplr) and lplr.Character:WaitForChild("HumanoidRootPart").Position
+	if not position then 
+		return nil 
+	end
+	if raycast and not workspace:Raycast(position, Vector3.new(0, -2000, 0), RaycastParams.new()) then
+		return nil
+	end
+	local lastblock = nil
+	for i = 1, 500 do 
+		local newray = workspace:Raycast(lastblock and lastblock.Position or position, customvector or Vector3.new(0.55, 999999, 0.55), RaycastParams.new())
+		local smartest = newray and smart and workspace:Raycast(lastblock and lastblock.Position or position, Vector3.new(0, 5.5, 0), RaycastParams.new()) or not smart
+		if newray and smartest then
+			lastblock = newray
+		else
+			break
+		end
+	end
+	return lastblock
+end
+
+local function FindTeamBed()
+	local bedstate, res = pcall(function()
+		return lplr:GetAttribute('HasBed')
+	end)
+	if bedstate and res then
+		return res
+	end
+	return nil
+end
+
+local function FindTarget(dist, blockRaycast, includemobs, healthmethod)
+	local sort, entity = healthmethod and math.huge or dist or math.huge, {}
+	local function abletocalculate() return lplr.Character and lplr.Character:FindFirstChild("HumanoidRootPart") end
+	local sortmethods = {Normal = function(entityroot, entityhealth) return abletocalculate() and GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), entityroot) < sort end, Health = function(entityroot, entityhealth) return abletocalculate() and entityhealth < sort end}
+	local sortmethod = healthmethod and "Health" or "Normal"
+	local function raycasted(entityroot) return abletocalculate() and blockRaycast and workspace:Raycast(entityroot.Position, Vector3.new(0, -2000, 0), RaycastParams.new()) or not blockRaycast end
+	for i,v in pairs(playersService:GetPlayers()) do
+		if v ~= lplr and abletocalculate() and IsAlive(v) and v.Team ~= lplr.Team then
+			if not select(2, whitelist:get(v)) then 
+				continue
+			end
+			if sortmethods[sortmethod](v.Character.HumanoidRootPart, v.Character:GetAttribute("Health") or v.Character.Humanoid.Health) and (not blockRaycast or raycasted(v.Character.HumanoidRootPart)) then
+				sort = healthmethod and (v.Character:GetAttribute("Health") or v.Character.Humanoid.Health) or GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), v.Character.HumanoidRootPart)
+				entity.Player = v
+				entity.Human = true 
+				entity.RootPart = v.Character.HumanoidRootPart
+				entity.Humanoid = v.Character.Humanoid
+			end
+		end
+	end
+	if includemobs then
+		local maxdistance = dist or math.huge
+		for i,v in pairs(store.blocks) do
+			if abletocalculate() and v.PrimaryPart and GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), v.PrimaryPart) < maxdistance then
+			entity.Player = {Character = v, Name = "PotEntity", DisplayName = "PotEntity", UserId = 1}
+			entity.Human = false
+			entity.RootPart = v.PrimaryPart
+			entity.Humanoid = {Health = 1, MaxHealth = 1}
+			end
+		end
+		for i,v in pairs(collectionService:GetTagged("DiamondGuardian")) do 
+			if v.PrimaryPart and v:FindFirstChild("Humanoid") and v.Humanoid.Health and abletocalculate() then
+				if sortmethods[sortmethod](v.PrimaryPart, v.Humanoid.Health) and (not blockRaycast or raycasted(v.PrimaryPart)) then
+				sort = healthmethod and v.Humanoid.Health or GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), v.PrimaryPart)
+				entity.Player = {Character = v, Name = "DiamondGuardian", DisplayName = "DiamondGuardian", UserId = 1}
+				entity.Human = false
+				entity.RootPart = v.PrimaryPart
+				entity.Humanoid = v.Humanoid
+				end
+			end
+		end
+		for i,v in pairs(collectionService:GetTagged("GolemBoss")) do
+			if v.PrimaryPart and v:FindFirstChild("Humanoid") and v.Humanoid.Health and abletocalculate() then
+				if sortmethods[sortmethod](v.PrimaryPart, v.Humanoid.Health) and (not blockRaycast or raycasted(v.PrimaryPart)) then
+				sort = healthmethod and v.Humanoid.Health or GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), v.PrimaryPart)
+				entity.Player = {Character = v, Name = "Titan", DisplayName = "Titan", UserId = 1}
+				entity.Human = false
+				entity.RootPart = v.PrimaryPart
+				entity.Humanoid = v.Humanoid
+				end
+			end
+		end
+		for i,v in pairs(collectionService:GetTagged("Drone")) do
+			local plr = playersService:GetPlayerByUserId(v:GetAttribute("PlayerUserId"))
+			if plr and plr ~= lplr and plr.Team and lplr.Team and plr.Team ~= lplr.Team and select(2, whitelist:get(plr)) and abletocalculate() and v.PrimaryPart and v:FindFirstChild("Humanoid") and v.Humanoid.Health then
+				if sortmethods[sortmethod](v.PrimaryPart, v.Humanoid.Health) and (not blockRaycast or raycasted(v.PrimaryPart)) then
+					sort = healthmethod and v.Humanoid.Health or GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), v.PrimaryPart)
+					entity.Player = {Character = v, Name = "Drone", DisplayName = "Drone", UserId = 1}
+					entity.Human = false
+					entity.RootPart = v.PrimaryPart
+					entity.Humanoid = v.Humanoid
+				end
+			end
+		end
+		for i,v in pairs(collectionService:GetTagged("Monster")) do
+			if v:GetAttribute("Team") ~= lplr:GetAttribute("Team") and abletocalculate() and v.PrimaryPart and v:FindFirstChild("Humanoid") and v.Humanoid.Health then
+				if sortmethods[sortmethod](v.PrimaryPart, v.Humanoid.Health) and (not blockRaycast or raycasted(v.PrimaryPart)) then
+				sort = healthmethod and v.Humanoid.Health or GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), v.PrimaryPart)
+				entity.Player = {Character = v, Name = "Monster", DisplayName = "Monster", UserId = 1}
+				entity.Human = false
+				entity.RootPart = v.PrimaryPart
+				entity.Humanoid = v.Humanoid
+				end
+			end
+		end
+	end
+	return entity
+end
+
+function IsAlive(plr)
+	plr = plr or lplr
+	if not plr.Character then return false end
+	if not plr.Character:FindFirstChild("Head") then return false end
+	if not plr.Character:FindFirstChild("Humanoid") then return false end
+	if plr.Character:FindFirstChild("Humanoid").Health < 0.11 then return false end
+	return true
+end
+run(function()
+    local Autowin = { Enabled = false }
+    local AutowinNotification = { Enabled = true }
+    local bedtween
+    local playertween
+    local lastActionTime = 0
+    local failedTweenAttempts = 0
+    local waitTimeAfterFails = 8 -- Seconds to wait after 3 failed attempts
+
+    Autowin = vape.Categories.Blatant:CreateModule({
+        Name = "Autowin",
+        ExtraText = function()
+            return store.queueType:find("5v5") and "BedShield" or "Normal"
+        end,
+        Function = function(callback)
+            if callback then
+                task.spawn(function()
+                    if store.matchState == 0 then repeat task.wait() until store.matchState ~= 0 or not Autowin.Enabled end
+                    if not vape.Loaded then repeat task.wait() until vape.Loaded or not Autowin.Enabled end
+                    if not Autowin.Enabled then return end
+                    if IsAlive(lplr) then
+                        lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+                        lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+                    end
+                    Autowin:Clean(runService.Heartbeat:Connect(function()
+                        pcall(function()
+                            local enemyBed = FindEnemyBed()
+                            if not isnetworkowner(lplr.Character:WaitForChild("HumanoidRootPart")) and (enemyBed and GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), enemyBed) > 75 or not enemyBed) then
+                                if IsAlive(lplr) and FindTeamBed() and Autowin.Enabled and (not store.matchState == 2) then
+                                    lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+                                    lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+                                end
+                            end
+                        end)
+                    end))
+                    Autowin:Clean(lplr.CharacterAdded:Connect(function()
+                        if not IsAlive(lplr) then repeat task.wait() until IsAlive(lplr) end
+                        local bed = FindEnemyBed()
+                        if bed and (bed:GetAttribute("BedShieldEndTime") and bed:GetAttribute("BedShieldEndTime") < workspace:GetServerTimeNow() or not bed:GetAttribute("BedShieldEndTime")) then
+
+                            if AutowinNotification.Enabled then
+                                local bedname = bed:GetAttribute("id") and string.split(bed:GetAttribute("id"), "_")[1] or "unknown"
+                                notif("Autowin", "Destroying " .. bedname:lower() .. " team's bed", 5)
+                            end
+
+                            bedtween = tweenService:Create(lplr.Character:WaitForChild("HumanoidRootPart"), TweenInfo.new(0.65, Enum.EasingStyle.Linear, Enum.EasingDirection.In, 0, false, 0), { CFrame = CFrame.new(bed.Position) + Vector3.new(0, 10, 0) })
+                            task.wait(0.1)
+                            bedtween:Play()
+
+
+                            bedtween.Completed:Wait()
+                            task.spawn(function()
+                                task.wait(1.5)
+                                local magnitude = GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), bed)
+                                if magnitude >= 50 and FindTeamBed() and Autowin.Enabled then
+                                    lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+                                    lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+                                end
+                            end)
+                            repeat task.wait() until FindEnemyBed() ~= bed or not IsAlive(lplr)
+
+
+                            -- Reset character after bed is broken
+                            if IsAlive(lplr) then
+                                lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+                                lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+                            end
+                            repeat
+                                task.wait()
+                            until IsAlive(lplr)
+
+                            -- Wait for 5 seconds after breaking the bed
+                            task.wait(5)
+
+                            -- Update lastActionTime after respawning and waiting
+                            lastActionTime = tick()
+
+                            -- Find and eliminate the closest enemy, waiting 4 seconds after the last action
+                            while Autowin.Enabled and IsAlive(lplr) do
+                                if (tick() - lastActionTime) >= 2.6 then
+                                    local target = FindTarget(45, true)
+                                    if target and target.RootPart and IsAlive(lplr) then
+                                        if AutowinNotification.Enabled then
+                                            local team = bed:GetAttribute("id") and string.split(bed:GetAttribute("id"), "_")[1] or "unknown"
+                                            notif("Autowin", "Killing " .. team:lower() .. " team's teamates", 5)
+                                        end
+                                        repeat
+                                            target = FindTarget(45, true)
+                                            if not target or not target.RootPart or not IsAlive(lplr) then break end
+                                            -- Check if the target's team is "Neutral"
+                                            if target.Player.Team and target.Player.Team.Name == "Neutral" then
+                                                notif("Autowin", "Target is on Neutral team. Skipping.", 5)
+                                                task.wait(4)
+                                                break
+                                            end
+                                            local startPosition = lplr.Character.HumanoidRootPart.Position
+                                            playertween = tweenService:Create(lplr.Character:WaitForChild("HumanoidRootPart"), TweenInfo.new(0.65), { CFrame = target.RootPart.CFrame + Vector3.new(0, 0, 0) })
+                                            playertween:Play()
+
+                                            -- Wait for the tween to complete or timeout after 2 seconds
+                                            local tweenStartTime = tick()
+                                            repeat
+                                                task.wait()
+                                            until not playertween or playertween.Completed or (tick() - tweenStartTime) >= 2
+
+                                            -- Check if the tween was successful
+                                            if playertween and playertween.PlaybackState == Enum.PlaybackState.Completed then
+                                                -- Check if the target is still alive after the tween
+                                                if not IsAlive(target.Player) then
+                                                    -- Reset character if target is killed
+                                                    lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+                                                    lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+                                                    repeat
+                                                        task.wait()
+                                                    until IsAlive(lplr)
+                                                    lastActionTime = tick()  -- Reset the timer after respawn
+                                                    failedTweenAttempts = 0  -- Reset failed attempts after successful kill
+                                                    break  -- Exit the inner repeat loop
+                                                else
+                                                    -- Check the distance to the target after tween
+                                                    local distance = GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), target.RootPart)
+                                                    if distance > 5 then
+                                                        failedTweenAttempts = failedTweenAttempts + 1
+                                                        if failedTweenAttempts >= 3 then
+                                                            notif("Autowin", "Failed to tween to target 3 times. Waiting for " .. waitTimeAfterFails .. " seconds.", 5)
+                                                            task.wait(waitTimeAfterFails)
+                                                            failedTweenAttempts = 0
+                                                            lastActionTime = tick()
+                                                        else
+                                                            notif("Autowin", "Failed to reach target. Retrying.", 5)
+                                                        end
+
+                                                        -- Reset character
+                                                        lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+                                                        lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+                                                        repeat
+                                                            task.wait()
+                                                        until IsAlive(lplr)
+                                                        lastActionTime = tick()  -- Reset the timer after respawn
+                                                    else
+                                                        -- Reset failed attempts if the player is close enough to the target
+                                                        failedTweenAttempts = 0
+                                                    end
+                                                end
+                                            else
+                                                -- Handle tween failure (timeout)
+                                                notif("Autowin", "Tween to target timed out. Retrying.", 5)
+                                                failedTweenAttempts = failedTweenAttempts + 1
+                                                if failedTweenAttempts >= 3 then
+                                                    notif("Autowin", "Failed to tween to target 3 times. Waiting for " .. waitTimeAfterFails .. " seconds.", 5)
+                                                    task.wait(waitTimeAfterFails)
+                                                    failedTweenAttempts = 0
+                                                    lastActionTime = tick()
+                                                end
+
+                                                -- Reset character
+                                                lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+                                                lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+                                                repeat
+                                                    task.wait()
+                                                until IsAlive(lplr)
+                                                lastActionTime = tick()  -- Reset the timer after respawn
+                                            end
+                                        until not (FindTarget(45, true) and FindTarget(45, true).RootPart) or not Autowin.Enabled or not IsAlive(lplr)
+
+                                        -- Update lastActionTime after killing an enemy
+                                        lastActionTime = tick()
+                                    else
+                                        -- Reset if no target is found
+                                        if IsAlive(lplr) and FindTeamBed() and Autowin.Enabled then
+                                            lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+                                            lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+                                            repeat
+                                                task.wait()
+                                            until IsAlive(lplr)
+                                            lastKillTime = tick() -- Reset the timer after respawn
+                                        end
+                                    end
+                                else
+                                    task.wait(0.1) -- wait to prevent lag
+                                end
+                            end
+
+                            if IsAlive(lplr) and FindTeamBed() and Autowin.Enabled then
+                                lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+                                lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+                            end
+                        elseif FindTarget(nil, true) and FindTarget(nil, true).RootPart then
+                            task.wait()
+                            local target = FindTarget(nil, true)
+                            playertween = tweenService:Create(lplr.Character:WaitForChild("HumanoidRootPart"), TweenInfo.new(0.65, Enum.EasingStyle.Linear), { CFrame = target.RootPart.CFrame + Vector3.new(0, 0, 0) })
+                            playertween:Play()
+                            if AutowinNotification.Enabled then
+                                notif("Autowin", "Killing " .. target.Player.DisplayName .. " (" .. (target.Player.Team and target.Player.Team.Name or "neutral") .. " Team)", 5)
+                            end
+                            playertween.Completed:Wait()
+                            if not Autowin.Enabled then return end
+                            if FindTarget(20, true) and FindTarget(20, true).RootPart and IsAlive(lplr) then
+                                repeat
+                                    target = FindTarget(20, true)
+                                    if not target or not target.RootPart or not IsAlive(lplr) then break end
+                                    playertween = tweenService:Create(lplr.Character:WaitForChild("HumanoidRootPart"), TweenInfo.new(0.65), { CFrame = target.RootPart.CFrame + Vector3.new(0, 0, 0) })
+                                    playertween:Play()
+                                    task.wait()
+                                until not (FindTarget(20, true) and FindTarget(20, true).RootPart) or (not Autowin.Enabled) or (not IsAlive(lplr))
+                            end
+                            if IsAlive(lplr) and FindTeamBed() and Autowin.Enabled then
+                                lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+                                lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+                            end
+                        else
+                            if store.matchState == 2 then return end
+                            lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+                            lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+                        end
+                    end))
+					
+					-- Disconnect character added connection when the Autowin is disabled
+					if Autowin.CharacterAddedConnection then
+						Autowin.CharacterAddedConnection:Disconnect()
+						Autowin.CharacterAddedConnection = nil
+					end
+					-- Disconnect heartbeat connection when Autowin is disabled
+					if Autowin.HeartbeatConnection then
+						Autowin.HeartbeatConnection:Disconnect()
+						Autowin.HeartbeatConnection = nil
+					end
+                end)
+            else
+                pcall(function() if playertween then playertween:Cancel() end end)
+                pcall(function() if bedtween then bedtween:Cancel() end end)
+            end
+        end,
+        HoverText = "best paid autowin 2023!1!!! rel11!11!1"
+    })
+	function IsAlive(plr)
+		plr = plr or lplr
+		if not plr.Character then return false end
+		if not plr.Character:FindFirstChild("Head") then return false end
+		if not plr.Character:FindFirstChild("Humanoid") then return false end
+		if plr.Character:FindFirstChild("Humanoid").Health < 0.11 then return false end
+		return true
+	end
+	
+	local function notif(...)
+		vape:CreateNotification(...)
+	end
+    -- Connect to MatchEndEvent
+    Autowin:Clean(vapeEvents.MatchEndEvent.Event:Connect(function(winTable)
+        if Autowin.Enabled then
+            if (bedwars.Store:getState().Game.myTeam or {}).id == winTable.winningTeamId or lplr.Neutral then
+                notif("Autowin", "Match ended! Lobbying & Uninjecting Vape.", 5)
+				loadfile('katware/games/lobby.lua')()
+                vape:Uninject() -- Uninject Vape
+            end
+        end
+    end))
+end)
+
+ --[[run(function()
+    local BedTP = {}
+    local tppos2 = nil
+    local TweenSpeed = 0.7
+    local HeightOffset = 5
+
+    local function teleportWithTween(char, destination)
+        local root = char:FindFirstChild("HumanoidRootPart")
+        if root then
+            destination = destination + Vector3.new(0, HeightOffset, 0)
+            local currentPosition = root.Position
+            if (destination - currentPosition).Magnitude > 0.5 then
+                local tweenInfo = TweenInfo.new(TweenSpeed, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+                local goal = {CFrame = CFrame.new(destination)}
+                local tween = tweenService:Create(root, tweenInfo, goal)
+                tween:Play()
+                tween.Completed:Wait()
+				BedTP:Toggle(false)
+            end
+        end
+    end
+
+    local function killPlayer(player)
+        local character = player.Character
+        if character then
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.Health = 0
+            end
+        end
+    end
+
+    local function getEnemyBed(range)
+        range = range or math.huge
+        local bed = nil
+        local player = lplr
+
+        if not IsAlive(player) then 
+            return nil 
+        end
+
+        local localPos = player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character.HumanoidRootPart.Position or Vector3.zero
+        local playerTeam = player:GetAttribute('Team')
+        local beds = collectionService:GetTagged('bed')
+
+        for _, v in ipairs(beds) do 
+            if v:GetAttribute('PlacedByUserId') == 0 then
+                local bedTeam = v:GetAttribute('id'):sub(1, 1)
+                if bedTeam ~= playerTeam then 
+                    local bedPosition = v.Position
+                    local bedDistance = (localPos - bedPosition).Magnitude
+                    if bedDistance < range then 
+                        bed = v
+                        range = bedDistance
+                    end
+                end
+            end
+        end
+
+        if not bed then 
+            notif("BedTP", 'No enemy beds found. Total beds: '..#beds, 5, 'warning')
+        else
+            notif("BedTP", 'Teleporting to bed at position: '..tostring(bed.Position), 3)
+        end
+
+        return bed
+    end
+    BedTP = vape.Categories.Blatant:CreateModule({
+        "Name" = "BedTP",
+        "Function" = function(callback)
+            if callback then
+				task.spawn(function()
+					repeat task.wait() until vape.Modules.Invisibility
+					repeat task.wait() until vape.Modules.GamingChair
+					if vape.Modules.Invisibility.Enabled and vape.Modules.GamingChair.Enabled then
+						notif("Katware BedTP", "Please turn off the Invisibility and GamingChair module!", 3, 'error')
+						BedTP:Toggle()
+						return
+					end
+					if vape.Modules.Invisibility.Enabled then
+						notif("katware BedTP", "Please turn off the Invisibility module!", 3, 'error')
+						BedTP:Toggle()
+						return
+					end
+					if vape.Modules.GamingChair.Enabled then
+						notif("Katware BedTP", "Please turn off the GamingChair module!", 3, 'error')
+						BedTP:Toggle()
+						return
+					end
+					BedTP:Clean(lplr.CharacterAdded:Connect(function(char)
+						if tppos2 then 
+							task.spawn(function()
+								local root = char:WaitForChild("HumanoidRootPart", 9000000000)
+								if root and tppos2 then 
+									teleportWithTween(char, tppos2)
+									tppos2 = nil
+								end
+							end)
+						end
+					end))
+					local bed = getEnemyBed()
+					if bed then 
+						tppos2 = bed.Position
+						killPlayer(lplr)
+					else
+						BedTP:Toggle(false)
+					end
+				end)
+            end
+        end
+    })
+
+	function IsAlive(plr)
+		plr = plr or lplr
+		if not plr.Character then return false end
+		if not plr.Character:FindFirstChild("Head") then return false end
+		if not plr.Character:FindFirstChild("Humanoid") then return false end
+		if plr.Character:FindFirstChild("Humanoid").Health < 0.11 then return false end
+		return true
+	end
+	
+	local function notif(...)
+		vape:CreateNotification(...)
+	end
+end)
+]]--
+local function getNearGround(range)
+	range = Vector3.new(3, 3, 3) * (range or 10)
+	local localPosition, mag, closest = entitylib.character.RootPart.Position, 60
+	local blocks = getBlocksInPoints(bedwars.BlockController:getBlockPosition(localPosition - range), bedwars.BlockController:getBlockPosition(localPosition + range))
+
+	for _, v in blocks do
+		if not getPlacedBlock(v + Vector3.new(0, 3, 0)) then
+			local newmag = (localPosition - v).Magnitude
+			if newmag < mag then
+				mag, closest = newmag, v + Vector3.new(0, 3, 0)
+			end
+		end
+	end
+
+	table.clear(blocks)
+	return closest
+end
+run(function()
+	local AutoPearl
+	local projectileRemote = {InvokeServer = function() end}
+	task.spawn(function()
+		projectileRemote = bedwars.Client:Get(remotes.FireProjectile).instance
+	end)
+	
+	local function firePearl(pos, spot, item)
+		switchItem(item.tool)
+		local meta = bedwars.ProjectileMeta.telepearl
+		local calc = prediction.SolveTrajectory(pos, meta.launchVelocity, meta.gravitationalAcceleration, spot, Vector3.zero, workspace.Gravity, 0, 0)
+	
+		if calc then
+			local dir = CFrame.lookAt(pos, calc).LookVector * meta.launchVelocity
+			bedwars.ProjectileController:createLocalProjectile(meta, 'telepearl', 'telepearl', pos, nil, dir, {drawDurationSeconds = 1})
+			projectileRemote:InvokeServer(item.tool, 'telepearl', 'telepearl', pos, pos, dir, httpService:GenerateGUID(true), {drawDurationSeconds = 1, shotId = httpService:GenerateGUID(false)}, workspace:GetServerTimeNow() - 0.045)
+		end
+	
+		if store.hand then
+			switchItem(store.hand.tool)
+		end
+	end
+	
+	AutoPearl = vape.Categories.Utility:CreateModule({
+		Name = 'AutoPearl',
+		Function = function(callback)
+			if callback then
+				local check
+				repeat
+					if entitylib.isAlive then
+						local root = entitylib.character.RootPart
+						local pearl = getItem('telepearl')
+	
+						if pearl and root.Velocity.Y < -100 then
+							if not check then
+								check = true
+								local ground = getNearGround(20)
+	
+								if ground then
+									firePearl(root.Position, ground, pearl)
+								end
+							end
+						else
+							check = false
+						end
+					end
+					task.wait(0.1)
+				until not AutoPearl.Enabled
+			end
+		end,
+		Tooltip = 'Automatically throws a pearl onto nearby ground after\nfalling a certain distance.'
+	})
+end)
+local tweenInProgress = function() end
+tweenInProgress = function()
+	if store.autowinning then 
+		return true 
+	end
+	for i,v in next, ({'BedTP', 'PlayerTP', 'EmeraldTP', 'DiamondTP'}) do 
+		if isEnabled(v) then 
+			return true
+		end
+	end
+	return false
+end
+run(function()
+	local FastBreak
+	local Time
+	
+	FastBreak = vape.Categories.Blatant:CreateModule({
+		Name = 'FastBreak',
+		Function = function(callback)
+			if callback then
+				repeat
+					bedwars.BlockBreakController.blockBreaker:setCooldown(Time.Value)
+					task.wait(0.1)
+				until not FastBreak.Enabled
+			else
+				bedwars.BlockBreakController.blockBreaker:setCooldown(0.3)
+			end
+		end,
+		Tooltip = 'Decreases block hit cooldown'
+	})
+	Time = FastBreak:CreateSlider({
+		Name = 'Break speed',
+		Min = 0,
+		Max = 0.3,
+		Default = 0.25,
+		Decimal = 100,
+		Suffix = 'seconds'
+	})
+end)
+
+run(function()
+    local AutoLobby = {}
+
+    AutoLobby = vape.Categories.Utility:CreateModule({
+        Name = "AutoLobby",
+        Function = function(callback)
+            if callback then
+				task.wait()
+                AutoLobby.MatchEndConnection = vapeEvents.MatchEndEvent.Event:Connect(function(winTable)
+                    if (bedwars.Store:getState().Game.myTeam or {}).id == winTable.winningTeamId or lplr.Neutral then
+                        local args = {
+                            [1] = "/bedwars",
+                            [2] = "All"
+                        }
+
+                        game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(unpack(args))
+                    end
+                end)
+            else
+                -- Disconnect the event when the module is disabled
+                if AutoLobby.MatchEndConnection then
+                    AutoLobby.MatchEndConnection:Disconnect()
+                    AutoLobby.MatchEndConnection = nil
+                end
+            end
+        end,
+        Tooltip = 'Automatically executes /bedwars command when you win a match.'
+    })
+end)
+
+
+print('Bedwars Module is loaded!  | Made by @rinnnaaaa_')
+vape:CreateNotification('Katware Bedwars Module is loaded!!', vape.VapeButton and 'Press the button in the top right to open GUI (whatever i did)' or 'Press '..table.concat(vape.Keybind, ' + '):upper()..' to open GUI', 5)
