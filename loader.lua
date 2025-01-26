@@ -13,62 +13,60 @@ local function downloadFile(url, path)
 	end
   end
   
-  -- Function to get a list of files from a GitHub repository
+  -- Function to get a list of files from a GitHub repository recursively
   local function getRepoFiles(repoUrl)
-	-- Get the repository's contents using GitHub's API
-	local success, response = pcall(game.HttpGet, game, repoUrl .. "?ref=main")
+	local files = {}
   
-	if success then
-	  -- Parse the JSON response
-	  local files = {}
-	  for _, fileData in ipairs(game:GetService("HttpService"):JSONDecode(response)) do
-		if fileData.type == "file" then
-		  table.insert(files, fileData.name)
+	local function traverse(url)
+	  -- Get the contents of the current URL
+	  local success, response = pcall(game.HttpGet, game, url)
+  
+	  if success then
+		local decodedResponse = game:GetService("HttpService"):JSONDecode(response)
+  
+		-- Check if the response is a table and iterate accordingly
+		if type(decodedResponse) == "table" then
+		  for _, item in ipairs(decodedResponse) do
+			if item.type == "file" then
+			  -- Add the file path to the list
+			  table.insert(files, item.path)
+			elseif item.type == "dir" then
+			  -- Recursively traverse subdirectories
+			  traverse(item.url)
+			end
+		  end
+		else
+		  -- Handle the case where the response is not a table (e.g., an error message)
+		  print("Unexpected response format:", decodedResponse)
 		end
+	  else
+		print("Failed to get repository files: " .. url)
 	  end
-	  return files
-	else
-	  print("Failed to get repository files: " .. repoUrl)
-	  return {}
 	end
+  
+	traverse(repoUrl)
+	return files
   end
   
   -- URL of the repository
-local repoUrl = "https://api.github.com/repos/XxlyitemXx/katware/contents"
+  local repoUrl = "https://api.github.com/repos/XxlyitemXx/katware/contents"
   
-  -- Get the list of files in the repository
-local files = getRepoFiles(repoUrl)
+  -- Get the list of files in the repository recursively
+  local files = getRepoFiles(repoUrl)
   
   -- Download each file
-for _, file in ipairs(files) do
+  for _, file in ipairs(files) do
 	local url = "https://raw.githubusercontent.com/XxlyitemXx/katware/main/" .. file
 	local path = "katware/" .. file
 	downloadFile(url, path)
-end
-for _, file in ipairs(files) do
-	local url = "https://raw.githubusercontent.com/XxlyitemXx/katware/main/games" .. file
-	local path = "katware/games" .. file
-	downloadFile(url, path)
-end
-for _, file in ipairs(files) do
-	local url = "https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets" .. file
-	local path = "katware/assets" .. file
-	downloadFile(url, path)
-end
-for _, file in ipairs(files) do
-	local url = "https://raw.githubusercontent.com/XxlyitemXx/katware/main/profiles" .. file
-	local path = "katware/profiles" .. file
-	downloadFile(url, path)
-end
-for _, file in ipairs(files) do
-	local url = "https://raw.githubusercontent.com/XxlyitemXx/katware/main/guis" .. file
-	local path = "katware/guis" .. file
-	downloadFile(url, path)
-end
-for _, file in ipairs(files) do
-	local url = "https://raw.githubusercontent.com/XxlyitemXx/katware/main/libraries" .. file
-	local path = "katware/libraries" .. file
-	downloadFile(url, path)
-end
-print("Finished downloading all files.")
-loadfile('katware/main.lua')()
+  end
+  
+  -- Load each downloaded file
+  for _, file in ipairs(files) do
+	local path = "katware/" .. file
+	if isfile(path) then
+	  loadstring(readfile(path), file)()
+	end
+  end
+  
+  print("Finished downloading and loading all files.")
