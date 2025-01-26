@@ -45,6 +45,30 @@ for _, file in ipairs(files) do
 	local path = "katware/" .. file
 	downloadFile(url, path)
 end
-
+for _, file in ipairs(files) do
+	local url = "https://raw.githubusercontent.com/XxlyitemXx/katware/main/games" .. file
+	local path = "katware/games" .. file
+	downloadFile(url, path)
+end
+for _, file in ipairs(files) do
+	local url = "https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets" .. file
+	local path = "katware/assets" .. file
+	downloadFile(url, path)
+end
+for _, file in ipairs(files) do
+	local url = "https://raw.githubusercontent.com/XxlyitemXx/katware/main/profiles" .. file
+	local path = "katware/profiles" .. file
+	downloadFile(url, path)
+end
+for _, file in ipairs(files) do
+	local url = "https://raw.githubusercontent.com/XxlyitemXx/katware/main/guis" .. file
+	local path = "katware/guis" .. file
+	downloadFile(url, path)
+end
+for _, file in ipairs(files) do
+	local url = "https://raw.githubusercontent.com/XxlyitemXx/katware/main/libraries" .. file
+	local path = "katware/libraries" .. file
+	downloadFile(url, path)
+end
 print("Finished downloading all files.")
 loadfile('katware/main.lua')()
