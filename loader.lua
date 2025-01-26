@@ -8,22 +8,15 @@ local delfile = delfile or function(file)
 	writefile(file, '')
 end
 
-local function downloadFile(path, func)
-	if not isfile(path) then
-		local suc, res = pcall(function()
-			return game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware/refs/heads/main/'..readfile('katware/profiles/commit.txt')..'/'..select(1, path:gsub('katware/', '')), true)
-		end)
-		if not suc or res == '404: Not Found' then
-			error(res)
-		end
-		if path:find('.lua') then
-			res = '--This watermark is used to delete the file if its cached, remove it to make the file persist after vape updates.\n'..res
-		end
-		writefile(path, res)
+function downloadFile(url, path)
+	local success, response = pcall(game.HttpGet, url)
+  
+	if success and response ~= '404: Not Found' then
+	  writefile(path, response)
+	else
+	  print("Failed to download file: " .. url)
 	end
-	return (func or readfile)(path)
-end
-
+  end
 local function wipeFolder(path)
 	if not isfolder(path) then return end
 	for _, file in listfiles(path) do
@@ -56,4 +49,4 @@ if not shared.VapeDeveloper then
 	writefile('katware/profiles/commit.txt', commit)
 end
 
-return loadstring(downloadFile('katware/main.lua'), 'main')()
+return loadstring(downloadFile("https://raw.githubusercontent.com/XxlyitemXx/katware/refs/heads/main/main.lua", "katware/main.lua"), 'main')()
