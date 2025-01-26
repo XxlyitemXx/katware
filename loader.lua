@@ -49,4 +49,4 @@ if not shared.VapeDeveloper then
 	writefile('katware/profiles/commit.txt', commit)
 end
 
-return loadstring(downloadFile("https://raw.githubusercontent.com/XxlyitemXx/katware/refs/heads/main/main.lua", "katware/main.lua"), 'main')()
+return loadstring(downloadFile("https://raw.githubusercontent.com/XxlyitemXx/katware/main/main.lua", "katware/main.lua"), 'main')()
