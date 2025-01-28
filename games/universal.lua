@@ -13,21 +13,19 @@ local isfile = isfile or function(file)
 	end)
 	return suc and res ~= nil and res ~= ''
 end
-local function downloadFile(path, func)
-	if not isfile(path) then
-		local suc, res = pcall(function()
-			return game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware'..readfile('katware/profiles/commit.txt')..'/'..select(1, path:gsub('katware/', '')), true)
-		end)
-		if not suc or res == '404: Not Found' then
-			error(res)
-		end
-		if path:find('.lua') then
-			res = '--This watermark is used to delete the file if its cached, remove it to make the file persist after vape updates.\n'..res
-		end
-		writefile(path, res)
-	end
-	return (func or readfile)(path)
+local function downloadFile(path, file)
+    if isfile(path) then
+        local suc, res = pcall(function()
+            return game:HttpGet('https://github.com/XxlyitemXx/katware/raw/main/'..file, true)
+        end)
+        if not suc or res == "404: Not Found" then
+            error(res)
+        end
+        writefile(path, res)
+    end
+    return readfile(path)
 end
+
 local run = function(func)
 	func()
 end
@@ -208,10 +206,12 @@ local function updateVelocity()
 		table.clear(oldfrict)
 	end
 end
-
-local hash = loadstring(downloadFile('katware/libraries/hash.lua'), 'hash')()
-local prediction = loadstring(downloadFile('katware/libraries/prediction.lua'), 'prediction')()
-entitylib = loadstring(downloadFile('katware/libraries/entity.lua'), 'entitylibrary')()
+downloadFile('katware/libraries/entity.lua', 'katware/libraries/')
+downloadFile('katware/libraries/hash.lua', 'katware/libraries/')
+downloadFile('katware/libraries/prediction.lua', 'katware/libraries/')
+local hash = loadfile('katware/libraries/hash.lua')()
+local prediction = loadfile('katware/libraries/prediction.lua')()
+local entitylib = loadfile('katware/libraries/entity.lua')()
 local whitelist = {
 	alreadychecked = {},
 	customtags = {},

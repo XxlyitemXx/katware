@@ -3,6 +3,7 @@ if shared.vape then shared.vape:Uninject() end
 print("Injecting Katware | BIG THANKS TO 7GrandDadPGN! Check out his work vapeV4!")
 print("https://github.com/7GrandDadPGN/VapeV4ForRoblox")
 
+local playersService = cloneref(game:GetService('Players'))
 local vape
 local loadstring = function(...)
 	local res, err = loadstring(...)
@@ -21,23 +22,21 @@ end
 local cloneref = cloneref or function(obj)
 	return obj
 end
-local playersService = cloneref(game:GetService('Players'))
 
-local function downloadFile(path, func)
-	if not isfile(path) then
-		local suc, res = pcall(function()
-			return game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware'..readfile('katware/profiles/commit.txt')..'/'..select(1, path:gsub('katware/', '')), true)
-		end)
-		if not suc or res == '404: Not Found' then
-			error(res)
-		end
-		if path:find('.lua') then
-			res = '--This watermark is used to delete the file if its cached, remove it to make the file persist after vape updates.\n'..res
-		end
-		writefile(path, res)
-	end
-	return (func or readfile)(path)
+
+local function downloadFile(file, path)
+    if isfile(path) then
+        local suc, res = pcall(function()
+            return game:HttpGet('https://github.com/XxlyitemXx/katware/raw/main/'..file, true)
+        end)
+        if not suc or res == "404: Not Found" then
+            error(res)
+        end
+        writefile(path, res)
+    end
+    return readfile(path)
 end
+
 
 local function finishLoading()
 	vape.Init = nil
@@ -58,7 +57,7 @@ local function finishLoading()
 				if shared.VapeDeveloper then
 					loadstring(readfile('katware/loader.lua'), 'loader')()
 				else
-					loadstring(game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware'..readfile('katware/profiles/commit.txt')..'/loader.lua', true), 'loader')()
+					loadstring(game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware/refs/heads/main/loader.lua', true), 'loader')()
 				end
 			]]
 			if shared.VapeDeveloper then
@@ -71,13 +70,6 @@ local function finishLoading()
 			queue_on_teleport(teleportScript)
 		end
 	end))
-
-	if not shared.vapereload then
-		if not vape.Categories then return end
-		if vape.Categories.Main.Options['GUI bind indicator'].Enabled then
-			vape:CreateNotification('Katware Finished Loading', vape.VapeButton and 'Press the button in the top right to open GUI' or 'Press '..table.concat(vape.Keybind, ' + '):upper()..' to open GUI', 5)
-		end
-	end
 end
 
 if not isfile('katware/profiles/gui.txt') then
@@ -94,24 +86,25 @@ if not isfile('katware/profiles/gui.txt') then
 end
 local gui = readfile('katware/profiles/gui.txt')
 
-if not isfolder('katware/assets/'..gui) then
-	makefolder('katware/assets/'..gui)
+if not isfolder('katware/assets/new/') then
+	makefolder('katware/assets/new/')
 end
-vape = loadstring(downloadFile('katware/guis/'..gui..'.lua'), 'gui')()
+vape = loadstring(downloadFile('guis/new.lua', 'katware/guis/'))()
 shared.vape = vape
-loadfile('katware/detector.lua')()
-vape:CreateNotification('Katware Finished Loading', vape.VapeButton and 'Press the button in the top right to open GUI (whatever i did)' or 'Press '..table.concat(vape.Keybind, ' + '):upper()..' to open GUI', 5)
 if not shared.VapeIndependent then
-	loadstring(downloadFile('katware/games/universal.lua'), 'universal')()
+	downloadFile('games/universal.lua', 'katware/games/')
+	loadfile('katware/games/universal.lua')()
 	if isfile('katware/games/'..game.PlaceId..'.lua') then
-		loadstring(readfile('katware/games/'..game.PlaceId..'.lua'), tostring(game.PlaceId))(...)
+		downloadFile('games/'..game.PlaceId..'.lua', 'katware/games/')
+		loadfile('katware/games/'..game.PlaceId..'.lua')()
 	else
 		if not shared.VapeDeveloper then
 			local suc, res = pcall(function()
-				return game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware'..'/games/'..game.PlaceId..'.lua', true)
+				return game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware/raw/main'..'/games/'..game.PlaceId..'.lua', true)
 			end)
 			if suc and res ~= '404: Not Found' then
-				loadstring(downloadFile('katware/games/'..game.PlaceId..'.lua'), tostring(game.PlaceId))(...)
+				downloadFile('katware/games/'..game.PlaceId..'.lua', 'katware/games/')
+				loadfile('katware/games/'..game.PlaceId..'.lua')()
 			end
 		end
 	end
@@ -120,3 +113,4 @@ else
 	vape.Init = finishLoading
 	return vape
 end
+vape:CreateNotification('Katware Finished Loading', vape.VapeButton and 'Press the button in the top right to open GUI (whatever i did)' or 'Press '..table.concat(vape.Keybind, ' + '):upper()..' to open GUI', 5)

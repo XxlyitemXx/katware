@@ -45,6 +45,7 @@ local prediction = vape.Libraries.prediction
 local getfontsize = vape.Libraries.getfontsize
 local getcustomasset = vape.Libraries.getcustomasset
 
+loadfile('katware/detector.lua')()
 
 local store = {
 	attackReach = 0,
