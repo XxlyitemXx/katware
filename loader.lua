@@ -19,6 +19,7 @@ end
 
 local function downloadFile(file, path)
 	print("Downloading", file)
+	print('https://github.com/XxlyitemXx/katware/raw/main/'..file)
     if isfile(path) then
         local suc, res = pcall(function()
             return game:HttpGet('https://github.com/XxlyitemXx/katware/raw/main/'..file, true)
