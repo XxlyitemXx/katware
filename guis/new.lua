@@ -59,68 +59,68 @@ local uipallet = {
 }
 
 local getcustomassets = {
-	['katware/assets/new/add.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/add.png',
-	['katware/assets/new/alert.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/alert.png',
-	['katware/assets/new/allowedicon.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/allowedicon.png',
-	['katware/assets/new/allowedtab.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/allowedtab.png',
-	['katware/assets/new/arrowmodule.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/arrowmodule.png',
-	['katware/assets/new/back.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/back.png',
-	['katware/assets/new/bind.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/bind.png',
-	['katware/assets/new/bindbkg.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/bindbkg.png',
-	['katware/assets/new/blatanticon.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/blatanticon.png',
-	['katware/assets/new/blockedicon.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/blockedicon.png',
-	['katware/assets/new/blockedtab.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/blockedtab.png',
-	['katware/assets/new/blur.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/blur.png',
-	['katware/assets/new/blurnotif.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/blurnotif.png',
-	['katware/assets/new/close.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/close.png',
-	['katware/assets/new/closemini.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/closemini.png',
-	['katware/assets/new/colorpreview.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/colorpreview.png',
-	['katware/assets/new/combaticon.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/combaticon.png',
-	['katware/assets/new/customsettings.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/customsettings.png',
-	['katware/assets/new/dots.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/dots.png',
-	['katware/assets/new/edit.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/edit.png',
-	['katware/assets/new/expandright.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/expandright.png',
-	['katware/assets/new/expandup.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/expandup.png',
-	['katware/assets/new/friendstab.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/friendstab.png',
-	['katware/assets/new/guisettings.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/guisettings.png',
-	['katware/assets/new/guislider.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/guislider.png',
-	['katware/assets/new/guisliderrain.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/guisliderrain.png',
-	['katware/assets/new/guiv4.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/guiv4.png',
-	['katware/assets/new/guikatware.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/guikatware.png',
-	['katware/assets/new/info.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/info.png',
-	['katware/assets/new/inventoryicon.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/inventoryicon.png',
-	['katware/assets/new/legit.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/legit.png',
-	['katware/assets/new/legittab.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/legittab.png',
-	['katware/assets/new/miniicon.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/miniicon.png',
-	['katware/assets/new/notification.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/notification.png',
-	['katware/assets/new/overlaysicon.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/overlaysicon.png',
-	['katware/assets/new/overlaystab.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/overlaystab.png',
-	['katware/assets/new/pin.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/pin.png',
-	['katware/assets/new/profilesicon.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/profilesicon.png',
-	['katware/assets/new/radaricon.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/radaricon.png',
-	['katware/assets/new/rainbow_1.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/rainbow_1.png',
-	['katware/assets/new/rainbow_2.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/rainbow_2.png',
-	['katware/assets/new/rainbow_3.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/rainbow_3.png',
-	['katware/assets/new/rainbow_4.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/rainbow_4.png',
-	['katware/assets/new/range.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/range.png',
-	['katware/assets/new/rangearrow.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/rangearrow.png',
-	['katware/assets/new/rendericon.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/rendericon.png',
-	['katware/assets/new/rendertab.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/rendertab.png',
-	['katware/assets/new/search.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/search.png',
-	['katware/assets/new/expandicon.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/expandicon.png',
-	['katware/assets/new/targetinfoicon.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/targetinfoicon.png',
-	['katware/assets/new/targetnpc1.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/targetnpc1.png',
-	['katware/assets/new/targetnpc2.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/targetnpc2.png',
-	['katware/assets/new/targetplayers1.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/targetplayers1.png',
-	['katware/assets/new/targetplayers2.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/targetplayers2.png',
-	['katware/assets/new/targetstab.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/targetstab.png',
-	['katware/assets/new/textguiicon.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/textguiicon.png',
-	['katware/assets/new/textv4.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/textv4.png',
-	['katware/assets/new/textkatware.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/textkatware.png',
-	['katware/assets/new/utilityicon.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/utilityicon.png',
-	['katware/assets/new/katware.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/katware.png',
-	['katware/assets/new/warning.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/warning.png',
-	['katware/assets/new/worldicon.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/worldicon.png'
+    ['katware/assets/new/add.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/add.png',
+    ['katware/assets/new/alert.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/alert.png',
+    ['katware/assets/new/allowedicon.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/allowedicon.png',
+    ['katware/assets/new/allowedtab.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/allowedtab.png',
+    ['katware/assets/new/arrowmodule.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/arrowmodule.png',
+    ['katware/assets/new/back.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/back.png',
+    ['katware/assets/new/bind.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/bind.png',
+    ['katware/assets/new/bindbkg.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/bindbkg.png',
+    ['katware/assets/new/blatanticon.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/blatanticon.png',
+    ['katware/assets/new/blockedicon.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/blockedicon.png',
+    ['katware/assets/new/blockedtab.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/blockedtab.png',
+    ['katware/assets/new/blur.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/blur.png',
+    ['katware/assets/new/blurnotif.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/blurnotif.png',
+    ['katware/assets/new/close.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/close.png',
+    ['katware/assets/new/closemini.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/closemini.png',
+    ['katware/assets/new/colorpreview.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/colorpreview.png',
+    ['katware/assets/new/combaticon.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/combaticon.png',
+    ['katware/assets/new/customsettings.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/customsettings.png',
+    ['katware/assets/new/dots.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/dots.png',
+    ['katware/assets/new/edit.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/edit.png',
+    ['katware/assets/new/expandright.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/expandright.png',
+    ['katware/assets/new/expandup.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/expandup.png',
+    ['katware/assets/new/friendstab.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/friendstab.png',
+    ['katware/assets/new/guisettings.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/guisettings.png',
+    ['katware/assets/new/guislider.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/guislider.png',
+    ['katware/assets/new/guisliderrain.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/guisliderrain.png',
+    ['katware/assets/new/guiv4.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/guiv4.png',
+    ['katware/assets/new/guikatware.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/guikatware.png',
+    ['katware/assets/new/info.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/info.png',
+    ['katware/assets/new/inventoryicon.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/inventoryicon.png',
+    ['katware/assets/new/legit.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/legit.png',
+    ['katware/assets/new/legittab.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/legittab.png',
+    ['katware/assets/new/miniicon.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/miniicon.png',
+    ['katware/assets/new/notification.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/notification.png',
+    ['katware/assets/new/overlaysicon.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/overlaysicon.png',
+    ['katware/assets/new/overlaystab.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/overlaystab.png',
+    ['katware/assets/new/pin.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/pin.png',
+    ['katware/assets/new/profilesicon.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/profilesicon.png',
+    ['katware/assets/new/radaricon.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/radaricon.png',
+    ['katware/assets/new/rainbow_1.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/rainbow_1.png',
+    ['katware/assets/new/rainbow_2.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/rainbow_2.png',
+    ['katware/assets/new/rainbow_3.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/rainbow_3.png',
+    ['katware/assets/new/rainbow_4.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/rainbow_4.png',
+    ['katware/assets/new/range.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/range.png',
+    ['katware/assets/new/rangearrow.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/rangearrow.png',
+    ['katware/assets/new/rendericon.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/rendericon.png',
+    ['katware/assets/new/rendertab.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/rendertab.png',
+    ['katware/assets/new/search.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/search.png',
+    ['katware/assets/new/expandicon.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/expandicon.png',
+    ['katware/assets/new/targetinfoicon.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/targetinfoicon.png',
+    ['katware/assets/new/targetnpc1.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/targetnpc1.png',
+    ['katware/assets/new/targetnpc2.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/targetnpc2.png',
+    ['katware/assets/new/targetplayers1.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/targetplayers1.png',
+    ['katware/assets/new/targetplayers2.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/targetplayers2.png',
+    ['katware/assets/new/targetstab.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/targetstab.png',
+    ['katware/assets/new/textguiicon.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/textguiicon.png',
+    ['katware/assets/new/textv4.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/textv4.png',
+    ['katware/assets/new/textkatware.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/textkatware.png',
+    ['katware/assets/new/utilityicon.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/utilityicon.png',
+    ['katware/assets/new/katware.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/katware.png',
+    ['katware/assets/new/warning.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/warning.png',
+    ['katware/assets/new/worldicon.png'] = 'https://raw.githubusercontent.com/XxlyitemXx/katware/main/assets/new/worldicon.png'
 }
 
 local isfile = isfile or function(file)
@@ -310,30 +310,21 @@ local function createMobileButton(buttonapi, position)
 end
 
 local function downloadFile(path, func)
-    if not isfile(path) then
-        local suc, res = pcall(function()
-            return game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware/'..readfile('katware/profiles/commit.txt')..'/'..select(1, path:gsub('katware/', '')), true)
-        end)
-        
-        if not suc or res == '404: Not Found' then
-            warn("Failed to download file: " .. path)
-            return nil
-        end
-        
-        if path:find('.lua') then
-            res = '--This watermark is used to delete the file if its cached, remove it to make the file persist after katware updates.\n'..res
-        end
-        
-        pcall(function()
-            writefile(path, res)
-        end)
-    end
-    
-    return (func or readfile)(path)
+	if not isfile(path) then
+		local suc, res = pcall(function()
+			return game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware/'..readfile('katware/profiles/commit.txt')..'/'..select(1, path:gsub('katware/', '')), true)
+		end)
+		if not suc or res == '404: Not Found' then
+			error(res)
+		end
+		if path:find('.lua') then
+			res = '--This watermark is used to delete the file if its cached, remove it to make the file persist after katware updates.\n'..res
+		end
+		writefile(path, res)
+	end
+	return (func or readfile)(path)
 end
-
 getcustomasset = not inputService.TouchEnabled and assetfunction and function(path)
-    -- Try to download and cache the image from GitHub
     if not isfile(path) then
         local success, imageData = pcall(function()
             return game:HttpGet(getcustomassets[path])
@@ -346,7 +337,6 @@ getcustomasset = not inputService.TouchEnabled and assetfunction and function(pa
     end
     return assetfunction(path)
 end or function(path)
-    -- For platforms that don't support custom assets, return the GitHub URL directly
     return getcustomassets[path] or ''
 end
 
@@ -475,6 +465,7 @@ do
 		tab = tab or self.tweens
 		if tab[obj] then
 			tab[obj]:Cancel()
+			tab[obj] = nil
 		end
 
 		if obj.Parent and obj.Visible then
@@ -533,7 +524,7 @@ components = {
 		label.Position = UDim2.fromOffset(2, 2)
 		label.BackgroundColor3 = uipallet.Main
 		label.Text = optionsettings.Name
-		label.TextColor = color.Dark(uipallet.Text, 0.16)
+		label.TextColor3 = color.Dark(uipallet.Text, 0.16)
 		label.TextSize = 14
 		label.FontFace = uipallet.Font
 		label.Parent = bkg
@@ -2096,6 +2087,99 @@ components = {
 		
 		return optionapi
 	end,
+	Toggle = function(optionsettings, children, api)
+		local optionapi = {
+			Type = 'Toggle',
+			Enabled = false,
+			Index = getTableSize(api.Options)
+		}
+		
+		local hovered = false
+		local toggle = Instance.new('TextButton')
+		toggle.Name = optionsettings.Name..'Toggle'
+		toggle.Size = UDim2.new(1, 0, 0, 30)
+		toggle.BackgroundColor3 = color.Dark(children.BackgroundColor3, optionsettings.Darker and 0.02 or 0)
+		toggle.BorderSizePixel = 0
+		toggle.AutoButtonColor = false
+		toggle.Visible = optionsettings.Visible == nil or optionsettings.Visible
+		toggle.Text = '          '..optionsettings.Name
+		toggle.TextXAlignment = Enum.TextXAlignment.Left
+		toggle.TextColor3 = color.Dark(uipallet.Text, 0.16)
+		toggle.TextSize = 14
+		toggle.FontFace = uipallet.Font
+		toggle.Parent = children
+		addTooltip(toggle, optionsettings.Tooltip)
+		local knobholder = Instance.new('Frame')
+		knobholder.Name = 'Knob'
+		knobholder.Size = UDim2.fromOffset(22, 12)
+		knobholder.Position = UDim2.new(1, -30, 0, 9)
+		knobholder.BackgroundColor3 = color.Light(uipallet.Main, 0.14)
+		knobholder.Parent = toggle
+		addCorner(knobholder, UDim.new(1, 0))
+		local knob = knobholder:Clone()
+		knob.Size = UDim2.fromOffset(8, 8)
+		knob.Position = UDim2.fromOffset(2, 2)
+		knob.BackgroundColor3 = uipallet.Main
+		knob.Parent = knobholder
+		optionsettings.Function = optionsettings.Function or function() end
+		
+		function optionapi:Save(tab)
+			tab[optionsettings.Name] = {Enabled = self.Enabled}
+		end
+		
+		function optionapi:Load(tab)
+			if self.Enabled ~= tab.Enabled then
+				self:Toggle()
+			end
+		end
+		
+		function optionapi:Color(hue, sat, val, rainbowcheck)
+			if self.Enabled then
+				tween:Cancel(knobholder)
+				knobholder.BackgroundColor3 = rainbowcheck and Color3.fromHSV(mainapi:Color((hue - (self.Index * 0.075)) % 1)) or Color3.fromHSV(hue, sat, val)
+			end
+		end
+		
+		function optionapi:Toggle()
+			self.Enabled = not self.Enabled
+			local rainbowcheck = mainapi.GUIColor.Rainbow and mainapi.RainbowMode.Value ~= 'Retro'
+			tween:Tween(knobholder, uipallet.Tween, {
+				BackgroundColor3 = self.Enabled and (rainbowcheck and Color3.fromHSV(mainapi:Color((mainapi.GUIColor.Hue - (self.Index * 0.075)) % 1)) or Color3.fromHSV(mainapi.GUIColor.Hue, mainapi.GUIColor.Sat, mainapi.GUIColor.Value)) or (hovered and color.Light(uipallet.Main, 0.37) or color.Light(uipallet.Main, 0.14))
+			})
+			tween:Tween(knob, uipallet.Tween, {
+				Position = UDim2.fromOffset(self.Enabled and 12 or 2, 2)
+			})
+			optionsettings.Function(self.Enabled)
+		end
+		
+		toggle.MouseEnter:Connect(function()
+			hovered = true
+			if not optionapi.Enabled then
+				tween:Tween(knobholder, uipallet.Tween, {
+					BackgroundColor3 = color.Light(uipallet.Main, 0.37)
+				})
+			end
+		end)
+		toggle.MouseLeave:Connect(function()
+			hovered = false
+			if not optionapi.Enabled then
+				tween:Tween(knobholder, uipallet.Tween, {
+					BackgroundColor3 = color.Light(uipallet.Main, 0.14)
+				})
+			end
+		end)
+		toggle.MouseButton1Click:Connect(function()
+			optionapi:Toggle()
+		end)
+		
+		if optionsettings.Default then
+			optionapi:Toggle()
+		end
+		optionapi.Object = toggle
+		api.Options[optionsettings.Name] = optionapi
+		
+		return optionapi
+	end,
 	TwoSlider = function(optionsettings, children, api)
 		local optionapi = {
 			Type = 'TwoSlider',
@@ -2757,6 +2841,7 @@ function mainapi:CreateGUI()
 				Index = getTableSize(optionapi.Toggles)
 			}
 
+			local hovered = false
 			local toggle = Instance.new('TextButton')
 			toggle.Name = togglesettings.Name..'Toggle'
 			toggle.Size = UDim2.new(1, 0, 0, 40)
@@ -2805,7 +2890,6 @@ function mainapi:CreateGUI()
 				togglesettings.Function(self.Enabled)
 			end
 
-			local hovered = false
 			scale:GetPropertyChangedSignal('Scale'):Connect(function()
 				toggle.Text = string.rep(' ', 33 * scale.Scale)..togglesettings.Name
 			end)
@@ -3596,6 +3680,7 @@ function mainapi:CreateCategory(categorysettings)
 			Category = categorysettings.Name
 		}
 
+		local hovered = false
 		local modulebutton = Instance.new('TextButton')
 		modulebutton.Name = modulesettings.Name
 		modulebutton.Size = UDim2.fromOffset(220, 40)
@@ -3796,7 +3881,6 @@ function mainapi:CreateCategory(categorysettings)
 		dotsbutton.MouseButton2Click:Connect(function()
 			modulechildren.Visible = not modulechildren.Visible
 		end)
-		local hovered = false
 		modulebutton.MouseEnter:Connect(function()
 			hovered = true
 			if not moduleapi.Enabled and not modulechildren.Visible then
@@ -4789,6 +4873,24 @@ function mainapi:CreateSearch()
 				button.MouseButton1Click:Connect(function()
 					v:Toggle()
 				end)
+
+				button.MouseButton2Click:Connect(function()
+					v.Object.Parent.Parent.Visible = true
+					local frame = v.Object.Parent
+					local highlight = Instance.new('Frame')
+					highlight.Size = UDim2.fromScale(1, 1)
+					highlight.BackgroundColor3 = Color3.new(1, 1, 1)
+					highlight.BackgroundTransparency = 0.6
+					highlight.BorderSizePixel = 0
+					highlight.Parent = v.Object
+					tween:Tween(highlight, TweenInfo.new(0.5), {
+						BackgroundTransparency = 1
+					})
+					task.delay(0.5, highlight.Destroy, highlight)
+
+					frame.CanvasPosition = Vector2.new(0, (v.Object.LayoutOrder * 40) - (math.min(frame.CanvasSize.Y.Offset, 600) / 2))
+				end)
+
 				button.Parent = children
 				task.spawn(function()
 					repeat
@@ -5659,8 +5761,61 @@ mainapi.Categories.Main:CreateDivider('misc')
 --[[
 	Friends
 ]]
-
-
+local friends
+local friendscolor = {
+	Hue = 1,
+	Sat = 1,
+	Value = 1
+}
+local friendssettings = {
+	Name = 'Friends',
+	Icon = getcustomasset('katware/assets/new/friendstab.png'),
+	Size = UDim2.fromOffset(17, 16),
+	Placeholder = 'Roblox username',
+	Color = Color3.fromRGB(5, 134, 105),
+	Function = function()
+		friends.Update:Fire()
+		friends.ColorUpdate:Fire(friendscolor.Hue, friendscolor.Sat, friendscolor.Value)
+	end
+}
+friends = mainapi:CreateCategoryList(friendssettings)
+friends.Update = Instance.new('BindableEvent')
+friends.ColorUpdate = Instance.new('BindableEvent')
+friends:CreateToggle({
+	Name = 'Recolor visuals',
+	Darker = true,
+	Default = true,
+	Function = function()
+		friends.Update:Fire()
+		friends.ColorUpdate:Fire(friendscolor.Hue, friendscolor.Sat, friendscolor.Value)
+	end
+})
+friendscolor = friends:CreateColorSlider({
+	Name = 'Friends color',
+	Darker = true,
+	Function = function(hue, sat, val)
+		for _, v in friends.Object.Children:GetChildren() do
+			local dot = v:FindFirstChild('Dot')
+			if dot and dot.BackgroundColor3 ~= color.Light(uipallet.Main, 0.37) then
+				dot.BackgroundColor3 = Color3.fromHSV(hue, sat, val)
+				dot.Dot.BackgroundColor3 = dot.BackgroundColor3
+			end
+		end
+		friendssettings.Color = Color3.fromHSV(hue, sat, val)
+		friends.ColorUpdate:Fire(hue, sat, val)
+	end
+})
+friends:CreateToggle({
+	Name = 'Use friends',
+	Darker = true,
+	Default = true,
+	Function = function()
+		friends.Update:Fire()
+		friends.ColorUpdate:Fire(friendscolor.Hue, friendscolor.Sat, friendscolor.Value)
+	end
+})
+mainapi:Clean(friends.Update)
+mainapi:Clean(friends.ColorUpdate)
 
 --[[
 	Profiles
