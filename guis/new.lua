@@ -5659,23 +5659,7 @@ mainapi.Categories.Main:CreateDivider('misc')
 --[[
 	Friends
 ]]
-local friends
-local friendscolor = {
-	Hue = 1,
-	Sat = 1,
-	Value = 1
-}
-local friendssettings = {
-	Name = 'Friends',
-	Icon = getcustomasset('katware/assets/new/friendstab.png'),
-	Size = UDim2.fromOffset(17, 16),
-	Placeholder = 'Roblox username',
-	Color = Color3.fromRGB(5, 134, 105),
-	Function = function()
-		friends.Update:Fire()
-		friends.ColorUpdate:Fire(friendscolor.Hue, friendscolor.Sat, friendscolor.Value)
-	end
-}
+
 
 
 --[[
