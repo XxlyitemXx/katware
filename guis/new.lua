@@ -310,19 +310,26 @@ local function createMobileButton(buttonapi, position)
 end
 
 local function downloadFile(path, func)
-	if not isfile(path) then
-		local suc, res = pcall(function()
-			return game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware/'..readfile('katware/profiles/commit.txt')..'/'..select(1, path:gsub('katware/', '')), true)
-		end)
-		if not suc or res == '404: Not Found' then
-			error(res)
-		end
-		if path:find('.lua') then
-			res = '--This watermark is used to delete the file if its cached, remove it to make the file persist after katware updates.\n'..res
-		end
-		writefile(path, res)
-	end
-	return (func or readfile)(path)
+    if not isfile(path) then
+        local suc, res = pcall(function()
+            return game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware/'..readfile('katware/profiles/commit.txt')..'/'..select(1, path:gsub('katware/', '')), true)
+        end)
+        
+        if not suc or res == '404: Not Found' then
+            warn("Failed to download file: " .. path)
+            return nil
+        end
+        
+        if path:find('.lua') then
+            res = '--This watermark is used to delete the file if its cached, remove it to make the file persist after katware updates.\n'..res
+        end
+        
+        pcall(function()
+            writefile(path, res)
+        end)
+    end
+    
+    return (func or readfile)(path)
 end
 
 getcustomasset = not inputService.TouchEnabled and assetfunction and function(path)
