@@ -4,7 +4,7 @@ end
 local cloneref = cloneref or function(obj) 
 	return obj 
 end
-local vapeEvents = setmetatable({}, {
+local katwareEvents = setmetatable({}, {
 	__index = function(self, index)
 		self[index] = Instance.new('BindableEvent')
 		return self[index]
@@ -24,16 +24,16 @@ local gameCamera = workspace.CurrentCamera
 local lplr = playersService.LocalPlayer
 local assetfunction = getcustomasset
 
-local vape = shared.vape
-local entitylib = vape.Libraries.entity
-local targetinfo = vape.Libraries.targetinfo
-local sessioninfo = vape.Libraries.sessioninfo
-local uipallet = vape.Libraries.uipallet
-local tween = vape.Libraries.tween
-local color = vape.Libraries.color
-local whitelist = vape.Libraries.whitelist
-local prediction = vape.Libraries.prediction
-local getcustomasset = vape.Libraries.getcustomasset
+local katware = shared.katware
+local entitylib = katware.Libraries.entity
+local targetinfo = katware.Libraries.targetinfo
+local sessioninfo = katware.Libraries.sessioninfo
+local uipallet = katware.Libraries.uipallet
+local tween = katware.Libraries.tween
+local color = katware.Libraries.color
+local whitelist = katware.Libraries.whitelist
+local prediction = katware.Libraries.prediction
+local getcustomasset = katware.Libraries.getcustomasset
 
 local skywars, remotes = {}, {}
 local store = {
@@ -125,10 +125,10 @@ local function getPickaxe()
 end
 
 local function isFriend(plr, recolor)
-	if vape.Categories.Friends.Options['Use friends'].Enabled then
-		local friend = table.find(vape.Categories.Friends.ListEnabled, plr.Name) and true
+	if katware.Categories.Friends.Options['Use friends'].Enabled then
+		local friend = table.find(katware.Categories.Friends.ListEnabled, plr.Name) and true
 		if recolor then
-			friend = friend and vape.Categories.Friends.Options['Recolor visuals'].Enabled
+			friend = friend and katware.Categories.Friends.Options['Recolor visuals'].Enabled
 		end
 		return friend
 	end
@@ -136,11 +136,11 @@ local function isFriend(plr, recolor)
 end
 
 local function isTarget(plr)
-	return table.find(vape.Categories.Targets.ListEnabled, plr.Name) and true
+	return table.find(katware.Categories.Targets.ListEnabled, plr.Name) and true
 end
 
 local function notif(...) 
-	return vape:CreateNotification(...) 
+	return katware:CreateNotification(...) 
 end
 
 local function parsePositions(v, func)
@@ -263,9 +263,9 @@ run(function()
 
 	entitylib.getEntityColor = function(ent)
 		ent = ent.Player
-		if not (ent and vape.Categories.Main.Options['Use team color'].Enabled) then return end
+		if not (ent and katware.Categories.Main.Options['Use team color'].Enabled) then return end
 		if isFriend(ent, true) then
-			return Color3.fromHSV(vape.Categories.Friends.Options['Friends color'].Hue, vape.Categories.Friends.Options['Friends color'].Sat, vape.Categories.Friends.Options['Friends color'].Value)
+			return Color3.fromHSV(katware.Categories.Friends.Options['Friends color'].Hue, katware.Categories.Friends.Options['Friends color'].Sat, katware.Categories.Friends.Options['Friends color'].Value)
 		end
 		return skywars.TeamController:getTeamColour(ent:GetAttribute('TeamId'))
 	end
@@ -330,7 +330,7 @@ run(function()
 
 	local function updateStore(newStore, oldStore)
 		if newStore.GameCurrency ~= oldStore.GameCurrency then 
-			vapeEvents.CurrencyChange:Fire(table.clone(newStore.GameCurrency.Quantities)) 
+			katwareEvents.CurrencyChange:Fire(table.clone(newStore.GameCurrency.Quantities)) 
 		end
 
 		if newStore.ActiveSlot ~= oldStore.ActiveSlot then
@@ -344,7 +344,7 @@ run(function()
 			store.hand = store.hand and skywars.ItemMeta[store.hand.Type] or {}
 			store.tools.sword = getSword()
 			store.tools.pickaxe = getPickaxe()
-			vapeEvents.InventoryAmountChanged:Fire()
+			katwareEvents.InventoryAmountChanged:Fire()
 		end 
 
 		if oldStore.Profile and oldStore.Profile.WasTeleporting and newStore.Profile.Stats ~= oldStore.Profile.Stats then
@@ -367,15 +367,15 @@ run(function()
 				entitylib.character.GroundPosition = entitylib.character.Humanoid.FloorMaterial ~= Enum.Material.Air and entitylib.character.RootPart.Position or entitylib.character.GroundPosition
 			end
 			task.wait()
-		until vape.Loaded == nil
+		until katware.Loaded == nil
 	end)
 
-	vape:Clean(workspace.BlockContainer.DescendantAdded:Connect(function(v)
+	katware:Clean(workspace.BlockContainer.DescendantAdded:Connect(function(v)
 		parsePositions(v, function(pos) 
 			store.blocks[pos] = v 
 		end)
 	end))
-	vape:Clean(workspace.BlockContainer.DescendantRemoving:Connect(function(v)
+	katware:Clean(workspace.BlockContainer.DescendantRemoving:Connect(function(v)
 		parsePositions(v, function(pos) 
 			store.blocks[pos] = nil 
 		end)
@@ -386,13 +386,13 @@ run(function()
 		end)
 	end
 
-	vape:Clean(function()
-		for _, v in vapeEvents do 
+	katware:Clean(function()
+		for _, v in katwareEvents do 
 			v:Destroy() 
 		end
 		table.clear(ControllerTable)
 		table.clear(RemoteTable)
-		table.clear(vapeEvents)
+		table.clear(katwareEvents)
 		table.clear(skywars)
 		table.clear(store.blocks)
 		table.clear(store)
@@ -402,7 +402,7 @@ run(function()
 end)
 
 for _, v in {'Reach', 'TriggerBot', 'Disabler', 'SilentAim', 'AutoRejoin', 'Rejoin', 'ServerHop', 'MurderMystery'} do
-	vape:Remove(v)
+	katware:Remove(v)
 end
 run(function()
 	local AutoClicker
@@ -433,7 +433,7 @@ run(function()
 		end)
 	end
 	
-	AutoClicker = vape.Categories.Combat:CreateModule({
+	AutoClicker = katware.Categories.Combat:CreateModule({
 		Name = 'AutoClicker',
 		Function = function(callback)
 			if callback then
@@ -480,7 +480,7 @@ run(function()
 	local Sprint
 	local old
 	
-	Sprint = vape.Categories.Combat:CreateModule({
+	Sprint = katware.Categories.Combat:CreateModule({
 		Name = 'Sprint',
 		Function = function(callback)
 			if callback then
@@ -529,7 +529,7 @@ run(function()
 		return old(velo, ...)
 	end
 	
-	Velocity = vape.Categories.Combat:CreateModule({
+	Velocity = katware.Categories.Combat:CreateModule({
 		Name = 'Velocity',
 		Function = function(callback)
 			if callback then
@@ -588,7 +588,7 @@ run(function()
 		return mag
 	end
 	
-	AntiFall = vape.Categories.Blatant:CreateModule({
+	AntiFall = katware.Categories.Blatant:CreateModule({
 		Name = 'AntiFall',
 		Function = function(callback)
 			if callback then
@@ -661,7 +661,7 @@ run(function()
 	local InvMove
 	local old
 	
-	InvMove = vape.Categories.Blatant:CreateModule({
+	InvMove = katware.Categories.Blatant:CreateModule({
 		Name = 'InvMove',
 		Function = function(callback)
 			if callback then
@@ -700,7 +700,7 @@ run(function()
 	local AnimTween
 	local Attacking
 	local Particles, Boxes = {}, {}
-	local anims, armC0 = vape.Libraries.auraanims
+	local anims, armC0 = katware.Libraries.auraanims
 	
 	local function getAttackData()
 		if Mouse.Enabled then
@@ -710,7 +710,7 @@ run(function()
 		return (not Limit.Enabled) and store.tools.sword or store.hand
 	end
 	
-	Killaura = vape.Categories.Blatant:CreateModule({
+	Killaura = katware.Categories.Blatant:CreateModule({
 		Name = 'Killaura',
 		Function = function(callback)
 			if callback then
@@ -797,7 +797,7 @@ run(function()
 					end
 	
 					Attacking = #attacked > 0
-					if Attacking and vape.ThreadFix then
+					if Attacking and katware.ThreadFix then
 						setthreadidentity(8)
 					end
 	
@@ -869,7 +869,7 @@ run(function()
 					box.Size = Vector3.new(3, 5, 3)
 					box.CFrame = CFrame.new(0, -0.5, 0)
 					box.ZIndex = 0
-					box.Parent = vape.gui
+					box.Parent = katware.gui
 					Boxes[i] = box
 				end
 			else
@@ -1025,7 +1025,7 @@ run(function()
 	local NoFall
 	local rayCheck = RaycastParams.new()
 	
-	NoFall = vape.Categories.Blatant:CreateModule({
+	NoFall = katware.Categories.Blatant:CreateModule({
 		Name = 'NoFall',
 		Function = function(callback)
 			if callback then
@@ -1055,7 +1055,7 @@ end)
 run(function()
 	local old, old2
 	
-	vape.Categories.Blatant:CreateModule({
+	katware.Categories.Blatant:CreateModule({
 		Name = 'NoSlowdown',
 		Function = function(callback)
 			if callback then
@@ -1120,7 +1120,7 @@ run(function()
 		return old(...)
 	end
 	
-	local ProjectileAimbot = vape.Categories.Blatant:CreateModule({
+	local ProjectileAimbot = katware.Categories.Blatant:CreateModule({
 		Name = 'ProjectileAimbot',
 		Function = function(callback)
 			if callback then 
@@ -1171,7 +1171,7 @@ run(function()
 		return items
 	end
 	
-	ProjectileAura = vape.Categories.Blatant:CreateModule({
+	ProjectileAura = katware.Categories.Blatant:CreateModule({
 		Name = 'ProjectileAura',
 		Function = function(callback)
 			if callback then
@@ -1309,7 +1309,7 @@ run(function()
 		end
 	end
 	
-	Scaffold = vape.Categories.Utility:CreateModule({
+	Scaffold = katware.Categories.Utility:CreateModule({
 		Name = 'Scaffold',
 		Function = function(callback)
 			if callback then
@@ -1377,7 +1377,7 @@ run(function()
 	local Open
 	local Delay = {}
 	
-	ChestSteal = vape.Categories.World:CreateModule({
+	ChestSteal = katware.Categories.World:CreateModule({
 		Name = 'ChestSteal',
 		Function = function(callback)
 			if callback then
@@ -1463,11 +1463,11 @@ run(function()
 		end
 	end
 	
-	AutoBuy = vape.Categories.Inventory:CreateModule({
+	AutoBuy = katware.Categories.Inventory:CreateModule({
 		Name = 'AutoBuy',
 		Function = function(callback)
 			if callback then
-				AutoBuy:Clean(vapeEvents.CurrencyChange.Event:Connect(buyCheck))
+				AutoBuy:Clean(katwareEvents.CurrencyChange.Event:Connect(buyCheck))
 				buyCheck(table.clone(skywars.Store:getState().GameCurrency.Quantities))
 			end
 		end,
@@ -1541,11 +1541,11 @@ run(function()
 		end
 	end
 	
-	AutoConsume = vape.Categories.Inventory:CreateModule({
+	AutoConsume = katware.Categories.Inventory:CreateModule({
 		Name = 'AutoConsume',
 		Function = function(callback)
 			if callback then
-				AutoConsume:Clean(vapeEvents.InventoryAmountChanged.Event:Connect(consumeCheck))
+				AutoConsume:Clean(katwareEvents.InventoryAmountChanged.Event:Connect(consumeCheck))
 				AutoConsume:Clean(lplr:GetAttributeChangedSignal('Shield'):Connect(consumeCheck))
 				consumeCheck()
 			end
@@ -1664,7 +1664,7 @@ run(function()
 		end)
 	end
 	
-	Breaker = vape.Categories.Minigames:CreateModule({
+	Breaker = katware.Categories.Minigames:CreateModule({
 		Name = 'Breaker',
 		Function = function(callback)
 			if callback then
@@ -1745,20 +1745,20 @@ run(function()
 		end))
 	end
 	
-	Viewmodel = vape.Legit:CreateModule({
+	Viewmodel = katware.Legit:CreateModule({
 		Name = 'Viewmodel',
 		Function = function(callback)
 			if callback then 
 				ViewmodelMotor = Instance.new('Motor6D')
-				vape:Clean(ViewmodelMotor)
-				vape:Clean(runService.RenderStepped:Connect(function()
+				katware:Clean(ViewmodelMotor)
+				katware:Clean(runService.RenderStepped:Connect(function()
 					if ViewmodelTool then 
 						local dcf = ((CFrame.new(2.06, -2.44, -2.24) * CFrame.new(0.6, -0.2, -0.6)) * CFrame.Angles(math.rad(99), math.rad(2), math.rad(-4))) * ViewmodelMotor.C0
 						local offsetcf = (CFrame.new(0, -0.15, -1.56) * CFrame.Angles(math.rad(-90), math.rad(-90), 0))
 						ViewmodelTool.CFrame = ((gameCamera.CFrame * dcf) * offsetcf)
 					end
 				end))
-				vape:Clean(entitylib.Events.LocalAdded:Connect(newCharacter))
+				katware:Clean(entitylib.Events.LocalAdded:Connect(newCharacter))
 				if entitylib.isAlive then 
 					newCharacter(entitylib.character) 
 				end

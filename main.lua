@@ -1,14 +1,17 @@
 repeat task.wait() until game:IsLoaded()
-if shared.vape then shared.vape:Uninject() end
-print("Injecting Katware | BIG THANKS TO 7GrandDadPGN! Check out his work vapeV4!")
-print("https://github.com/7GrandDadPGN/VapeV4ForRoblox")
+if shared.katware then shared.katware:Uninject() end
 
-local playersService = cloneref(game:GetService('Players'))
-local vape
+if identifyexecutor then
+	if table.find({'Argon', 'Wave'}, ({identifyexecutor()})[1]) then
+		getgenv().setthreadidentity = nil
+	end
+end
+
+local katware
 local loadstring = function(...)
 	local res, err = loadstring(...)
-	if err and vape then
-		vape:CreateNotification('Katware', 'Failed to load : '..err, 30, 'alert')
+	if err and katware then
+		katware:CreateNotification('Katware', 'Failed to load : '..err, 30, 'alert')
 	end
 	return res
 end
@@ -22,54 +25,63 @@ end
 local cloneref = cloneref or function(obj)
 	return obj
 end
+local playersService = cloneref(game:GetService('Players'))
 
-
-local function downloadFile(file, path)
-    if isfile(path) then
-        local suc, res = pcall(function()
-            return game:HttpGet('https://github.com/XxlyitemXx/katware/raw/main/'..file, true)
-        end)
-        if not suc or res == "404: Not Found" then
-            error(res)
-        end
-        writefile(path, res)
-    end
-    return readfile(path)
+local function downloadFile(path, func)
+	if not isfile(path) then
+		local suc, res = pcall(function()
+			return game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware/'..readfile('katware/profiles/commit.txt')..'/'..select(1, path:gsub('katware/', '')), true)
+		end)
+		if not suc or res == '404: Not Found' then
+			error(res)
+		end
+		if path:find('.lua') then
+			res = '--This watermark is used to delete the file if its cached, remove it to make the file persist after katware updates.\n'..res
+		end
+		writefile(path, res)
+	end
+	return (func or readfile)(path)
 end
 
-
 local function finishLoading()
-	vape.Init = nil
-	vape:Load()
+	katware.Init = nil
+	katware:Load()
 	task.spawn(function()
 		repeat
-			vape:Save()
+			katware:Save()
 			task.wait(10)
-		until not vape.Loaded
+		until not katware.Loaded
 	end)
 
 	local teleportedServers
-	vape:Clean(playersService.LocalPlayer.OnTeleport:Connect(function()
-		if (not teleportedServers) and (not shared.VapeIndependent) then
+	katware:Clean(playersService.LocalPlayer.OnTeleport:Connect(function()
+		if (not teleportedServers) and (not shared.KatwareIndependent) then
 			teleportedServers = true
 			local teleportScript = [[
-				shared.vapereload = true
-				if shared.VapeDeveloper then
+				shared.katwarereload = true
+				if shared.KatwareDeveloper then
 					loadstring(readfile('katware/loader.lua'), 'loader')()
 				else
-					loadstring(game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware/refs/heads/main/loader.lua', true), 'loader')()
+					loadstring(game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware/'..readfile('katware/profiles/commit.txt')..'/loader.lua', true), 'loader')()
 				end
 			]]
-			if shared.VapeDeveloper then
-				teleportScript = 'shared.VapeDeveloper = true\n'..teleportScript
+			if shared.KatwareDeveloper then
+				teleportScript = 'shared.KatwareDeveloper = true\n'..teleportScript
 			end
-			if shared.VapeCustomProfile then
-				teleportScript = 'shared.VapeCustomProfile = "'..shared.VapeCustomProfile..'"\n'..teleportScript
+			if shared.KatwareCustomProfile then
+				teleportScript = 'shared.KatwareCustomProfile = "'..shared.KatwareCustomProfile..'"\n'..teleportScript
 			end
-			vape:Save()
+			katware:Save()
 			queue_on_teleport(teleportScript)
 		end
 	end))
+
+	if not shared.katwarereload then
+		if not katware.Categories then return end
+		if katware.Categories.Main.Options['GUI bind indicator'].Enabled then
+			katware:CreateNotification('Finished Loading', katware.KatwareButton and 'Press the button in the top right to open GUI' or 'Press '..table.concat(katware.Keybind, ' + '):upper()..' to open GUI', 5)
+		end
+	end
 end
 
 if not isfile('katware/profiles/gui.txt') then
@@ -80,37 +92,25 @@ local gui = readfile('katware/profiles/gui.txt')
 if not isfolder('katware/assets/'..gui) then
 	makefolder('katware/assets/'..gui)
 end
+katware = loadstring(downloadFile('katware/guis/'..gui..'.lua'), 'gui')()
+shared.katware = katware
 
-if not isfile('katware/profiles/gui.txt') then
-	writefile('katware/profiles/gui.txt', 'new')
-end
-local gui = readfile('katware/profiles/gui.txt')
-
-if not isfolder('katware/assets/new/') then
-	makefolder('katware/assets/new/')
-end
-vape = loadstring(downloadFile('guis/new.lua', 'katware/guis/'))()
-shared.vape = vape
-if not shared.VapeIndependent then
-	downloadFile('games/universal.lua', 'katware/games/')
-	loadfile('katware/games/universal.lua')()
+if not shared.KatwareIndependent then
+	loadstring(downloadFile('katware/games/universal.lua'), 'universal')()
 	if isfile('katware/games/'..game.PlaceId..'.lua') then
-		downloadFile('games/'..game.PlaceId..'.lua', 'katware/games/')
-		loadfile('katware/games/'..game.PlaceId..'.lua')()
+		loadstring(readfile('katware/games/'..game.PlaceId..'.lua'), tostring(game.PlaceId))(...)
 	else
-		if not shared.VapeDeveloper then
+		if not shared.KatwareDeveloper then
 			local suc, res = pcall(function()
-				return game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware/raw/main'..'/games/'..game.PlaceId..'.lua', true)
+				return game:HttpGet('https://raw.githubusercontent.com/XxlyitemXx/katware/'..readfile('katware/profiles/commit.txt')..'/games/'..game.PlaceId..'.lua', true)
 			end)
 			if suc and res ~= '404: Not Found' then
-				downloadFile('katware/games/'..game.PlaceId..'.lua', 'katware/games/')
-				loadfile('katware/games/'..game.PlaceId..'.lua')()
+				loadstring(downloadFile('katware/games/'..game.PlaceId..'.lua'), tostring(game.PlaceId))(...)
 			end
 		end
 	end
 	finishLoading()
 else
-	vape.Init = finishLoading
-	return vape
+	katware.Init = finishLoading
+	return katware
 end
-vape:CreateNotification('Katware Finished Loading', vape.VapeButton and 'Press the button in the top right to open GUI (whatever i did)' or 'Press '..table.concat(vape.Keybind, ' + '):upper()..' to open GUI', 5)

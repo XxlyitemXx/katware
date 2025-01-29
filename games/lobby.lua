@@ -1,3 +1,4 @@
+
 local args = {
     [1] = "/bedwars",
     [2] = "All"

@@ -21,8 +21,32 @@
                  "color": [0, 255, 0]
              }
           ]
+       },
+        {
+          "hash":"94dd74b2a7a9197c82a55340d9022b396503bd3539068315cdcb7976b11a29763229062c541609b488558d70c2a59dd136e092b788e3bd3d36f3f65a6c236aa4",
+          "level":1,
+          "attackable": true,
+          "tags": [
+             {
+                 "text":"kittykat",
+                 "color": [0, 255, 0]
+             }
+          ]
+       },
+        {
+          "hash":"1f7b6d2a89a20d8ffdf056284ac875a2b67a8955daa45b69b64c5862a57dbd01bc0889126afa3e3c5b574fcb0f69cdbf310e182e4c756dcc4faa0e1e082dda07",
+          "level":1,
+          "attackable": true,
+          "tags": [
+             {
+                 "text":"Cutie",
+                 "color": [0, 255, 0]
+             }
+          ]
        }
+        
     ],
+
     "Announcement": {
         "expiretime": 30,
         "text":"...",

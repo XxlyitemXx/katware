@@ -14,13 +14,13 @@ local tweenService = cloneref(game:GetService('TweenService'))
 local gameCamera = workspace.CurrentCamera
 local lplr = playersService.LocalPlayer
 
-local vape = shared.vape
-local entitylib = vape.Libraries.entity
-local targetinfo = vape.Libraries.targetinfo
-local prediction = vape.Libraries.prediction
-local color = vape.Libraries.color
-local uipallet = vape.Libraries.uipallet
-local getcustomasset = vape.Libraries.getcustomasset
+local katware = shared.katware
+local entitylib = katware.Libraries.entity
+local targetinfo = katware.Libraries.targetinfo
+local prediction = katware.Libraries.prediction
+local color = katware.Libraries.color
+local uipallet = katware.Libraries.uipallet
+local getcustomasset = katware.Libraries.getcustomasset
 
 local clientData = require(replicatedStorage.modules.player.ClientData)
 local aiController = require(lplr.PlayerScripts.AIController)
@@ -144,7 +144,7 @@ entitylib.start()
 run(function()
 	local InfiniteStamina
 	
-	InfiniteStamina = vape.Categories.Blatant:CreateModule({
+	InfiniteStamina = katware.Categories.Blatant:CreateModule({
 		Name = 'InfiniteStamina',
 		Function = function(callback)
 			if callback then 
@@ -194,7 +194,7 @@ run(function()
 		--autoBlock:FireServer(state)
 	end
 
-	Killaura = vape.Categories.Blatant:CreateModule({
+	Killaura = katware.Categories.Blatant:CreateModule({
 		Name = 'Killaura',
 		Function = function(callback)
 			if callback then
@@ -288,7 +288,7 @@ run(function()
 			BoxAttackColor.Object.Visible = callback
 			if callback then
 				KillauraFunctions.Box = function(attacked)
-					if vape.ThreadFix then
+					if katware.ThreadFix then
 						setthreadidentity(8)
 					end
 
@@ -307,7 +307,7 @@ run(function()
 					box.Size = Vector3.new(3, 5, 3)
 					box.CFrame = CFrame.new(0, -0.5, 0)
 					box.ZIndex = 0
-					box.Parent = vape.gui
+					box.Parent = katware.gui
 					Boxes[i] = box
 				end
 			else
@@ -341,7 +341,7 @@ run(function()
 			ParticleSize.Object.Visible = callback
 			if callback then
 				KillauraFunctions.Particles = function(attacked)
-					if vape.ThreadFix then
+					if katware.ThreadFix then
 						setthreadidentity(8)
 					end
 
@@ -441,7 +441,7 @@ run(function()
 	local NoFall
 	local connections = {}
 	
-	NoFall = vape.Categories.Blatant:CreateModule({
+	NoFall = katware.Categories.Blatant:CreateModule({
 		Name = 'NoFall',
 		Function = function(callback)
 			if callback then
@@ -480,7 +480,7 @@ run(function()
 	local rayCheck = RaycastParams.new()
 	rayCheck.RespectCanCollide = true
 	
-	Speed = vape.Categories.Blatant:CreateModule({
+	Speed = katware.Categories.Blatant:CreateModule({
 		Name = 'Speed',
 		Function = function(callback)
 			if callback then
@@ -555,7 +555,7 @@ run(function()
 		end
 	end
 	
-	AutoEat = vape.Categories.Utility:CreateModule({
+	AutoEat = katware.Categories.Utility:CreateModule({
 		Name = 'AutoEat',
 		Function = function(callback)
 			if callback then
@@ -583,7 +583,7 @@ run(function()
 	local pickuptable = {}
 	local pickupdelay = {}
 	
-	AutoPickup = vape.Categories.Utility:CreateModule({
+	AutoPickup = katware.Categories.Utility:CreateModule({
 		Name = 'AutoPickup',
 		Function = function(callback)
 			if callback then 
@@ -744,7 +744,7 @@ run(function()
 		end
 	end
 	
-	Breaker = vape.Categories.Minigames:CreateModule({
+	Breaker = katware.Categories.Minigames:CreateModule({
 		Name = 'Breaker',
 		Function = function(callback)
 			if callback then

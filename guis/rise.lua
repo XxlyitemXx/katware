@@ -243,13 +243,13 @@ local function downloadFile(path, func)
 	if not isfile(path) then
 		createDownloader(path)
 		local suc, res = pcall(function()
-			return game:HttpGet('https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/'..readfile('katware/profiles/commit.txt')..'/'..select(1, path:gsub('katware/', '')), true)
+			return game:HttpGet('https://raw.githubusercontent.com/7GrandDadPGN/katwareV4ForRoblox/'..readfile('katware/profiles/commit.txt')..'/'..select(1, path:gsub('katware/', '')), true)
 		end)
 		if not suc or res == '404: Not Found' then
 			error(res)
 		end
 		if path:find('.lua') then
-			res = '--This watermark is used to delete the file if its cached, remove it to make the file persist after vape updates.\n'..res
+			res = '--This watermark is used to delete the file if its cached, remove it to make the file persist after katware updates.\n'..res
 		end
 		writefile(path, res)
 	end
@@ -2299,7 +2299,7 @@ function mainapi:Load(skipgui, profile)
 		guidata = loadJson('katware/profiles/'..game.GameId..'.gui.txt')
 		if not guidata then
 			guidata = {Categories = {}}
-			self:CreateNotification('Vape', 'Failed to load GUI settings.', 10, 'alert')
+			self:CreateNotification('katware', 'Failed to load GUI settings.', 10, 'alert')
 			savecheck = false
 		end
 
@@ -2333,7 +2333,7 @@ function mainapi:Load(skipgui, profile)
 				Modules = {},
 				Legit = {}
 			}
-			self:CreateNotification('Vape', 'Failed to load '..self.Profile..' profile.', 10, 'alert')
+			self:CreateNotification('katware', 'Failed to load '..self.Profile..' profile.', 10, 'alert')
 			savecheck = false
 		end
 
@@ -2494,9 +2494,9 @@ function mainapi:Uninject()
 	mainapi.gui:Destroy()
 	table.clear(mainapi.Libraries)
 	loopClean(mainapi)
-	shared.vape = nil
-	shared.vapereload = nil
-	shared.VapeIndependent = nil
+	shared.katware = nil
+	shared.katwarereload = nil
+	shared.katwareIndependent = nil
 end
 
 gui = Instance.new('ScreenGui')
@@ -2837,11 +2837,11 @@ mainapi.Categories.Main:CreateDropdown({
 	Function = function(val, mouse)
 		if mouse then
 			writefile('katware/profiles/gui.txt', val)
-			shared.vapereload = true
-			if shared.VapeDeveloper then
+			shared.katwarereload = true
+			if shared.katwareDeveloper then
 				loadstring(readfile('katware/loader.lua'), 'loader')()
 			else
-				loadstring(game:HttpGet('https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/'..readfile('katware/profiles/commit.txt')..'/loader.lua', true))()
+				loadstring(game:HttpGet('https://raw.githubusercontent.com/7GrandDadPGN/katwareV4ForRoblox/'..readfile('katware/profiles/commit.txt')..'/loader.lua', true))()
 			end
 		end
 	end
@@ -2865,11 +2865,11 @@ mainapi.RainbowUpdateSpeed = mainapi.Categories.Main:CreateSlider({
 mainapi.Categories.Main:CreateButton({
 	Name = 'Reinject',
 	Function = function()
-		shared.vapereload = true
-		if shared.VapeDeveloper then
+		shared.katwarereload = true
+		if shared.katwareDeveloper then
 			loadstring(readfile('katware/loader.lua'), 'loader')()
 		else
-			loadstring(game:HttpGet('https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/'..readfile('katware/profiles/commit.txt')..'/loader.lua', true))()
+			loadstring(game:HttpGet('https://raw.githubusercontent.com/7GrandDadPGN/katwareV4ForRoblox/'..readfile('katware/profiles/commit.txt')..'/loader.lua', true))()
 		end
 	end
 })

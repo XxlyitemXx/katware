@@ -15,17 +15,17 @@ local gameCamera = workspace.CurrentCamera
 local lplr = playersService.LocalPlayer
 local assetfunction = getcustomasset
 
-local vape = shared.vape
-local entitylib = vape.Libraries.entity
-local targetinfo = vape.Libraries.targetinfo
-local sessioninfo = vape.Libraries.sessioninfo
-local uipallet = vape.Libraries.uipallet
-local tween = vape.Libraries.tween
-local color = vape.Libraries.color
-local whitelist = vape.Libraries.whitelist
-local prediction = vape.Libraries.prediction
-local getfontsize = vape.Libraries.getfontsize
-local getcustomasset = vape.Libraries.getcustomasset
+local katware = shared.katware
+local entitylib = katware.Libraries.entity
+local targetinfo = katware.Libraries.targetinfo
+local sessioninfo = katware.Libraries.sessioninfo
+local uipallet = katware.Libraries.uipallet
+local tween = katware.Libraries.tween
+local color = katware.Libraries.color
+local whitelist = katware.Libraries.whitelist
+local prediction = katware.Libraries.prediction
+local getfontsize = katware.Libraries.getfontsize
+local getcustomasset = katware.Libraries.getcustomasset
 
 run(function()
     local autoShake = false
@@ -79,13 +79,13 @@ run(function()
 	end
     
 	local function notif(...)
-		vape:CreateNotification(...)
+		katware:CreateNotification(...)
 	end
 	local function setclipboard(text)
         setclipboard(text)
     end
 	
-    local AutoShake = vape.Categories.Minigames:CreateModule({
+    local AutoShake = katware.Categories.Minigames:CreateModule({
         Name = 'AutoShake',
 		Function = function()
 			getHRP()
@@ -127,7 +127,7 @@ run(function()
     	{ AutoShakeToggle, true }
 	})
 	
-    local AutoReel = vape.Categories.Minigames:CreateModule({
+    local AutoReel = katware.Categories.Minigames:CreateModule({
         Name = 'AutoReel',
 		Function = function()
 			getHRP()
@@ -156,7 +156,7 @@ run(function()
 		{ AutoReelToggle, true }
 	})
 
-    local AutoCast = vape.Categories.Minigames:CreateModule({
+    local AutoCast = katware.Categories.Minigames:CreateModule({
         Name = 'AutoCast',
 		Function = function()
 			getHRP()
@@ -218,7 +218,7 @@ run(function()
 		{ AutoCastToggle, true }
 	})
 	
-	local FishUtilities = vape.Categories.Minigames:CreateModule({Name = 'Fish Utilities'})
+	local FishUtilities = katware.Categories.Minigames:CreateModule({Name = 'Fish Utilities'})
     FishUtilities:CreateButton({
         Text = 'Sell a fish',
         Func = function()
@@ -241,7 +241,7 @@ run(function()
         Tooltip = 'Appraises the fish you are holding'
     })
 	
-	local ZoneCastModule = vape.Categories.Minigames:CreateModule({Name = 'ZoneCast'})
+	local ZoneCastModule = katware.Categories.Minigames:CreateModule({Name = 'ZoneCast'})
 	local ZoneCastToggle = ZoneCastModule:CreateToggle({
 		Text = 'Enabled',
 		Default = false,
@@ -264,7 +264,7 @@ run(function()
 		{ZoneCastToggle, true}
 	})
 
-	local CollarPlayerModule = vape.Categories.Minigames:CreateModule({Name = 'CollarPlayer'})
+	local CollarPlayerModule = katware.Categories.Minigames:CreateModule({Name = 'CollarPlayer'})
 	local CollarPlayerToggle = CollarPlayerModule:CreateToggle({
         Text = 'Enabled',
         Default = false,
@@ -286,7 +286,7 @@ run(function()
     	{CollarPlayerToggle, true}
 	})
 
-	local Teleports = vape.Categories.Blatant:CreateModule({Name = "Teleports"})
+	local Teleports = katware.Categories.Blatant:CreateModule({Name = "Teleports"})
 	Teleports:CreateDropdown('PlaceTeleport', {
 		Name = 'Place teleport',
 		Tooltip = 'Teleport to a place',
@@ -321,7 +321,7 @@ run(function()
 		end
 	})
 
-	local SafeZoneModule = vape.Categories.Blatant:CreateModule({Name = 'Safe Zone'})
+	local SafeZoneModule = katware.Categories.Blatant:CreateModule({Name = 'Safe Zone'})
 	SafeZoneModule:CreateButton({
         Text = 'Teleport to safe zone',
         Func = function()
@@ -333,7 +333,7 @@ run(function()
         Tooltip = 'Teleports you to a safe zone'
     })
 
-    local LocalPlayer = vape.Categories.Blatant:CreateModule({Name = 'LocalPlayer'})
+    local LocalPlayer = katware.Categories.Blatant:CreateModule({Name = 'LocalPlayer'})
 	LocalPlayer:CreateToggle('Noclip', {
         Text = 'Noclip',
         Default = false,
@@ -381,7 +381,7 @@ run(function()
         end
     })
 	
-	local ResetRod = vape.Categories.Blatant:CreateModule({Name = 'Reset'})
+	local ResetRod = katware.Categories.Blatant:CreateModule({Name = 'Reset'})
     ResetRod:CreateButton({
         Text = 'Reset rod',
         Func = function()
@@ -395,7 +395,7 @@ run(function()
         Tooltip = 'Resets your rod'
     })
 	
-	local AntiAFKModule = vape.Categories.Blatant:CreateModule({Name = 'AntiAFK'})
+	local AntiAFKModule = katware.Categories.Blatant:CreateModule({Name = 'AntiAFK'})
     AntiAFKModule:CreateButton({
         Text = 'Anti-AFK',
         Func = function()
@@ -409,7 +409,7 @@ run(function()
         Tooltip = 'Disables idle kick'
     })
 	
-    local FreezeCharacter = vape.Categories.Blatant:CreateModule({Name = 'Freeze Character'})
+    local FreezeCharacter = katware.Categories.Blatant:CreateModule({Name = 'Freeze Character'})
     FreezeCharacter:CreateToggle({
         Text = 'Enabled',
         Default = false,
@@ -424,10 +424,10 @@ run(function()
         end
     })
 
-	local Settings = vape.Categories.Blatant:CreateModule({Name = 'Settings'})
-	Settings:CreateButton('Unload', function() vape:Unload() end)
+	local Settings = katware.Categories.Blatant:CreateModule({Name = 'Settings'})
+	Settings:CreateButton('Unload', function() katware:Unload() end)
 
-	local Credits = vape.Categories.Blatant:CreateModule({Name = 'Credits'})
+	local Credits = katware.Categories.Blatant:CreateModule({Name = 'Credits'})
 	Credits:AddLabel('Made by kylosilly and netpa!')
 	Credits:AddLabel('Made with love and hate :3')
 	Credits:CreateButton({
