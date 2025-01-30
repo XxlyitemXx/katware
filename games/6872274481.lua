@@ -8832,9 +8832,6 @@ run(function()
 			if callback then
 				task.wait(delay)
 				katware:CreateNotification("Autowin", "Started Autowin only @katware", 5)
-				katware.Modules.Killaura:Toggle(true)
-				katware.Modules.Breaker:Toggle(true)
-
 				task.spawn(function()
 					if store.matchState == 0 then
 						repeat
