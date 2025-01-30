@@ -8832,6 +8832,7 @@ run(function()
 			if callback then
 				task.wait(delay)
 				katware:CreateNotification("Autowin", "Started Autowin only @katware", 5)
+				katware:CreateNotification("Autowin", "Also Enable Killaura and Breaker!", 5)
 				task.spawn(function()
 					if store.matchState == 0 then
 						repeat
