@@ -8636,9 +8636,10 @@ end
 run(function()
     local Autowin = { Enabled = false }
     local AutowinNotification = { Enabled = true }
-	local Autolobby = { Enabled = false }
 	local delay = 0
 	local Autowindelay
+	local AutowinUninject = { Enabled = false }
+	local uninject = false
     local bedtween
     local playertween
     local lastActionTime = 0
@@ -9090,19 +9091,6 @@ run(function()
 		end,
 		Tooltip = "uhh Best autowin only @katware"
 	})
-	Autolobby = Autowin:CreateToggle({
-		Name = "Autolobby",
-		Function = function()
-			Autowin:Clean(katwareEvents.MatchEndEvent.Event:Connect(function(winTable)
-				if Autolobby.Enabled then
-					if (bedwars.Store:getState().Game.myTeam or {}).id == winTable.winningTeamId or lplr.Neutral then
-						notif("Autowin", "Match ended!. Lobbying..", 5)
-						loadfile('katware/games/lobby.lua')()
-					end
-				end
-			end))
-		end
-	})
 	Autowindelay = Autowin:CreateSlider({
 		Name = "Delay",
 		Function = function(value)
@@ -9111,13 +9099,25 @@ run(function()
 		Min = 0,
 		Max = 300,
 		Default = 0,
-		Suffix = "s"
+		Suffix = "s",
+		Tooltip = "Delay before Start Autowin"
+	})
+	AutowinUninject = Autowin:CreateToggle({
+		Name = "Auto Uninject",
+		Function = function(callback)
+			if callback then
+				uninject = true
+			end
+		end,
+		Tooltip = "Uninjects katware after a match ends"
 	})
 	Autowin:Clean(katwareEvents.MatchEndEvent.Event:Connect(function(winTable)
 		if Autowin.Enabled then
 			if (bedwars.Store:getState().Game.myTeam or {}).id == winTable.winningTeamId or lplr.Neutral then
 				notif("Autowin", "Match ended!.", 5)
-				katware:Uninject()
+				if uninject == true then
+					katware:Uninject()
+				end
 			end
 		end
 	end))
@@ -9500,24 +9500,25 @@ end)
 
 run(function()
     local AutoLobby = {}
+	local delay = 0
+	local AutoLobbyDelay
 
     AutoLobby = katware.Categories.Utility:CreateModule({
         Name = "AutoLobby",
         Function = function(callback)
             if callback then
-				task.wait()
-                AutoLobby.MatchEndConnection = katwareEvents.MatchEndEvent.Event:Connect(function(winTable)
-                    if (bedwars.Store:getState().Game.myTeam or {}).id == winTable.winningTeamId or lplr.Neutral then
-                        local args = {
-                            [1] = "/bedwars",
-                            [2] = "All"
-                        }
-
-                        game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(unpack(args))
-                    end
-                end)
+				repeat
+					Autowin:Clean(katwareEvents.MatchEndEvent.Event:Connect(function(winTable)
+						if AutoLobby.Enabled then
+							if (bedwars.Store:getState().Game.myTeam or {}).id == winTable.winningTeamId or lplr.Neutral then
+								notif("AutoLobby", "Match ended!. Lobbying..", 5)
+								task.wait(delay)
+								loadfile('katware/games/lobby.lua')()
+							end
+						end
+					end))
+				until not AutoLobby.Enabled
             else
-                -- Disconnect the event when the module is disabled
                 if AutoLobby.MatchEndConnection then
                     AutoLobby.MatchEndConnection:Disconnect()
                     AutoLobby.MatchEndConnection = nil
@@ -9526,6 +9527,16 @@ run(function()
         end,
         Tooltip = 'Automatically executes /bedwars command when you win a match.'
     })
+	AutoLobbyDelay = AutoLobby:CreateSlider({
+		Name = 'Delay',
+		Function = function(value)
+			delay = value
+		end,
+		Min = 0,
+		Max = 300,
+		Default = 0,
+		Suffix = 's'
+	})
 end)
 
 
