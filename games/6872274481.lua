@@ -8921,13 +8921,6 @@ run(function()
 
 							lastActionTime = tick()
 							
-							if not katware.Modules.Killaura.Enabled then
-								katware.Modules.Killaura:Toggle(true)
-							end
-							-- Reset breaker if its not on
-							if not katware.Modules.Breaker.Enabled then
-								katware.Modules.Breaker:Toggle(true)
-							end
 							-- Find and eliminate the closest enemy, waiting 2.7 seconds after the last action
 							while Autowin.Enabled and IsAlive(lplr) do
                                 if (tick() - lastActionTime) >= 2.7 then
