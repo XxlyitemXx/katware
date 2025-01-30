@@ -9657,6 +9657,66 @@ run(function()
     })
 end)
 
+run(function()
+    local TexturePack = katware.Categories.Render:CreateModule({
+        Name = 'TexturePack',
+        Function = function(callback)
+            if callback then
+                local assetMap = {
+                    ["Realistic Pack"] = "rbxassetid://14431940695",
+                    ["32x Pack"] = "rbxassetid://14421314747", 
+                    ["16x Pack"] = "rbxassetid://14474879594",
+                    ["Garbage"] = "rbxassetid://14336548540"
+                }
+                
+                local loaded = game:GetObjects(assetMap[TexturePack.Selected.Value])
+                local mainAsset = loaded[1]
+                mainAsset.Parent = replicatedStorage
+
+                TexturePack:Clean(workspace.Camera.Viewmodel.ChildAdded:Connect(function(tool)
+                    if tool:IsA("Accessory") then
+                        -- Clone and attach model logic from original
+                        for _, part in tool:GetDescendants() do
+                            if part:IsA("BasePart") then
+                                part.Transparency = 1
+                            end
+                        end
+                        
+                        local model = mainAsset:FindFirstChild(tool.Name)
+                        if model then
+                            local clone = model:Clone()
+                            clone.CFrame = tool.Handle.CFrame
+                            clone.Parent = tool
+                            
+                            local weld = Instance.new("WeldConstraint")
+                            weld.Part0 = clone
+                            weld.Part1 = tool.Handle
+                            weld.Parent = clone
+                        end
+                    end
+                end))
+                
+                notif("TexturePack", "Equip a tool to see changes", 3)
+            else
+                if mainAsset then
+                    mainAsset:Destroy()
+                end
+            end
+        end,
+        Tooltip = "Replaces default tool models with custom textures"
+    })
+    
+    TexturePack:CreateDropdown({
+        Name = "Pack",
+        List = {"Realistic Pack", "32x Pack", "16x Pack", "Garbage"},
+        Function = function(val)
+            if TexturePack.Enabled then
+                TexturePack:Toggle()
+                TexturePack:Toggle()
+            end
+        end
+    })
+end)
 
 print('Bedwars Module is loaded!  | Made with love by @rinnnaaaa_')
 katware:CreateNotification('Katware Bedwars Module is loaded!!', katware.katwareButton and 'Press the button in the top right to open GUI (whatever i did)' or 'Press '..table.concat(katware.Keybind, ' + '):upper()..' to open GUI', 5)
