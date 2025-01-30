@@ -8637,6 +8637,8 @@ run(function()
     local Autowin = { Enabled = false }
     local AutowinNotification = { Enabled = true }
 	local Autolobby = { Enabled = false }
+	local delay = 0
+	local Autowindelay
     local bedtween
     local playertween
     local lastActionTime = 0
@@ -8821,11 +8823,17 @@ run(function()
 	local function notif(...)
 		katware:CreateNotification(...)
 	end
+
 	
 	Autowin = katware.Categories.Blatant:CreateModule({
 		Name = "Autowin",
 		Function = function(callback)
 			if callback then
+				task.wait(delay)
+				katware:CreateNotification("Autowin", "Started Autowin only @katware", 5)
+				katware.Modules.Killaura:Toggle(true)
+				katware.Modules.Breaker:Toggle(true)
+
 				task.spawn(function()
 					if store.matchState == 0 then
 						repeat
@@ -9082,30 +9090,39 @@ run(function()
 		end,
 		Tooltip = "uhh Best autowin only @katware"
 	})
-
+	Autolobby = Autowin:CreateToggle({
+		Name = "Autolobby",
+		Function = function()
+			Autowin:Clean(katwareEvents.MatchEndEvent.Event:Connect(function(winTable)
+				if Autolobby.Enabled then
+					if (bedwars.Store:getState().Game.myTeam or {}).id == winTable.winningTeamId or lplr.Neutral then
+						notif("Autowin", "Match ended!. Lobbying..", 5)
+						loadfile('katware/games/lobby.lua')()
+					end
+				end
+			end))
+		end
+	})
+	Autowindelay = Autowin:CreateSlider({
+		Name = "Delay",
+		Function = function(value)
+			delay = value
+		end,
+		Min = 0,
+		Max = 300,
+		Default = 0,
+		Suffix = "s"
+	})
 	Autowin:Clean(katwareEvents.MatchEndEvent.Event:Connect(function(winTable)
 		if Autowin.Enabled then
 			if (bedwars.Store:getState().Game.myTeam or {}).id == winTable.winningTeamId or lplr.Neutral then
 				notif("Autowin", "Match ended!.", 5)
-				loadfile('katware/games/lobby.lua')()
 				katware:Uninject()
 			end
 		end
 	end))
 end)
 
--- Example of how you can use these functions
--- Assuming lplr is defined and refers to the local player
--- and bed is a valid reference to an enemy bed object
-
--- Safely kill the player
--- safeDamagePlayer(lplr, lplr.Character.Humanoid.Health)
-
--- Safely change the player's humanoid state to dead
--- safeChangeHumanoidState(lplr.Character.Humanoid, Enum.HumanoidStateType.Dead)
-
--- Safely calculate the magnitude between the player's root part and a bed
--- local magnitude = safeGetMagnitudeOf2Objects(lplr.Character.HumanoidRootPart, bed)
 run(function()
     local BedTP = {}
     local TweenSpeed = 0.65  -- Match autowin speed
