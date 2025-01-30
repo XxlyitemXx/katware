@@ -6938,7 +6938,6 @@ run(function()
 						local localPosition = entitylib.character.RootPart.Position
 	
 						if attemptBreak(Bed.Enabled and beds, localPosition) then continue end
-						if attemptBreak(customlist, localPosition) then continue end
 						if attemptBreak(LuckyBlock.Enabled and luckyblock, localPosition) then continue end
 						if attemptBreak(IronOre.Enabled and ironores, localPosition) then continue end
 	
@@ -9540,7 +9539,119 @@ run(function()
 	})
 end)
 
+run(function()
+    local Nuker
+    local Range = {Value = 30}
+    local Effects = {Enabled = true}
+    local Animation = {Enabled = false}
+    local NoFly = {Enabled = false}
+    local SelfBreak = {Enabled = false}
+    local LuckyBlock = {Enabled = true}
+    local IronOre = {Enabled = false}
+    local Bed = {Enabled = true}
+    local Custom = {ListEnabled = {}, RefreshValues = function() end}
+    local blocks = {}
 
+    local function refreshBlocks()
+        table.clear(blocks)
+        for _, obj in store.blocks do
+            if Bed.Enabled and obj.Name == "bed" then
+                table.insert(blocks, obj)
+            end
+            if LuckyBlock.Enabled and obj.Name:find("lucky") then
+                table.insert(blocks, obj)
+            end
+            if IronOre.Enabled and obj.Name == "iron_ore" then
+                table.insert(blocks, obj)
+            end
+            if table.find(Custom.ListEnabled, obj.Name) then
+                table.insert(blocks, obj)
+            end
+        end
+    end
+
+    Nuker = katware.Categories.World:CreateModule({
+        Name = 'Nuker',
+        Function = function(callback)
+            if callback then
+                refreshBlocks()
+                Nuker:Clean(collectionService:GetInstanceAddedSignal("block"):Connect(refreshBlocks))
+                Nuker:Clean(collectionService:GetInstanceRemovedSignal("block"):Connect(refreshBlocks))
+                
+                task.spawn(function()
+                    repeat
+                        if entitylib.isAlive and (not NoFly.Enabled or not katware.Fly.Enabled) then
+                            local localPos = entitylib.character.HumanoidRootPart.Position
+                            for _, block in pairs(blocks) do
+                                if (localPos - block.Position).Magnitude <= Range.Value then
+                                    if not SelfBreak.Enabled and block:GetAttribute("PlacedByUserId") == lplr.UserId then continue end
+                                    if block:GetAttribute('BedShieldEndTime') and block:GetAttribute('BedShieldEndTime') > workspace:GetServerTimeNow() then continue end
+                                    
+                                    local target, path = bedwars.breakBlock(
+                                        block.Position,
+                                        Effects.Enabled,
+                                        Animation.Enabled,
+                                        nil, -- custom healthbar
+                                        true -- instant break
+                                    )
+                                end
+                            end
+                        end
+                        task.wait()
+                    until not Nuker.Enabled
+                end)
+            else
+                table.clear(blocks)
+            end
+        end,
+        Tooltip = 'Automatically destroys beds & lucky blocks around you'
+    })
+    
+    Range = Nuker:CreateSlider({
+        Name = 'Range',
+        Min = 1,
+        Max = 30,
+        Default = 30,
+        Suffix = 'studs'
+    })
+    
+    Effects = Nuker:CreateToggle({
+        Name = 'Show Effects',
+        Default = true
+    })
+    
+    Animation = Nuker:CreateToggle({
+        Name = 'Animation'
+    })
+    
+    NoFly = Nuker:CreateToggle({
+        Name = 'Disable with Fly',
+        Tooltip = 'Stops nuker when fly is active'
+    })
+    
+    SelfBreak = Nuker:CreateToggle({
+        Name = 'Self Break'
+    })
+    
+    Bed = Nuker:CreateToggle({
+        Name = 'Break Beds',
+        Default = true
+    })
+    
+    LuckyBlock = Nuker:CreateToggle({
+        Name = 'Break Lucky Blocks',
+        Default = true
+    })
+    
+    IronOre = Nuker:CreateToggle({
+        Name = 'Break Iron Ore'
+    })
+    
+    Custom = Nuker:CreateTextList({
+        Name = 'Custom Blocks',
+        Function = refreshBlocks
+    })
+end)
 
 
 print('Bedwars Module is loaded!  | Made with love by @rinnnaaaa_')
