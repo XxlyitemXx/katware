@@ -8647,7 +8647,7 @@ run(function()
     local waitTimeAfterFails = 5
     local targetSearchRange = 5 -- Range to search for targets before resetting
     local tweenTimeout = 2 -- Timeout for the tween to be considered as failed
-    local maxBedTweenDistance = 5 -- max distance from bed before assuming tween failed
+    local maxBedTweenDistance = 20 -- max distance from bed before assuming tween failed
     local tweenAttemptDelay = 0.5 -- Delay after tween starts before failure checks
     local lastKnownPosition = nil -- Store the last known position of the character
     local positionCheckInterval = 0.2 -- Frequency of position checks
@@ -8871,12 +8871,10 @@ run(function()
 								notif("Autowin", "Destroying " .. bedname:lower() .. " team's bed", 5)
 							end
 
-                            -- Set up the tween
-                            bedtween = tweenService:Create(lplr.Character:WaitForChild("HumanoidRootPart"), TweenInfo.new(0.65, Enum.EasingStyle.Linear, Enum.EasingDirection.In, 0, false, 0), { CFrame = CFrame.new(bed.Position) + Vector3.new(0, 4, 0) })
+                            bedtween = tweenService:Create(lplr.Character:WaitForChild("HumanoidRootPart"), TweenInfo.new(0.65, Enum.EasingStyle.Linear, Enum.EasingDirection.In, 0, false, 0), { CFrame = CFrame.new(bed.Position) + Vector3.new(0, 10, 3) })
                             task.wait(0.1)
                             bedtween:Play()
 
-                            -- Monitor the tween for failure
                             task.delay(tweenTimeout, function()
                                 if bedtween and (bedtween.PlaybackState == Enum.PlaybackState.Playing or bedtween.PlaybackState == Enum.PlaybackState.Delayed) then
                                     notif("Autowin", "Tween to bed timed out. Resetting.", 5)
@@ -8886,10 +8884,8 @@ run(function()
                                 end
                             end)
 
-                            -- Wait for the tween to complete
                             bedtween.Completed:Wait()
 
-                            -- Check distance after tweening to the bed
                             local distanceToBed = GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), bed)
                             if distanceToBed > 10 then
                                 notif("Autowin", "Failed to reach bed. Distance: " .. tostring(math.floor(distanceToBed)) .. " studs", 5)
@@ -8898,7 +8894,7 @@ run(function()
                                 repeat
                                     task.wait()
                                 until IsAlive(lplr)
-                                return -- Stop further execution for this character respawn
+                                return
                             end
 
 							
@@ -8912,7 +8908,6 @@ run(function()
 							end)
 							repeat task.wait() until FindEnemyBed() ~= bed or not IsAlive(lplr)
 
-							-- Reset character after bed is broken
 							if IsAlive(lplr) then
 								lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
 								lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
@@ -8921,13 +8916,10 @@ run(function()
 								task.wait()
 							until IsAlive(lplr)
 
-							-- Wait for 3 seconds after breaking the bed
 							task.wait(3)
 
-							-- Update lastActionTime after respawning and waiting
 							lastActionTime = tick()
 							
-							-- Reset killaura if its not on
 							if not katware.Modules.Killaura.Enabled then
 								katware.Modules.Killaura:Toggle(true)
 							end
@@ -8954,7 +8946,7 @@ run(function()
                                                 break
                                             end
                                             local startPosition = lplr.Character.HumanoidRootPart.Position
-                                            playertween = tweenService:Create(lplr.Character:WaitForChild("HumanoidRootPart"), TweenInfo.new(0.65), { CFrame = target.RootPart.CFrame + Vector3.new(0, 0, 0) })
+                                            playertween = tweenService:Create(lplr.Character:WaitForChild("HumanoidRootPart"), TweenInfo.new(0.65), { CFrame = target.RootPart.CFrame + Vector3.new(0, 3, 0) })
                                             playertween:Play()
 
                                             -- Monitor the tween for failure
@@ -9049,7 +9041,7 @@ run(function()
 						elseif FindTarget(nil, true) and FindTarget(nil, true).RootPart then
 							task.wait()
 							local target = FindTarget(nil, true)
-							playertween = tweenService:Create(lplr.Character:WaitForChild("HumanoidRootPart"), TweenInfo.new(0.65, Enum.EasingStyle.Linear), { CFrame = target.RootPart.CFrame + Vector3.new(0, 0, 0) })
+							playertween = tweenService:Create(lplr.Character:WaitForChild("HumanoidRootPart"), TweenInfo.new(0.65, Enum.EasingStyle.Linear), { CFrame = target.RootPart.CFrame + Vector3.new(0, 3, 3) })
 							playertween:Play()
 							if AutowinNotification.Enabled then
 								notif("Autowin", "Killing " .. target.Player.DisplayName .. " (" .. (target.Player.Team and target.Player.Team.Name or "neutral") .. " Team)", 5)
@@ -9060,7 +9052,7 @@ run(function()
 								repeat
 									target = FindTarget(20, true)
 									if not target or not target.RootPart or not IsAlive(lplr) then break end
-									playertween = tweenService:Create(lplr.Character:WaitForChild("HumanoidRootPart"), TweenInfo.new(0.65), { CFrame = target.RootPart.CFrame + Vector3.new(0, 0, 0) })
+									playertween = tweenService:Create(lplr.Character:WaitForChild("HumanoidRootPart"), TweenInfo.new(0.65), { CFrame = target.RootPart.CFrame + Vector3.new(0, 3, 3) })
 									playertween:Play()
 									task.wait()
 								until not (FindTarget(20, true) and FindTarget(20, true).RootPart) or (not Autowin.Enabled) or (not IsAlive(lplr))
