@@ -8639,6 +8639,8 @@ run(function()
 	local Autowindelay
 	local AutowinUninject = { Enabled = false }
 	local uninject = false
+	local AutoLobby = { Enabled = false }
+	local lobby = false
     local bedtween
     local playertween
     local lastActionTime = 0
@@ -9047,14 +9049,14 @@ run(function()
 							end
 							playertween.Completed:Wait()
 							if not Autowin.Enabled then return end
-							if FindTarget(20, true) and FindTarget(20, true).RootPart and IsAlive(lplr) then
+							if FindTarget(200, true) and FindTarget(200, true).RootPart and IsAlive(lplr) then
 								repeat
-									target = FindTarget(20, true)
+									target = FindTarget(200, true)
 									if not target or not target.RootPart or not IsAlive(lplr) then break end
 									playertween = tweenService:Create(lplr.Character:WaitForChild("HumanoidRootPart"), TweenInfo.new(0.65), { CFrame = target.RootPart.CFrame + Vector3.new(0, 3, 3) })
 									playertween:Play()
 									task.wait()
-								until not (FindTarget(20, true) and FindTarget(20, true).RootPart) or (not Autowin.Enabled) or (not IsAlive(lplr))
+								until not (FindTarget(200, true) and FindTarget(200, true).RootPart) or (not Autowin.Enabled) or (not IsAlive(lplr))
 							end
 
 							if IsAlive(lplr) and FindTeamBed() and Autowin.Enabled then
@@ -9100,10 +9102,27 @@ run(function()
 		end,
 		Tooltip = "Uninjects katware after a match ends"
 	})
+	AutoLobby = Autowin:CreateToggle({
+		Name = "Auto Lobby",
+		Function = function(callback)
+			if callback then
+				lobby = true
+			end
+		end,
+		Tooltip = "Auto lobby after a match ends"
+	})
 	Autowin:Clean(katwareEvents.MatchEndEvent.Event:Connect(function(winTable)
 		if Autowin.Enabled then
 			if (bedwars.Store:getState().Game.myTeam or {}).id == winTable.winningTeamId or lplr.Neutral then
 				notif("Autowin", "Match ended!.", 5)
+				if lobby == true then		
+					local args = {
+						[1] = "/bedwars",
+						[2] = "All"
+					}
+
+					game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(unpack(args))
+				end
 				if uninject == true then
 					katware:Uninject()
 				end
