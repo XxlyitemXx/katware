@@ -1,6 +1,4 @@
 
-katware.Place = 6872274481
-
 local katware = shared.katware
 local loadstring = function(...)
 	local res, err = loadstring(...)
@@ -30,6 +28,7 @@ local function downloadFile(path, func)
 	end
 	return (func or readfile)(path)
 end
+katware.Place = 6872274481
 
 if isfile('katware/games/'..katware.Place..'.lua') then
 	loadstring(readfile('katware/games/'..katware.Place..'.lua'), 'bedwars')()
