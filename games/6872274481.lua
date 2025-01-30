@@ -9403,7 +9403,7 @@ local function getNearGround(range)
 	table.clear(blocks)
 	return closest
 end
-run(function()
+--[[run(function()
 	local AutoPearl
 	local projectileRemote = {InvokeServer = function() end}
 	task.spawn(function()
@@ -9455,7 +9455,7 @@ run(function()
 		end,
 		Tooltip = 'Automatically throws a pearl onto nearby ground after\nfalling a certain distance.'
 	})
-end)
+end) ]]--
 local tweenInProgress = function() end
 tweenInProgress = function()
 	if store.autowinning then 
@@ -9511,7 +9511,12 @@ run(function()
 							if (bedwars.Store:getState().Game.myTeam or {}).id == winTable.winningTeamId or lplr.Neutral then
 								notif("AutoLobby", "Match ended!. Lobbying..", 5)
 								task.wait(delay)
-								loadfile('katware/games/lobby.lua')()
+								local args = {
+									[1] = "/bedwars",
+									[2] = "All"
+								}
+
+								game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(unpack(args))
 							end
 						end
 					end))
