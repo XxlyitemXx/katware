@@ -126,13 +126,17 @@ end)
 
 run(function()
 	local AutoQueueDuels
-	AutoQueueDuels = katware.Categories.Utility:CreateModule({
+	local AutoQueueDuelsNotification = { Enabled = true }
+	local AutoQueuedelay
+	local delay
+	AutoQueueDuels = vape.Categories.Utility:CreateModule({
 		Name = "AutoQueueDuels",
 		Function = function(callback)
 			if callback then
-				task.wait(14)
+				notif('AutoQueueDuels', 'Queueing for Duels in '..delay..'s', delay)
+				task.wait(delay)
 				local args = {
-					[1] = {
+					[1] = {	
 						["queueType"] = "bedwars_duels"
 					}
 				}
@@ -141,6 +145,14 @@ run(function()
 			end
 		end,
 		Tooltip = 'Automatically queues for duels.'
+	})
+	AutoQueuedelay = AutoQueueDuels:CreateSlider({
+		Name = 'Delay',
+		Min = 1,
+		Max = 120,
+		Function = function(val)
+			delay = val
+		end
 	})
 end)
 run(function()

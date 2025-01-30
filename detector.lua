@@ -40,13 +40,6 @@ local function showNotification(message)
     debris:AddItem(notification, 3)
 end
 
-if not isKeybindValid(Keybind) then
-    showNotification("Invalid keybind! Defaulting to RightShift.")
-    Keybind = "RightShift"
-else
-    showNotification("Press "..tostring(Keybind).." to show/hide esp")
-end
-
 local function espadd(v, icon)
     local billboard = Instance.new("BillboardGui")
     billboard.Parent = espfold
