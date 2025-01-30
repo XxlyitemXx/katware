@@ -7830,6 +7830,45 @@ run(function()
 	)
 
 end)
-
+run(function()
+    local InfJump
+    local Mode = {Value = "Normal"}
+    local JumpPower = {Value = 30}
+    
+    InfJump = katware.Categories.Blatant:CreateModule({
+        Name = "InfJump",
+        Function = function(callback)
+            if callback then
+                InfJump:Clean(inputService.JumpRequest:Connect(function()
+                    if entitylib.isAlive then
+                        if Mode.Value == "Normal" then
+                            entitylib.character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                        elseif Mode.Value == "Velocity" then
+                            entitylib.character.RootPart.Velocity += Vector3.new(0, JumpPower.Value, 0)
+                        end
+                    end
+                end))
+            end
+        end,
+        Tooltip = "Customizes your jumping ability"
+    })
+    
+    Mode = InfJump:CreateDropdown({
+        Name = "Mode",
+        List = {"Normal", "Velocity"},
+        Function = function(val)
+            JumpPower.Object.Visible = val == "Velocity"
+        end
+    })
+    
+    JumpPower = InfJump:CreateSlider({
+        Name = "Jump Power",
+        Min = 1,
+        Max = 100,
+        Default = 30,
+        Visible = false,
+        Darker = true
+    })
+end)
 
 print('Loaded univeral.lua')
