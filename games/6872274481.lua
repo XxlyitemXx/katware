@@ -8644,8 +8644,8 @@ run(function()
     local playertween
     local lastActionTime = 0
     local failedTweenAttempts = 0
-    local waitTimeAfterFails = 5
-    local targetSearchRange = 5 -- Range to search for targets before resetting
+    local waitTimeAfterFails = 3
+    local targetSearchRange = 30 -- Range to search for targets before resetting
     local tweenTimeout = 2 -- Timeout for the tween to be considered as failed
     local maxBedTweenDistance = 20 -- max distance from bed before assuming tween failed
     local tweenAttemptDelay = 0.5 -- Delay after tween starts before failure checks
@@ -8871,7 +8871,7 @@ run(function()
 								notif("Autowin", "Destroying " .. bedname:lower() .. " team's bed", 5)
 							end
 
-                            bedtween = tweenService:Create(lplr.Character:WaitForChild("HumanoidRootPart"), TweenInfo.new(0.65, Enum.EasingStyle.Linear, Enum.EasingDirection.In, 0, false, 0), { CFrame = CFrame.new(bed.Position) + Vector3.new(0, 10, 3) })
+                            bedtween = tweenService:Create(lplr.Character:WaitForChild("HumanoidRootPart"), TweenInfo.new(0.65, Enum.EasingStyle.Linear, Enum.EasingDirection.In, 0, false, 0), { CFrame = CFrame.new(bed.Position) + Vector3.new(0, 6, 3) })
                             task.wait(0.1)
                             bedtween:Play()
 
