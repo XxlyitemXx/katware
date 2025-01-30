@@ -9552,23 +9552,27 @@ run(function()
     local Custom = {ListEnabled = {}, RefreshValues = function() end}
     local blocks = {}
 
-    local function refreshBlocks()
+	local function refreshBlocks()
         table.clear(blocks)
         for _, obj in store.blocks do
-            if Bed.Enabled and obj.Name == "bed" then
-                table.insert(blocks, obj)
-            end
-            if LuckyBlock.Enabled and obj.Name:find("lucky") then
-                table.insert(blocks, obj)
-            end
-            if IronOre.Enabled and obj.Name == "iron_ore" then
-                table.insert(blocks, obj)
-            end
-            if table.find(Custom.ListEnabled, obj.Name) then
-                table.insert(blocks, obj)
+            -- Add type check to ensure we're handling instances
+            if typeof(obj) == "Instance" and obj:IsA("BasePart") then
+                if Bed.Enabled and obj.Name == "bed" then
+                    table.insert(blocks, obj)
+                end
+                if LuckyBlock.Enabled and obj.Name:find("lucky") then
+                    table.insert(blocks, obj)
+                end
+                if IronOre.Enabled and obj.Name == "iron_ore" then
+                    table.insert(blocks, obj)
+                end
+                if table.find(Custom.ListEnabled, obj.Name) then
+                    table.insert(blocks, obj)
+                end
             end
         end
     end
+
 
     Nuker = katware.Categories.World:CreateModule({
         Name = 'Nuker',
