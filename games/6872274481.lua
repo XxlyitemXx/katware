@@ -787,7 +787,6 @@ run(function()
 
 	bedwars.BlockController.isBlockBreakable = function(self, breakTable, plr)
 		local obj = bedwars.BlockController:getStore():getBlockAt(breakTable.blockPosition)
-
 		if obj and obj.Name == 'bed' then
 			for _, plr in playersService:GetPlayers() do
 				if obj:GetAttribute('Team'..(plr:GetAttribute('Team') or 0)..'NoBreak') and not select(2, whitelist:get(plr)) then
@@ -8871,7 +8870,7 @@ run(function()
 								notif("Autowin", "Destroying " .. bedname:lower() .. " team's bed", 5)
 							end
 
-                            bedtween = tweenService:Create(lplr.Character:WaitForChild("HumanoidRootPart"), TweenInfo.new(0.65, Enum.EasingStyle.Linear, Enum.EasingDirection.In, 0, false, 0), { CFrame = CFrame.new(bed.Position) + Vector3.new(0, 6, 3) })
+                            bedtween = tweenService:Create(lplr.Character:WaitForChild("HumanoidRootPart"), TweenInfo.new(0.65, Enum.EasingStyle.Linear, Enum.EasingDirection.In, 0, false, 0), { CFrame = CFrame.new(bed.Position) + Vector3.new(4, 3, 6) })
                             task.wait(0.1)
                             bedtween:Play()
 
