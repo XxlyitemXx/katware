@@ -129,7 +129,7 @@ run(function()
 	local AutoQueueDuelsNotification = { Enabled = true }
 	local AutoQueuedelay
 	local delay
-	AutoQueueDuels = vape.Categories.Utility:CreateModule({
+	AutoQueueDuels = katware.Categories.Utility:CreateModule({
 		Name = "AutoQueueDuels",
 		Function = function(callback)
 			if callback then
