@@ -499,7 +499,7 @@ run(function()
 					entitylib.character = entity
 					entitylib.isAlive = true
 					entitylib.Events.LocalAdded:Fire(entity)
-					table.insert(entitylib.Connections, char.AttributeChanged:Connect(function(attr)
+					table.insert(entity.Connections, char.AttributeChanged:Connect(function(attr)
 						katwareEvents.AttributeChanged:Fire(attr)
 					end))
 				else
@@ -595,7 +595,7 @@ run(function()
 		end
 		if ent.NPC then return true end
 		if isFriend(ent.Player) then return false end
-		if not select(2, whitelist:get(ent.Player)) then return false end
+		if not checkWhitelist(ent.Player) then return false end
 		return lplr:GetAttribute('Team') ~= ent.Player:GetAttribute('Team')
 	end
 	katware:Clean(entitylib.Events.LocalAdded:Connect(updateVelocity))
@@ -1585,12 +1585,12 @@ run(function()
 													repeat task.wait() until store.matchState ~= 0
 													if not (v.Character.HumanoidRootPart.Velocity.Y < -10*5) then
 														lplr.Character.Archivable = true
-		
+	
 														local Clone = lplr.Character:Clone()
 														Clone.Parent = game.Workspace
 														Clone.Head:ClearAllChildren()
 														gameCamera.CameraSubject = Clone:FindFirstChild("Humanoid")
-			
+	
 														for i,v in pairs(Clone:GetChildren()) do
 															if string.lower(v.ClassName):find("part") and v.Name ~= "HumanoidRootPart" then
 																v.Transparency = 1
@@ -4520,7 +4520,7 @@ run(function()
 			until custommsg ~= said[name]
 		end
 		said[name] = custommsg
-	
+
 		custommsg = custommsg and custommsg:gsub('<obj>', obj or '') or ''
 		if textChatService.ChatVersion == Enum.ChatVersion.TextChatService then
 			textChatService.ChatInputBarConfiguration.TargetTextChannel:SendAsync(custommsg)
@@ -5367,14 +5367,14 @@ run(function()
 				holder.BackgroundTransparency = 1
 				holder.Parent = Schematica.Children
 				local icon = Instance.new('ImageLabel')
-				icon.Size = UDim2.fromOffset(24, 24)
-				icon.Position = UDim2.fromOffset(4, 4)
+				icon.Size = UDim.fromOffset(24, 24)
+				icon.Position = UDim.fromOffset(4, 4)
 				icon.BackgroundTransparency = 1
 				icon.Image = bedwars.getIcon({itemType = i}, true)
 				icon.Parent = holder
 				local text = Instance.new('TextLabel')
-				text.Size = UDim2.fromOffset(100, 32)
-				text.Position = UDim2.fromOffset(32, 0)
+				text.Size = UDim.fromOffset(100, 32)
+				text.Position = UDim.fromOffset(32, 0)
 				text.BackgroundTransparency = 1
 				text.Text = (bedwars.ItemMeta[i] and bedwars.ItemMeta[i].displayName or i)..': '..v
 				text.TextXAlignment = Enum.TextXAlignment.Left
@@ -5685,18 +5685,25 @@ run(function()
 		return bought
 	end
 	
+	local function checkWhitelist(player)
+		if whitelist and type(whitelist.get) == "function" then
+			return select(2, whitelist:get(player))
+		end
+		return true  -- Default to allowing if whitelist isn't available
+	end
+	
 	AutoBuy = katware.Categories.Inventory:CreateModule({
 		Name = 'AutoBuy',
 		Function = function(callback)
 			if callback then
 				repeat task.wait() until store.queueType ~= 'bedwars_test'
 				if BedwarsCheck.Enabled and not store.queueType:find('bedwars') then return end
-	
+
 				local lastupgrades
 				AutoBuy:Clean(katwareEvents.InventoryAmountChanged.Event:Connect(function()
 					if (npctick - tick()) > 1 then npctick = tick() end
 				end))
-	
+
 				repeat
 					local npc, shop, upgrades, newid = getShopNPC()
 					id = newid
@@ -5705,12 +5712,12 @@ run(function()
 							npc = nil
 						end
 					end
-	
+
 					if npc and lastupgrades ~= upgrades then
 						if (npctick - tick()) > 1 then npctick = tick() end
 						lastupgrades = upgrades
 					end
-	
+
 					if npc and npctick <= tick() and store.matchState ~= 2 and store.shopLoaded then
 						local currencytable = {}
 						local waitcheck
@@ -5724,7 +5731,7 @@ run(function()
 						end
 						npctick = tick() + (waitcheck and 0.4 or math.huge)
 					end
-	
+
 					task.wait(0.1)
 				until not AutoBuy.Enabled
 			else
