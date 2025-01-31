@@ -8911,7 +8911,7 @@ run(function()
 							
 							while Autowin.Enabled and IsAlive(lplr) do
                                 if (tick() - lastActionTime) >= 1.5 then
-                                    local target = FindTarget(45, true)
+                                    local target = FindTarget(20, true)
                                     if target and target.RootPart and IsAlive(lplr) then
                                         if AutowinNotification.Enabled then
                                             local team = bed:GetAttribute("id") and string.split(bed:GetAttribute("id"), "_")[1] or "unknown"
