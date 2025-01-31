@@ -596,7 +596,7 @@ run(function()
 		if ent.NPC then return true end
 		if isFriend(ent.Player) then return false end
 		if not checkWhitelist(ent.Player) then return false end
-		return lplr:GetAttribute('Team') ~= ent.Player:GetAttribute('Team')
+		return ent.Player and lplr:GetAttribute('Team') ~= ent.Player:GetAttribute('Team')
 	end
 	katware:Clean(entitylib.Events.LocalAdded:Connect(updateVelocity))
 end)
@@ -5005,7 +5005,7 @@ run(function()
 				if pages.IsFinished then break end
 				pages:AdvanceToNextPageAsync()
 			end
-	
+
 			local friend = checkFriends(tab)
 			if not friend then
 				staffFunction(plr, 'impossible_join')
