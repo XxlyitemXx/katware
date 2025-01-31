@@ -8634,9 +8634,9 @@ run(function()
     local playertween
     local lastActionTime = 0
     local failedTweenAttempts = 0
-    local waitTimeAfterFails = 3
+    local waitTimeAfterFails = 1.5
     local targetSearchRange = 30 -- Range to search for targets before resetting
-    local tweenTimeout = 2 -- Timeout for the tween to be considered as failed
+    local tweenTimeout = 1.5 -- Timeout for the tween to be considered as failed
     local maxBedTweenDistance = 20 -- max distance from bed before assuming tween failed
     local tweenAttemptDelay = 0.5 -- Delay after tween starts before failure checks
     local lastKnownPosition = nil -- Store the last known position of the character
@@ -8889,7 +8889,6 @@ run(function()
 
 							
 							task.spawn(function()
-								task.wait(1.5)
 								local magnitude = GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), bed)
 								if magnitude >= 50 and FindTeamBed() and Autowin.Enabled then
 									lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
@@ -8906,13 +8905,12 @@ run(function()
 								task.wait()
 							until IsAlive(lplr)
 
-							task.wait(3)
+							task.wait(1.5)
 
 							lastActionTime = tick()
 							
-							-- Find and eliminate the closest enemy, waiting 2.7 seconds after the last action
 							while Autowin.Enabled and IsAlive(lplr) do
-                                if (tick() - lastActionTime) >= 2.7 then
+                                if (tick() - lastActionTime) >= 1.5 then
                                     local target = FindTarget(45, true)
                                     if target and target.RootPart and IsAlive(lplr) then
                                         if AutowinNotification.Enabled then
@@ -8922,8 +8920,7 @@ run(function()
                                         repeat
                                             target = FindTarget(25, true)
                                             if not target or not target.RootPart or not IsAlive(lplr) then break end
-                                            -- Check if the target's team is "Neutral"
-                                            if target.Player.Team and target.Player.Team.Name == "Neutral" then
+                                            if target.Player.Team and target.Player.Team.Name == "Spectators" then
                                                 notif("Autowin", "Target is on Neutral team. Skipping.", 5)
                                                 task.wait(5)
                                                 break
