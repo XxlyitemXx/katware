@@ -8636,7 +8636,7 @@ run(function()
     local failedTweenAttempts = 0
     local waitTimeAfterFails = 1.5
     local targetSearchRange = 30 -- Range to search for targets before resetting
-    local tweenTimeout = 0.8 -- Timeout for the tween to be considered as failed
+    local tweenTimeout = 1.4 -- Timeout for the tween to be considered as failed
     local maxBedTweenDistance = 20 -- max distance from bed before assuming tween failed
     local tweenAttemptDelay = 0.5 -- Delay after tween starts before failure checks
     local lastKnownPosition = nil -- Store the last known position of the character
