@@ -595,7 +595,6 @@ run(function()
 		end
 		if ent.NPC then return true end
 		if isFriend(ent.Player) then return false end
-		if not checkWhitelist(ent.Player) then return false end
 		return ent.Player and lplr:GetAttribute('Team') ~= ent.Player:GetAttribute('Team')
 	end
 	katware:Clean(entitylib.Events.LocalAdded:Connect(updateVelocity))
