@@ -8901,14 +8901,10 @@ run(function()
 								task.wait()
 							until IsAlive(lplr)
 
-							task.wait(3)
-
 							lastActionTime = tick()
-							
-							-- Find and eliminate the closest enemy, waiting 2.7 seconds after the last action
 							while Autowin.Enabled and IsAlive(lplr) do
                                 if (tick() - lastActionTime) >= 2.7 then
-                                    local target = FindTarget(45, true)
+                                    local target = FindTarget(80, true)
                                     if target and target.RootPart and IsAlive(lplr) then
                                         if AutowinNotification.Enabled then
                                             local team = bed:GetAttribute("id") and string.split(bed:GetAttribute("id"), "_")[1] or "unknown"
@@ -8917,7 +8913,6 @@ run(function()
                                         repeat
                                             target = FindTarget(25, true)
                                             if not target or not target.RootPart or not IsAlive(lplr) then break end
-                                            -- Check if the target's team is "Neutral"
                                             if target.Player.Team and target.Player.Team.Name == "Neutral" then
                                                 notif("Autowin", "Target is on Neutral team. Skipping.", 5)
                                                 task.wait(5)
