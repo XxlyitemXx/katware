@@ -775,8 +775,8 @@ run(function()
 
 		if obj and obj.Name == 'bed' then
 			for _, plr in playersService:GetPlayers() do
-				if obj:GetAttribute('Team'..(plr:GetAttribute('Team') or 0)..'NoBreak') and not select(2, whitelist:get(plr)) then
-					return false
+				if obj:GetAttribute('Team'..(plr:GetAttribute('Team') or 0)..'NoBreak') then
+					return true
 				end
 			end
 		end
@@ -6904,6 +6904,7 @@ run(function()
 		Name = 'Breaker',
 		Function = function(callback)
 			if callback then
+				notif('Breaker', 'I just put a temporary fix for bb it might break your own bed sarry I have no idea to fix this shit')
 				for _ = 1, 30 do
 					local part = Instance.new('Part')
 					part.Anchored = true
@@ -8886,7 +8887,6 @@ run(function()
                                 return
                             end
 
-							
 							task.spawn(function()
 								task.wait(1.5)
 								local magnitude = GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), bed)
@@ -8897,10 +8897,6 @@ run(function()
 							end)
 							repeat task.wait() until FindEnemyBed() ~= bed or not IsAlive(lplr)
 
-							if IsAlive(lplr) then
-								lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
-								lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
-							end
 							repeat
 								task.wait()
 							until IsAlive(lplr)
