@@ -8980,7 +8980,7 @@ run(function()
                 end
             end
         end,
-        Tooltip = "Teleports you to the nearest enemy bed using safe tweening"
+        Tooltip = "hahhahahahhaha"
     })
 
     -- Clean up on unload
