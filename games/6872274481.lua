@@ -8449,179 +8449,9 @@ run(function()
         Default = "Shield"
     })
 end)
-local function IsAlive(plr)
-	plr = plr or lplr
-	if not plr.Character then return false end
-	if not plr.Character:FindFirstChild("Head") then return false end
-	if not plr.Character:FindFirstChild("Humanoid") then return false end
-	if plr.Character:FindFirstChild("Humanoid").Health < 0.11 then return false end
-	return true
-end
 
-local function GetMagnitudeOf2Objects(part, part2, bypass)
-	local magnitude, partcount = 0, 0
-	if not bypass then 
-		local suc, res = pcall(function() return part.Position end)
-		partcount = suc and partcount + 1 or partcount
-		suc, res = pcall(function() return part2.Position end)
-		partcount = suc and partcount + 1 or partcount
-	end
-	if partcount > 1 or bypass then 
-		magnitude = bypass and (part - part2).Magnitude or (part.Position - part2.Position).Magnitude
-	end
-	return magnitude
 end
-
-local function GetTopBlock(position, smart, raycast, customvector)
-	position = position or IsAlive(lplr) and lplr.Character:WaitForChild("HumanoidRootPart").Position
-	if not position then 
-		return nil 
-	end
-	if raycast and not workspace:Raycast(position, Vector3.new(0, -2000, 0), RaycastParams.new()) then
-		return nil
-	end
-	local lastblock = nil
-	for i = 1, 500 do 
-		local newray = workspace:Raycast(lastblock and lastblock.Position or position, customvector or Vector3.new(0.55, 999999, 0.55), RaycastParams.new())
-		local smartest = newray and smart and workspace:Raycast(lastblock and lastblock.Position or position, Vector3.new(0, 5.5, 0), RaycastParams.new()) or not smart
-		if newray and smartest then
-			lastblock = newray
-		else
-			break
-		end
-	end
-	return lastblock
-end
-
-local function FindEnemyBed(maxdistance, highest)
-	local target = nil
-	local distance = maxdistance or math.huge
-	local whitelistuserteams = {}
-	local badbeds = {}
-	if not lplr:GetAttribute("Team") then return nil end
-	for i, v in pairs(playersService:GetPlayers()) do
-		if v ~= lplr then
-			if not select(2, whitelist:get(v)) then
-				whitelistuserteams[v:GetAttribute("Team")] = true
-			end
-		end
-	end
-	for i, v in pairs(collectionService:GetTagged("bed")) do
-			local bedteamstring = string.split(v:GetAttribute("id"), "_")[1]
-			if whitelistuserteams[bedteamstring] ~= nil then
-			   badbeds[v] = true
-			end
-		end
-	for i, v in pairs(collectionService:GetTagged("bed")) do
-		if v:GetAttribute("id") and v:GetAttribute("id") ~= lplr:GetAttribute("Team").."_bed" and badbeds[v] == nil and lplr.Character and lplr.Character.PrimaryPart then
-			if v:GetAttribute("NoBreak") or v:GetAttribute("PlacedByUserId") and v:GetAttribute("PlacedByUserId") ~= 0 then continue end
-			local magdist = GetMagnitudeOf2Objects(lplr.Character.PrimaryPart, v)
-			if magdist < distance then
-				target = v
-				distance = magdist
-			end
-		end
-	end
-	local coveredblock = highest and target and GetTopBlock(target.Position, true)
-	if coveredblock then
-		target = coveredblock.Instance
-	end
-	return target
-end
-
-local function FindTeamBed()
-	local bedstate, res = pcall(function()
-		return lplr:GetAttribute('HasBed')
-	end)
-	if bedstate and res then
-		return res
-	end
-	return nil
-end
-
-local function FindTarget(dist, blockRaycast, includemobs, healthmethod)
-	local sort, entity = healthmethod and math.huge or dist or math.huge, {}
-	local function abletocalculate() return lplr.Character and lplr.Character:FindFirstChild("HumanoidRootPart") end
-	local sortmethods = {Normal = function(entityroot, entityhealth) return abletocalculate() and GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), entityroot) < sort end, Health = function(entityroot, entityhealth) return abletocalculate() and entityhealth < sort end}
-	local sortmethod = healthmethod and "Health" or "Normal"
-	local function raycasted(entityroot) return abletocalculate() and blockRaycast and workspace:Raycast(entityroot.Position, Vector3.new(0, -2000, 0), RaycastParams.new()) or not blockRaycast end
-	for i,v in pairs(playersService:GetPlayers()) do
-		if v ~= lplr and abletocalculate() and IsAlive(v) and v.Team ~= lplr.Team then
-			if not select(2, whitelist:get(v)) then 
-				continue
-			end
-			if sortmethods[sortmethod](v.Character.HumanoidRootPart, v.Character:GetAttribute("Health") or v.Character.Humanoid.Health) and (not blockRaycast or raycasted(v.Character.HumanoidRootPart)) then
-				sort = healthmethod and (v.Character:GetAttribute("Health") or v.Character.Humanoid.Health) or GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), v.Character.HumanoidRootPart)
-				entity.Player = v
-				entity.Human = true 
-				entity.RootPart = v.Character.HumanoidRootPart
-				entity.Humanoid = v.Character.Humanoid
-			end
-		end
-	end
-	if includemobs then
-		local maxdistance = dist or math.huge
-		for i,v in pairs(store.blocks) do
-			if abletocalculate() and v.PrimaryPart and GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), v.PrimaryPart) < maxdistance then
-			entity.Player = {Character = v, Name = "PotEntity", DisplayName = "PotEntity", UserId = 1}
-			entity.Human = false
-			entity.RootPart = v.PrimaryPart
-			entity.Humanoid = {Health = 1, MaxHealth = 1}
-			end
-		end
-		for i,v in pairs(collectionService:GetTagged("DiamondGuardian")) do 
-			if v.PrimaryPart and v:FindFirstChild("Humanoid") and v.Humanoid.Health and abletocalculate() then
-				if sortmethods[sortmethod](v.PrimaryPart, v.Humanoid.Health) and (not blockRaycast or raycasted(v.PrimaryPart)) then
-				sort = healthmethod and v.Humanoid.Health or GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), v.PrimaryPart)
-				entity.Player = {Character = v, Name = "DiamondGuardian", DisplayName = "DiamondGuardian", UserId = 1}
-				entity.Human = false
-				entity.RootPart = v.PrimaryPart
-				entity.Humanoid = v.Humanoid
-				end
-			end
-		end
-		for i,v in pairs(collectionService:GetTagged("GolemBoss")) do
-			if v.PrimaryPart and v:FindFirstChild("Humanoid") and v.Humanoid.Health and abletocalculate() then
-				if sortmethods[sortmethod](v.PrimaryPart, v.Humanoid.Health) and (not blockRaycast or raycasted(v.PrimaryPart)) then
-				sort = healthmethod and v.Humanoid.Health or GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), v.PrimaryPart)
-				entity.Player = {Character = v, Name = "Titan", DisplayName = "Titan", UserId = 1}
-				entity.Human = false
-				entity.RootPart = v.PrimaryPart
-				entity.Humanoid = v.Humanoid
-				end
-			end
-		end
-		for i,v in pairs(collectionService:GetTagged("Drone")) do
-			local plr = playersService:GetPlayerByUserId(v:GetAttribute("PlayerUserId"))
-			if plr and plr ~= lplr and plr.Team and lplr.Team and plr.Team ~= lplr.Team and select(2, whitelist:get(plr)) and abletocalculate() and v.PrimaryPart and v:FindFirstChild("Humanoid") and v.Humanoid.Health then
-				if sortmethods[sortmethod](v.PrimaryPart, v.Humanoid.Health) and (not blockRaycast or raycasted(v.PrimaryPart)) then
-					sort = healthmethod and v.Humanoid.Health or GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), v.PrimaryPart)
-					entity.Player = {Character = v, Name = "Drone", DisplayName = "Drone", UserId = 1}
-					entity.Human = false
-					entity.RootPart = v.PrimaryPart
-					entity.Humanoid = v.Humanoid
-				end
-			end
-		end
-		for i,v in pairs(collectionService:GetTagged("Monster")) do
-			if v:GetAttribute("Team") ~= lplr:GetAttribute("Team") and abletocalculate() and v.PrimaryPart and v:FindFirstChild("Humanoid") and v.Humanoid.Health then
-				if sortmethods[sortmethod](v.PrimaryPart, v.Humanoid.Health) and (not blockRaycast or raycasted(v.PrimaryPart)) then
-				sort = healthmethod and v.Humanoid.Health or GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), v.PrimaryPart)
-				entity.Player = {Character = v, Name = "Monster", DisplayName = "Monster", UserId = 1}
-				entity.Human = false
-				entity.RootPart = v.PrimaryPart
-				entity.Humanoid = v.Humanoid
-				end
-			end
-		end
-	end
-	return entity
-end
-
-local function notif(...)
-	katware:CreateNotification(...)
-end
---[[run(function()
+run(function()
 	task.wait(1)
     local Autowin = { Enabled = false }
     local AutowinNotification = { Enabled = true }
@@ -8642,7 +8472,177 @@ end
     local tweenAttemptDelay = 0.2
     local lastKnownPosition = nil
     local positionCheckInterval = 0.1
-
+	local function IsAlive(plr)
+		plr = plr or lplr
+		if not plr.Character then return false end
+		if not plr.Character:FindFirstChild("Head") then return false end
+		if not plr.Character:FindFirstChild("Humanoid") then return false end
+		if plr.Character:FindFirstChild("Humanoid").Health < 0.11 then return false end
+		return true
+	end
+	
+	local function GetMagnitudeOf2Objects(part, part2, bypass)
+		local magnitude, partcount = 0, 0
+		if not bypass then 
+			local suc, res = pcall(function() return part.Position end)
+			partcount = suc and partcount + 1 or partcount
+			suc, res = pcall(function() return part2.Position end)
+			partcount = suc and partcount + 1 or partcount
+		end
+		if partcount > 1 or bypass then 
+			magnitude = bypass and (part - part2).Magnitude or (part.Position - part2.Position).Magnitude
+		end
+		return magnitude
+	end
+	
+	local function GetTopBlock(position, smart, raycast, customvector)
+		position = position or IsAlive(lplr) and lplr.Character:WaitForChild("HumanoidRootPart").Position
+		if not position then 
+			return nil 
+		end
+		if raycast and not workspace:Raycast(position, Vector3.new(0, -2000, 0), RaycastParams.new()) then
+			return nil
+		end
+		local lastblock = nil
+		for i = 1, 500 do 
+			local newray = workspace:Raycast(lastblock and lastblock.Position or position, customvector or Vector3.new(0.55, 999999, 0.55), RaycastParams.new())
+			local smartest = newray and smart and workspace:Raycast(lastblock and lastblock.Position or position, Vector3.new(0, 5.5, 0), RaycastParams.new()) or not smart
+			if newray and smartest then
+				lastblock = newray
+			else
+				break
+			end
+		end
+		return lastblock
+	end
+	
+	local function FindEnemyBed(maxdistance, highest)
+		local target = nil
+		local distance = maxdistance or math.huge
+		local whitelistuserteams = {}
+		local badbeds = {}
+		if not lplr:GetAttribute("Team") then return nil end
+		for i, v in pairs(playersService:GetPlayers()) do
+			if v ~= lplr then
+				if not select(2, whitelist:get(v)) then
+					whitelistuserteams[v:GetAttribute("Team")] = true
+				end
+			end
+		end
+		for i, v in pairs(collectionService:GetTagged("bed")) do
+				local bedteamstring = string.split(v:GetAttribute("id"), "_")[1]
+				if whitelistuserteams[bedteamstring] ~= nil then
+				   badbeds[v] = true
+				end
+			end
+		for i, v in pairs(collectionService:GetTagged("bed")) do
+			if v:GetAttribute("id") and v:GetAttribute("id") ~= lplr:GetAttribute("Team").."_bed" and badbeds[v] == nil and lplr.Character and lplr.Character.PrimaryPart then
+				if v:GetAttribute("NoBreak") or v:GetAttribute("PlacedByUserId") and v:GetAttribute("PlacedByUserId") ~= 0 then continue end
+				local magdist = GetMagnitudeOf2Objects(lplr.Character.PrimaryPart, v)
+				if magdist < distance then
+					target = v
+					distance = magdist
+				end
+			end
+		end
+		local coveredblock = highest and target and GetTopBlock(target.Position, true)
+		if coveredblock then
+			target = coveredblock.Instance
+		end
+		return target
+	end
+	
+	local function FindTeamBed()
+		local bedstate, res = pcall(function()
+			return lplr:GetAttribute('HasBed')
+		end)
+		if bedstate and res then
+			return res
+		end
+		return nil
+	end
+	
+	local function FindTarget(dist, blockRaycast, includemobs, healthmethod)
+		local sort, entity = healthmethod and math.huge or dist or math.huge, {}
+		local function abletocalculate() return lplr.Character and lplr.Character:FindFirstChild("HumanoidRootPart") end
+		local sortmethods = {Normal = function(entityroot, entityhealth) return abletocalculate() and GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), entityroot) < sort end, Health = function(entityroot, entityhealth) return abletocalculate() and entityhealth < sort end}
+		local sortmethod = healthmethod and "Health" or "Normal"
+		local function raycasted(entityroot) return abletocalculate() and blockRaycast and workspace:Raycast(entityroot.Position, Vector3.new(0, -2000, 0), RaycastParams.new()) or not blockRaycast end
+		for i,v in pairs(playersService:GetPlayers()) do
+			if v ~= lplr and abletocalculate() and IsAlive(v) and v.Team ~= lplr.Team then
+				if not select(2, whitelist:get(v)) then 
+					continue
+				end
+				if sortmethods[sortmethod](v.Character.HumanoidRootPart, v.Character:GetAttribute("Health") or v.Character.Humanoid.Health) and (not blockRaycast or raycasted(v.Character.HumanoidRootPart)) then
+					sort = healthmethod and (v.Character:GetAttribute("Health") or v.Character.Humanoid.Health) or GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), v.Character.HumanoidRootPart)
+					entity.Player = v
+					entity.Human = true 
+					entity.RootPart = v.Character.HumanoidRootPart
+					entity.Humanoid = v.Character.Humanoid
+				end
+			end
+		end
+		if includemobs then
+			local maxdistance = dist or math.huge
+			for i,v in pairs(store.blocks) do
+				if abletocalculate() and v.PrimaryPart and GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), v.PrimaryPart) < maxdistance then
+				entity.Player = {Character = v, Name = "PotEntity", DisplayName = "PotEntity", UserId = 1}
+				entity.Human = false
+				entity.RootPart = v.PrimaryPart
+				entity.Humanoid = {Health = 1, MaxHealth = 1}
+				end
+			end
+			for i,v in pairs(collectionService:GetTagged("DiamondGuardian")) do 
+				if v.PrimaryPart and v:FindFirstChild("Humanoid") and v.Humanoid.Health and abletocalculate() then
+					if sortmethods[sortmethod](v.PrimaryPart, v.Humanoid.Health) and (not blockRaycast or raycasted(v.PrimaryPart)) then
+					sort = healthmethod and v.Humanoid.Health or GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), v.PrimaryPart)
+					entity.Player = {Character = v, Name = "DiamondGuardian", DisplayName = "DiamondGuardian", UserId = 1}
+					entity.Human = false
+					entity.RootPart = v.PrimaryPart
+					entity.Humanoid = v.Humanoid
+					end
+				end
+			end
+			for i,v in pairs(collectionService:GetTagged("GolemBoss")) do
+				if v.PrimaryPart and v:FindFirstChild("Humanoid") and v.Humanoid.Health and abletocalculate() then
+					if sortmethods[sortmethod](v.PrimaryPart, v.Humanoid.Health) and (not blockRaycast or raycasted(v.PrimaryPart)) then
+					sort = healthmethod and v.Humanoid.Health or GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), v.PrimaryPart)
+					entity.Player = {Character = v, Name = "Titan", DisplayName = "Titan", UserId = 1}
+					entity.Human = false
+					entity.RootPart = v.PrimaryPart
+					entity.Humanoid = v.Humanoid
+					end
+				end
+			end
+			for i,v in pairs(collectionService:GetTagged("Drone")) do
+				local plr = playersService:GetPlayerByUserId(v:GetAttribute("PlayerUserId"))
+				if plr and plr ~= lplr and plr.Team and lplr.Team and plr.Team ~= lplr.Team and select(2, whitelist:get(plr)) and abletocalculate() and v.PrimaryPart and v:FindFirstChild("Humanoid") and v.Humanoid.Health then
+					if sortmethods[sortmethod](v.PrimaryPart, v.Humanoid.Health) and (not blockRaycast or raycasted(v.PrimaryPart)) then
+						sort = healthmethod and v.Humanoid.Health or GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), v.PrimaryPart)
+						entity.Player = {Character = v, Name = "Drone", DisplayName = "Drone", UserId = 1}
+						entity.Human = false
+						entity.RootPart = v.PrimaryPart
+						entity.Humanoid = v.Humanoid
+					end
+				end
+			end
+			for i,v in pairs(collectionService:GetTagged("Monster")) do
+				if v:GetAttribute("Team") ~= lplr:GetAttribute("Team") and abletocalculate() and v.PrimaryPart and v:FindFirstChild("Humanoid") and v.Humanoid.Health then
+					if sortmethods[sortmethod](v.PrimaryPart, v.Humanoid.Health) and (not blockRaycast or raycasted(v.PrimaryPart)) then
+					sort = healthmethod and v.Humanoid.Health or GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), v.PrimaryPart)
+					entity.Player = {Character = v, Name = "Monster", DisplayName = "Monster", UserId = 1}
+					entity.Human = false
+					entity.RootPart = v.PrimaryPart
+					entity.Humanoid = v.Humanoid
+					end
+				end
+			end
+		end
+		return entity
+	end
+	
+	local function notif(...)
+		katware:CreateNotification(...)
     local function VerifyPosition(targetPosition, maxAllowedDistance, context)
         local currentPosition = lplr.Character.HumanoidRootPart.Position
         local actualDistance = (currentPosition - targetPosition).Magnitude
@@ -8903,7 +8903,7 @@ end
             end
         end
     end))
-end)]]--
+end)
 
 run(function()
     BedTP = katware.Categories.Utility:CreateModule({
@@ -9008,7 +9008,7 @@ local function getNearGround(range)
 	table.clear(blocks)
 	return closest
 end
---[[run(function()
+run(function()
 	local AutoPearl
 	local projectileRemote = {InvokeServer = function() end}
 	task.spawn(function()
@@ -9060,7 +9060,8 @@ end
 		end,
 		Tooltip = 'Automatically throws a pearl onto nearby ground after\nfalling a certain distance.'
 	})
-end) ]]--
+end) 
+
 local tweenInProgress = function() end
 tweenInProgress = function()
 	if store.autowinning then 
