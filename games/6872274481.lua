@@ -8633,6 +8633,15 @@ run(function()
     local lastActionTime = 0
     local failedTweenAttempts = 0
     local maxDistanceThreshold = 75
+    local activeTweens = {}
+    local connections = {}
+
+    -- Configuration
+    local BED_APPROACH_OFFSET = Vector3.new(4, 1, 6)
+    local MAX_BED_ATTEMPTS = 5
+    local BED_SHIELD_CHECK_INTERVAL = 2
+    local COMBAT_TWEEN_TIMEOUT = 1.2
+    local STUCK_POSITION_THRESHOLD = 1
 
     local function IsAlive(plr)
         plr = plr or lplr
@@ -8654,239 +8663,194 @@ run(function()
         return false
     end
 
-    local function GetMagnitudeOf2Objects(part, part2, bypass)
-        local magnitude, partcount = 0, 0
-        if not bypass then 
-            local suc, res = pcall(function() return part.Position end)
-            partcount = suc and partcount + 1 or partcount
-            suc, res = pcall(function() return part2.Position end)
-            partcount = suc and partcount + 1 or partcount
+    local function CleanupConnections()
+        for _, connection in pairs(connections) do
+            connection:Disconnect()
         end
-        if partcount > 1 or bypass then 
-            magnitude = bypass and (part - part2).Magnitude or (part.Position - part2.Position).Magnitude
+        table.clear(connections)
+        
+        for _, tween in pairs(activeTweens) do
+            pcall(function() tween:Cancel() end)
         end
-        return magnitude
+        table.clear(activeTweens)
     end
 
-    local function FindEnemyBed(maxdistance, highest)
-        local target = nil
-        local distance = maxdistance or math.huge
-        local whitelistuserteams = {}
-        local badbeds = {}
-        if not lplr:GetAttribute("Team") then return nil end
-        for i, v in pairs(playersService:GetPlayers()) do
-            if v ~= lplr then
-                if not select(2, whitelist:get(v)) then
-                    whitelistuserteams[v:GetAttribute("Team")] = true
-                end
-            end
+    local function SafeTweenTo(targetCF, timeout)
+        if not GetNetworkOwnership() then 
+            notif("Autowin", "Network issue, resetting...", 3)
+            lplr.Character:BreakJoints()
+            repeat task.wait() until IsAlive(lplr)
+            return false
         end
-        for i, v in pairs(collectionService:GetTagged("bed")) do
-                local bedteamstring = string.split(v:GetAttribute("id"), "_")[1]
-                if whitelistuserteams[bedteamstring] ~= nil then
-                   badbeds[v] = true
-                end
-            end
-        for i, v in pairs(collectionService:GetTagged("bed")) do
-            if v:GetAttribute("id") and v:GetAttribute("id") ~= lplr:GetAttribute("Team").."_bed" and badbeds[v] == nil and lplr.Character and lplr.Character.PrimaryPart then
-                if v:GetAttribute("NoBreak") or v:GetAttribute("PlacedByUserId") and v:GetAttribute("PlacedByUserId") ~= 0 then continue end
-                local magdist = GetMagnitudeOf2Objects(lplr.Character.PrimaryPart, v)
-                if magdist < distance then
-                    target = v
-                    distance = magdist
-                end
-            end
-        end
-        local coveredblock = highest and target and GetTopBlock(target.Position, true)
-        if coveredblock then
-            target = coveredblock.Instance
-        end
-        return target
-    end
-
-    local function FindTeamBed()
-        local bedstate, res = pcall(function()
-            return lplr:GetAttribute('HasBed')
+        
+        local tween = tweenService:Create(
+            lplr.Character.HumanoidRootPart,
+            TweenInfo.new(math.clamp((targetCF.Position - lplr.Character.HumanoidRootPart.Position).Magnitude/100, 0.4, 1.2), Enum.EasingStyle.Linear),
+            {CFrame = targetCF}
+        )
+        
+        table.insert(activeTweens, tween)
+        
+        local success = false
+        tween.Completed:Connect(function()
+            success = true
+            failedTweenAttempts = 0
         end)
-        if bedstate and res then
-            return res
+        
+        tween:Play()
+        local startTime = tick()
+        
+        while tick() - startTime < timeout do
+            if not success then
+                task.wait(0.1)
+            else
+                break
+            end
         end
-        return nil
+        
+        if not success then
+            tween:Cancel()
+            notif("Autowin", "Movement timeout, retrying...", 3)
+            return false
+        end
+        return true
+    end
+
+    local function SmartBedApproach(bed)
+        local baseCF = CFrame.new(bed.Position) + BED_APPROACH_OFFSET
+        local raycastParams = RaycastParams.new()
+        raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+        raycastParams.FilterDescendantsInstances = {lplr.Character}
+        
+        for angle = 0, 360, 45 do
+            local testCF = baseCF * CFrame.Angles(0, math.rad(angle), 0) * CFrame.new(0, 0, 5)
+            local ray = workspace:Raycast(testCF.Position, Vector3.new(0, -10, 0), raycastParams)
+            if ray and ray.Instance then
+                return SafeTweenTo(CFrame.new(ray.Position + Vector3.new(0, 1.5, 0)), 1.5)
+            end
+        end
+        return SafeTweenTo(baseCF, 1.5)
+    end
+
+    local function FindOptimalTarget()
+        local targets = {}
+        for _, v in pairs(playersService:GetPlayers()) do
+            if v ~= lplr and IsAlive(v) and v.Team ~= lplr.Team then
+                local distance = GetMagnitudeOf2Objects(lplr.Character.HumanoidRootPart, v.Character.HumanoidRootPart)
+                if distance < 100 then
+                    table.insert(targets, {
+                        Player = v,
+                        Distance = distance,
+                        Health = v.Character.Humanoid.Health
+                    })
+                end
+            end
+        end
+        
+        table.sort(targets, function(a, b)
+            if a.Health ~= b.Health then return a.Health < b.Health end
+            return a.Distance < b.Distance
+        end)
+        
+        return targets[1] and targets[1].Player or nil
+    end
+
+    local function EngageCombat()
+        while Autowin.Enabled and IsAlive(lplr) do
+            local target = FindOptimalTarget()
+            if target then
+                local targetPos = target.Character.HumanoidRootPart.CFrame + Vector3.new(0, 1, 0)
+                
+                if not SafeTweenTo(targetPos, COMBAT_TWEEN_TIMEOUT) then
+                    lplr.Character:BreakJoints()
+                    repeat task.wait() until IsAlive(lplr)
+                    task.wait(0.5)
+                    continue
+                end
+                
+                local lastValidPos = lplr.Character.HumanoidRootPart.Position
+                task.delay(0.5, function()
+                    if (lastValidPos - lplr.Character.HumanoidRootPart.Position).Magnitude < STUCK_POSITION_THRESHOLD then
+                        notif("Autowin", "Position stuck, resetting...", 3)
+                        lplr.Character:BreakJoints()
+                    end
+                end)
+            else
+                task.wait(0.5)
+            end
+        end
     end
 
     Autowin = katware.Categories.Blatant:CreateModule({
         Name = "Autowin",
         Function = function(callback)
             if callback then
+                CleanupConnections()
                 task.wait(delay)
-                katware:CreateNotification("Autowin", "Optimized autowin sequence started", 5)
-                task.spawn(function()
-                    local function SafeTweenTo(targetCF, timeout)
-                        if not GetNetworkOwnership() then 
-                            notif("Autowin", "Network ownership failed, resetting...", 3)
-                            lplr.Character:BreakJoints()
-                            repeat task.wait() until IsAlive(lplr)
-                        end
-                        
-                        local tween = tweenService:Create(
-                            lplr.Character.HumanoidRootPart,
-                            TweenInfo.new(math.clamp((targetCF.Position - lplr.Character.HumanoidRootPart.Position).Magnitude/100, 0.4, 1.2), Enum.EasingStyle.Linear),
-                            {CFrame = targetCF}
-                        )
-                        
-                        local success = false
-                        tween.Completed:Connect(function()
-                            success = true
-                            failedTweenAttempts = 0
-                        end)
-                        
-                        tween:Play()
-                        local startTime = tick()
-                        
-                        while tick() - startTime < timeout do
-                            if not success then
-                                task.wait(0.1)
-                            else
-                                break
-                            end
-                        end
-                        
-                        if not success then
-                            tween:Cancel()
-                            notif("Autowin", "Tween timeout, retrying...", 3)
-                            return false
-                        end
-                        return true
-                    end
-
-                    local function SmartBedApproach(bed)
-                        local baseCF = CFrame.new(bed.Position) + Vector3.new(4, 1, 6)
-                        local raycastParams = RaycastParams.new()
-                        raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
-                        raycastParams.FilterDescendantsInstances = {lplr.Character}
-                        
-                        local optimalPosition
-                        for angle = 0, 360, 45 do
-                            local testCF = baseCF * CFrame.Angles(0, math.rad(angle), 0) * CFrame.new(0, 0, 5)
-                            local ray = workspace:Raycast(testCF.Position, Vector3.new(0, -10, 0), raycastParams)
-                            if ray and ray.Instance then
-                                optimalPosition = ray.Position + Vector3.new(0, 1.5, 0)
-                                break
-                            end
-                        end
-                        
-                        if optimalPosition then
-                            return SafeTweenTo(CFrame.new(optimalPosition), 1.5)
-                        end
-                        return SafeTweenTo(baseCF, 1.5)
-                    end
-
-                    local function FindOptimalTarget()
-                        local targets = {}
-                        local maxDistance = 100
-                        
-                        for _, v in pairs(playersService:GetPlayers()) do
-                            if v ~= lplr and IsAlive(v) and v.Team ~= lplr.Team then
-                                if IsAlive(v) and GetMagnitudeOf2Objects(lplr.Character.HumanoidRootPart, v.Character.HumanoidRootPart) < maxDistance then
-                                    table.insert(targets, {
-                                        Player = v,
-                                        Distance = GetMagnitudeOf2Objects(lplr.Character.HumanoidRootPart, v.Character.HumanoidRootPart),
-                                        Health = v.Character.Humanoid.Health
-                                    })
-                                end
-                            end
-                        end
-                        
-                        table.sort(targets, function(a, b)
-                            if a.Health ~= b.Health then
-                                return a.Health < b.Health
-                            end
-                            return a.Distance < b.Distance
-                        end)
-                        
-                        return targets[1] and targets[1].Player or nil
-                    end
-
-                    local function EngageCombat()
-                        while Autowin.Enabled and IsAlive(lplr) do
-                            local target = FindOptimalTarget()
-                            if target then
-                                local targetPos = target.Character.HumanoidRootPart.CFrame + Vector3.new(0, 1, 0)
-                                
-                                if not SafeTweenTo(targetPos, 1.2) then
-                                    lplr.Character:BreakJoints()
-                                    repeat task.wait() until IsAlive(lplr)
-                                    task.wait(0.5)
-                                    continue
-                                end
-                                
-                                local currentDistance = GetMagnitudeOf2Objects(lplr.Character.HumanoidRootPart, target.Character.HumanoidRootPart)
-                                if currentDistance > 8 then
-                                    SafeTweenTo(target.Character.HumanoidRootPart.CFrame + Vector3.new(0, 1, 0), 0.8)
-                                end
-                                
-                                local lastValidPos = lplr.Character.HumanoidRootPart.Position
-                                task.delay(0.5, function()
-                                    if (lastValidPos - lplr.Character.HumanoidRootPart.Position).Magnitude < 1 then
-                                        notif("Autowin", "Position stuck detected, resetting...", 3)
-                                        lplr.Character:BreakJoints()
-                                    end
-                                end)
-                            else
-                                task.wait(0.5)
-                            end
-                        end
-                    end
-
-                    -- Main execution flow
-                    if store.matchState == 0 then
-                        repeat task.wait() until store.matchState ~= 0 or not Autowin.Enabled
+                
+                katware:CreateNotification("Autowin", "Starting bed destruction phase", 5)
+                
+                -- Phase 1: Bed Destruction
+                local bedAttempts = 0
+                local bedDestroyed = false
+                
+                connections.bedLoop = runService.Heartbeat:Connect(function()
+                    if bedDestroyed or bedAttempts >= MAX_BED_ATTEMPTS then return end
+                    
+                    local bed = FindEnemyBed()
+                    if not bed then
+                        bedDestroyed = true
+                        katware:CreateNotification("Autowin", "No enemy bed found, starting combat", 5)
+                        return
                     end
                     
-                    repeat task.wait() until lplr.Team and lplr.Team.Name ~= "Spectators" or not Autowin.Enabled
+                    if bed:GetAttribute("BedShieldEndTime") and bed:GetAttribute("BedShieldEndTime") > workspace:GetServerTimeNow() then
+                        notif("Autowin", "Bed shielded, waiting...", 3)
+                        task.wait(BED_SHIELD_CHECK_INTERVAL)
+                        return
+                    end
                     
-                    if IsAlive(lplr) then
+                    if not SmartBedApproach(bed) then
+                        bedAttempts += 1
+                        notif("Autowin", string.format("Bed approach failed (%d/%d)", bedAttempts, MAX_BED_ATTEMPTS), 3)
                         lplr.Character:BreakJoints()
+                        repeat task.wait() until IsAlive(lplr)
+                        task.wait(0.5)
+                        return
                     end
                     
-                    Autowin:Clean(runService.Heartbeat:Connect(function()
-                        pcall(function()
-                            local enemyBed = FindEnemyBed()
-                            if not isnetworkowner(lplr.Character.HumanoidRootPart) and (enemyBed and GetMagnitudeOf2Objects(lplr.Character.HumanoidRootPart, enemyBed) > maxDistanceThreshold or not enemyBed) then
-                                if IsAlive(lplr) and FindTeamBed() and Autowin.Enabled and store.matchState ~= 2 then
-                                    lplr.Character:BreakJoints()
-                                end
-                            end
-                        end)
-                    end))
-
-                    Autowin:Clean(lplr.CharacterAdded:Connect(function()
-                        repeat task.wait() until IsAlive(lplr)
-                        local bed = FindEnemyBed()
-                        if bed and (not bed:GetAttribute("BedShieldEndTime") or bed:GetAttribute("BedShieldEndTime") < workspace:GetServerTimeNow()) then
-                            if AutowinNotification.Enabled then
-                                local bedname = bed:GetAttribute("id") and string.split(bed:GetAttribute("id"), "_")[1] or "unknown"
-                                notif("Autowin", "Destroying " .. bedname:lower() .. " team's bed", 5)
-                            end
-
-                            if not SmartBedApproach(bed) then
-                                lplr.Character:BreakJoints()
-                                repeat task.wait() until IsAlive(lplr)
-                                task.wait(0.5)
-                            end
-
-                            EngageCombat()
-                        end
-                    end))
+                    -- If we reach here, bed should be broken by other script
+                    task.wait(1) -- Allow time for bed destruction
+                    if not FindEnemyBed() then
+                        bedDestroyed = true
+                        katware:CreateNotification("Autowin", "Bed destroyed, starting combat", 5)
+                    end
+                end)
+                
+                -- Phase 2: Player Elimination
+                connections.combatLoop = runService.Heartbeat:Connect(function()
+                    if not bedDestroyed then return end
+                    EngageCombat()
+                end)
+                
+                -- Cleanup on death
+                connections.characterAdded = lplr.CharacterAdded:Connect(function()
+                    if not Autowin.Enabled then return end
+                    task.wait(1) -- Allow respawn time
+                    if bedDestroyed then
+                        EngageCombat()
+                    else
+                        bedAttempts = 0 -- Reset bed attempts on respawn
+                    end
                 end)
             else
-                pcall(function() end) -- Cleanup handled by katware
+                CleanupConnections()
             end
         end,
-        Tooltip = "Optimized autowin system with network ownership handling"
+        Tooltip = "The cutiest autowin script!"
     })
 
-    -- Rest of UI elements remain same
+    -- UI Elements
     Autowindelay = Autowin:CreateSlider({
         Name = "Delay",
         Function = function(value) delay = value end,
@@ -8905,7 +8869,7 @@ run(function()
 
     Autowin:Clean(katwareEvents.MatchEndEvent.Event:Connect(function(winTable)
         if Autowin.Enabled and (bedwars.Store:getState().Game.myTeam or {}).id == winTable.winningTeamId then
-            notif("Autowin", "Match ended!", 5)
+            notif("Autowin", "Match completed!", 5)
             if lobby then
                 game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer("/bedwars", "All")
             end
