@@ -8744,7 +8744,7 @@ run(function()
         end
     end
 
-    local Autowin = katware.Categories.Blatant:CreateModule({
+    Autowin = katware.Categories.Blatant:CreateModule({
         Name = "Autowin",
         Function = function(callback)
             if callback then
@@ -8855,7 +8855,7 @@ run(function()
                 end)
             end
         end,
-        Tooltip = "Automated bed destruction and player elimination system"
+        Tooltip = "Ahaha"
     })
 
     -- Configuration items
