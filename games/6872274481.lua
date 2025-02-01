@@ -8815,110 +8815,75 @@ run(function()
 		Function = function(callback)
 			if callback then
 				task.spawn(function()
-					-- Initial forced reset for synchronization
+					-- Initial hard reset
 					if IsAlive(lplr) then
 						lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
-						lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
 						repeat task.wait() until IsAlive(lplr)
-						task.wait(1.5) -- Initial sync delay
-					end
-	
-					local function ValidateMovement(startPos)
-						-- Network ownership check
-						if not isnetworkowner(lplr.Character.HumanoidRootPart) then
-							notif("Autowin", "Network desync detected!", 3)
-							return false
-						end
-						
-						-- Position validation
-						if (lplr.Character.HumanoidRootPart.Position - startPos).Magnitude > 150 then
-							notif("Autowin", "Position mismatch!", 3)
-							return false
-						end
-						return true
+						task.wait(2) -- Extended sync time
 					end
 	
 					while Autowin.Enabled and IsAlive(lplr) do
+						-- Pre-movement desync check
+						if not isnetworkowner(lplr.Character.HumanoidRootPart) then
+							lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+							repeat task.wait() until IsAlive(lplr)
+							task.wait(1.5)
+							continue
+						end
+	
 						local bed = FindEnemyBed()
-						if bed and (not bed:GetAttribute("BedShieldEndTime") or bed:GetAttribute("BedShieldEndTime") < workspace:GetServerTimeNow()) then
-							-- Bed approach with desync checks
+						if bed then
+							-- Store initial position
 							local startPos = lplr.Character.HumanoidRootPart.Position
+							
+							-- Pure tween without mid-checks
 							bedtween = tweenService:Create(lplr.Character.HumanoidRootPart, 
 								TweenInfo.new(0.65, Enum.EasingStyle.Linear), 
 								{CFrame = CFrame.new(bed.Position) + Vector3.new(3, 5, 0)}
 							)
-							
-							-- Add position monitor
-							local connection
-							connection = runService.Heartbeat:Connect(function()
-								if not ValidateMovement(startPos) then
-									connection:Disconnect()
-									bedtween:Cancel()
-									lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
-								end
-							end)
-	
 							bedtween:Play()
 							bedtween.Completed:Wait()
-							connection:Disconnect()
 	
 							-- Post-tween validation
-							if not ValidateMovement(startPos) then
+							if (lplr.Character.HumanoidRootPart.Position - startPos).Magnitude > 100 then
 								lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
 								repeat task.wait() until IsAlive(lplr)
 								task.wait(1.5)
 								continue
 							end
 	
-							-- Original bed break logic
-							task.spawn(function()
-								bedwars.ClientHandler:Get("BedwarsBreakBed"):CallServerAsync({
-									bedEntity = bed,
-									fakeBed = bed
-								})
-							end)
+							-- Break bed
+							bedwars.ClientHandler:Get("BedwarsBreakBed"):CallServerAsync({bedEntity = bed})
 							repeat task.wait() until FindEnemyBed() ~= bed
-	
-							-- Post-bed break reset
-							if IsAlive(lplr) then
-								lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
-								repeat task.wait() until IsAlive(lplr)
-								task.wait(2.5) -- Respawn cooldown
-							end
 						end
 	
-						-- Target engagement loop
+						-- Player targeting phase
 						local target = FindTarget(45, true)
 						if target and target.RootPart then
-							local startPos = lplr.Character.HumanoidRootPart.Position
+							-- Pre-movement check
+							if not isnetworkowner(lplr.Character.HumanoidRootPart) then
+								lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+								repeat task.wait() until IsAlive(lplr)
+								task.wait(1.5)
+								continue
+							end
+	
+							-- Direct tween to target
 							playertween = tweenService:Create(lplr.Character.HumanoidRootPart, 
 								TweenInfo.new(0.65), 
 								{CFrame = target.RootPart.CFrame + Vector3.new(0, 4, 0)}
 							)
-							
-							-- Movement validation
-							local connection
-							connection = runService.Heartbeat:Connect(function()
-								if not ValidateMovement(startPos) then
-									connection:Disconnect()
-									playertween:Cancel()
-									lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
-								end
-							end)
-	
 							playertween:Play()
 							playertween.Completed:Wait()
-							connection:Disconnect()
 	
-							-- Post-tween check
+							-- Post-tween reset if needed
 							if GetMagnitudeOf2Objects(lplr.Character.HumanoidRootPart, target.RootPart) > 15 then
-								notif("Autowin", "Target too far! Resetting...", 3)
 								lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
 								repeat task.wait() until IsAlive(lplr)
 								task.wait(1.5)
 							end
 						else
-							-- Periodic sync reset
+							-- Periodic reset
 							lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
 							repeat task.wait() until IsAlive(lplr)
 							task.wait(1.5)
