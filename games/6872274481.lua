@@ -8807,7 +8807,6 @@ run(function()
         for i, v in pairs(collectionService:GetTagged("bed")) do
             if v:GetAttribute("id") and v:GetAttribute("id") ~= lplr:GetAttribute("Team").."_bed" and badbeds[v] == nil and lplr.Character and lplr.Character.PrimaryPart then
                 if v:GetAttribute("NoBreak") or v:GetAttribute("PlacedByUserId") and v:GetAttribute("PlacedByUserId") ~= 0 then continue end
-@@ -8771,352 +8873,253 @@
                     entity.RootPart = v.PrimaryPart
                     entity.Humanoid = v.Humanoid
                     end
