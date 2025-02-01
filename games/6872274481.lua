@@ -9008,6 +9008,7 @@ local function getNearGround(range)
 	table.clear(blocks)
 	return closest
 end
+--[[
 run(function()
 	local AutoPearl
 	local projectileRemote = {InvokeServer = function() end}
@@ -9265,7 +9266,7 @@ run(function()
         Function = refreshBlocks
     })
 end)
-
+--]]
 run(function()
     local TexturePack = katware.Categories.Render:CreateModule({
         Name = 'TexturePack',
