@@ -8643,6 +8643,7 @@ run(function()
 	
 	local function notif(...)
 		katware:CreateNotification(...)
+	end
     local function VerifyPosition(targetPosition, maxAllowedDistance, context)
         local currentPosition = lplr.Character.HumanoidRootPart.Position
         local actualDistance = (currentPosition - targetPosition).Magnitude
