@@ -8662,133 +8662,149 @@ run(function()
     end
 
     local function ExecuteTween(targetCFrame, tweenType)
-        local currentHRP = lplr.Character and lplr.Character:FindFirstChild("HumanoidRootPart")
-        if not currentHRP then return false end
-        
-        local distance = (currentHRP.Position - targetCFrame.Position).Magnitude
-        local tweenInfo = TweenInfo.new(
-            math.clamp(distance / 100, 0.4, 1.2),
-            Enum.EasingStyle.Linear,
-            Enum.EasingDirection.Out,
-            0,
-            false,
-            0
-        )
-        
-        local controller = tweenService:Create(currentHRP, tweenInfo, {CFrame = targetCFrame})
-        tweenControllers[tweenType] = controller
-        
-        local tweenSuccess = false
-        local connection
-        connection = controller.Completed:Connect(function()
-            tweenSuccess = true
-            connection:Disconnect()
-        end)
-        
-        controller:Play()
-        local startTime = tick()
-        
-        repeat task.wait() until tweenSuccess or (tick() - startTime) > tweenInfo.Time + safetyChecks.tweenSafetyMargin
-        
-        if tweenControllers[tweenType] == controller then
-            tweenControllers[tweenType] = nil
-        end
-        
-        return tweenSuccess
-    end
-
-    local function HandleBedInteraction(bed)
-        if not bed or not bed:IsA("BasePart") then return false end
-        
-        local targetCFrame = bed.CFrame + Vector3.new(4, 1, 6)
-        local attempts = 0
-        
-        repeat
-            attempts += 1
-            local success = ExecuteTween(targetCFrame, "bed")
-            if success and ValidatePosition(bed.Position, safetyChecks.maxBedDistance, "bed approach") then
-                return true
-            end
-            task.wait(0.2)
-        until attempts >= searchState.maxAttempts
-        
-        -- Critical failure handling
-        if IsAlive(lplr) then
-            lplr.Character.Humanoid:TakeDamage(lplr.Character.Humanoid.Health)
-        end
-        return false
-    end
-
-    local function HandlePlayerEngagement()
-        local target = nil
-        searchState.currentRangeIndex = 1
-        
-        -- Progressive target acquisition
-        while searchState.currentRangeIndex <= #searchState.ranges do
-            local range = searchState.ranges[searchState.currentRangeIndex]
-            target = FindTarget(range, true)
-            
-            if target and target.RootPart then
-                if AutowinNotification.Enabled then
-                    notif("Autowin", string.format("Engaging target at %s studs", range), 3)
-                end
-                break
-            else
-                searchState.currentRangeIndex += 1
-                task.wait(0.2)
-            end
-        end
-        
-        if not target or not target.RootPart then
-            notif("Autowin", "No viable targets found", 3)
-            return false
-        end
-
-        local targetCFrame = target.RootPart.CFrame + Vector3.new(0, 1, 0)
-        local attempts = 0
-        
-        repeat
-            attempts += 1
-            local success = ExecuteTween(targetCFrame, "player")
-            if success and ValidatePosition(target.RootPart.Position, safetyChecks.maxPlayerDistance, "player attack") then
-                return true
-            end
-            task.wait(0.2)
-        until attempts >= searchState.maxAttempts
-        
-        return false
-    end
-
-    -- Main control loop
-    Autowin = katware.Categories.Blatant:CreateModule({
-        Name = 'Autowin',
-        Function = function(calling)
-            if calling then
-                task.spawn(function()
-                    task.wait(Autowindelay.Value)
-                    
-                    while Autowin.Enabled do
-                        if IsAlive(lplr) then
-                            local enemyBed = FindEnemyBed()
-                            
-                            if enemyBed then
-                                if not HandleBedInteraction(enemyBed) then
-                                    notif("Autowin", "Bed destruction failed, resetting...", 4)
-                                end
-                            else
-                                if not HandlePlayerEngagement() then
-                                    notif("Autowin", "Combat failure, resetting...", 4)
-                                    if IsAlive(lplr) then
-                                        lplr.Character.Humanoid:TakeDamage(lplr.Character.Humanoid.Health)
-                                    end
-                                end
-                            end
-                        end
-                        
-                        task.wait(0.5)
-                    end
-                end)
-            else
+		local currentHRP = lplr.Character and lplr.Character:FindFirstChild("HumanoidRootPart")
+		if not currentHRP then return false end
+		
+		-- Cancel existing tweens of this type
+		if tweenControllers[tweenType] then
+			tweenControllers[tweenType]:Cancel()
+		end
+	
+		local distance = (currentHRP.Position - targetCFrame.Position).Magnitude
+		local tweenInfo = TweenInfo.new(
+			math.clamp(distance / 100, 0.4, 1.2),
+			Enum.EasingStyle.Linear,
+			Enum.EasingDirection.Out,
+			0,
+			false,
+			0
+		)
+		
+		local controller = tweenService:Create(currentHRP, tweenInfo, {CFrame = targetCFrame})
+		tweenControllers[tweenType] = controller
+		
+		local tweenSuccess = false
+		local connection
+		connection = controller.Completed:Connect(function()
+			tweenSuccess = true
+			connection:Disconnect()
+		end)
+		
+		controller:Play()
+		local startTime = tick()
+		
+		repeat task.wait() until tweenSuccess or (tick() - startTime) > tweenInfo.Time + safetyChecks.tweenSafetyMargin
+		
+		-- Cleanup and validation
+		if tweenControllers[tweenType] == controller then
+			tweenControllers[tweenType] = nil
+		end
+		
+		if not tweenSuccess then
+			notif("Autowin", "Tween failed, resetting...", 3)
+			if IsAlive(lplr) then
+				lplr.Character.Humanoid:TakeDamage(lplr.Character.Humanoid.Health)
+			end
+			repeat task.wait() until IsAlive(lplr)
+		end
+		
+		return tweenSuccess
+	end
+	
+	local function HandleBedInteraction(bed)
+		if not bed or not bed:IsA("BasePart") then return false end
+		
+		local targetCFrame = bed.CFrame + Vector3.new(4, 1, 6)
+		local attempts = 0
+		
+		while Autowin.Enabled and attempts < 3 do
+			attempts += 1
+			local success = ExecuteTween(targetCFrame, "bed")
+			
+			if success and ValidatePosition(bed.Position, safetyChecks.maxBedDistance, "bed approach") then
+				return true
+			end
+			
+			-- Wait for respawn before retrying
+			repeat task.wait() until IsAlive(lplr)
+			task.wait(0.5)
+		end
+		
+		return false
+	end
+	
+	local function HandlePlayerEngagement()
+		while Autowin.Enabled do
+			local target = nil
+			searchState.currentRangeIndex = 1
+			
+			-- Progressive target acquisition
+			while searchState.currentRangeIndex <= #searchState.ranges do
+				local range = searchState.ranges[searchState.currentRangeIndex]
+				target = FindTarget(range, true)
+				
+				if target and target.RootPart then
+					if AutowinNotification.Enabled then
+						notif("Autowin", string.format("Engaging target at %s studs", range), 3)
+					end
+					break
+				else
+					searchState.currentRangeIndex += 1
+					task.wait(0.2)
+				end
+			end
+			
+			if not target or not target.RootPart then
+				notif("Autowin", "No viable targets found", 3)
+				return false
+			end
+	
+			local targetCFrame = target.RootPart.CFrame + Vector3.new(0, 1, 0)
+			local attempts = 0
+			
+			while Autowin.Enabled and attempts < 3 do
+				attempts += 1
+				local success = ExecuteTween(targetCFrame, "player")
+				
+				if success and ValidatePosition(target.RootPart.Position, safetyChecks.maxPlayerDistance, "player attack") then
+					return true
+				end
+				
+				-- Wait for respawn before retrying
+				repeat task.wait() until IsAlive(lplr)
+				task.wait(0.5)
+			end
+		end
+		
+		return false
+	end
+	
+	-- In the main control loop:
+	Autowin = katware.Categories.Blatant:CreateModule({
+		Name = 'Autowin',
+		Function = function(calling)
+			if calling then
+				task.spawn(function()
+					task.wait(Autowindelay.Value)
+					
+					while Autowin.Enabled do
+						if IsAlive(lplr) then
+							local enemyBed = FindEnemyBed()
+							
+							if enemyBed then
+								if not HandleBedInteraction(enemyBed) then
+									notif("Autowin", "Bed destruction cycle failed", 4)
+								end
+							else
+								if not HandlePlayerEngagement() then
+									notif("Autowin", "Combat cycle failed", 4)
+								end
+							end
+						end
+						task.wait(0.1) -- Reduced from 0.5 for faster retries
+					end
+				end)
+			else
                 -- Cleanup
                 for _, controller in pairs(tweenControllers) do
                     pcall(function() controller:Cancel() end)
