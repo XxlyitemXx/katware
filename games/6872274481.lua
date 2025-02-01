@@ -8854,203 +8854,161 @@ run(function()
         katware:CreateNotification(...)
     end
 
-    Autowin = katware.Categories.Blatant:CreateModule({
+    local Autowin = katware.Categories.Blatant:CreateModule({
         Name = "Autowin",
         Function = function(callback)
             if callback then
-                task.wait(delay)
-                katware:CreateNotification("Autowin", "Started Autowin only @katware", 5)
-                katware:CreateNotification("Autowin", "Also Enable Killaura and Breaker!", 5)
-                task.spawn(function()
-                    if store.matchState == 0 then
-                        repeat
-                            task.wait()
-                        until store.matchState ~= 0 or not Autowin.Enabled
+                -- Initialization checks
+                if not katware.Loaded then
+                    notif("Autowin", "Waiting for Katware to fully load...", 3)
+                    repeat task.wait() until katware.Loaded
+                end
+
+                local connection
+                local safeExit = false
+                local attemptCount = 0
+                local MAX_ATTEMPTS = 5
+
+                local function cleanUp()
+                    if connection then
+                        connection:Disconnect()
                     end
-                    if not katware.Loaded then
-                        repeat
-                            task.wait()
-                        until katware.Loaded or not Autowin.Enabled
+                    if playertween then
+                        playertween:Cancel()
                     end
-                    
-                    repeat
-                        task.wait()
-                    until lplr.Team and lplr.Team.Name ~= "Spectators" or not Autowin.Enabled
-                    
-                    if not Autowin.Enabled then
-                        return
+                    if bedtween then
+                        bedtween:Cancel()
                     end
-                    if IsAlive(lplr) then
-                        lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
-                        lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+                end
+
+                local function handleBedInteraction(bed)
+                    if not bed or bed.Parent == nil then
+                        notif("Autowin", "Target bed no longer exists", 3)
+                        return false
                     end
-                    Autowin:Clean(runService.Heartbeat:Connect(function()
-                        pcall(function()
-                            local enemyBed = FindEnemyBed()
-                            if not isnetworkowner(lplr.Character:WaitForChild("HumanoidRootPart")) and (enemyBed and GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), enemyBed) > 75 or not enemyBed) then
-                                if IsAlive(lplr) and FindTeamBed() and Autowin.Enabled and (not store.matchState == 2) then
-                                    lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
-                                    lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
-                                end
+
+                    local success, result = pcall(function()
+                        -- Tween to bed with position validation
+                        local tweenInfo = TweenInfo.new(0.65, Enum.EasingStyle.Linear)
+                        bedtween = tweenService:Create(lplr.Character.HumanoidRootPart, tweenInfo, {
+                            CFrame = CFrame.new(bed.Position + Vector3.new(4, 1, 6))
+                        })
+                        
+                        bedtween.Completed:Once(function()
+                            if (lplr.Character.HumanoidRootPart.Position - bed.Position).Magnitude > 15 then
+                                error("Position verification failed")
                             end
                         end)
-                    end))
-                    Autowin:Clean(lplr.CharacterAdded:Connect(function()
-                        if not IsAlive(lplr) then repeat task.wait() until IsAlive(lplr) end
-                        local bed = FindEnemyBed()
-                        if bed and (bed:GetAttribute("BedShieldEndTime") and bed:GetAttribute("BedShieldEndTime") < workspace:GetServerTimeNow() or not bed:GetAttribute("BedShieldEndTime")) then
-                            if AutowinNotification.Enabled then
-                                local bedname = bed:GetAttribute("id") and string.split(bed:GetAttribute("id"), "_")[1] or "unknown"
-                                notif("Autowin", "Destroying " .. bedname:lower() .. " team's bed", 5)
-                            end
+                        
+                        bedtween:Play()
+                        return true
+                    end)
 
-                            if bed and IsAlive(lplr) then
-                                local success = HandleBedTween(bed)
-                                if not success then
-                                    -- Reset the entire cycle
-                                    lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character.Humanoid.Health)
-                                    lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
-                                    repeat task.wait() until IsAlive(lplr)
-                                    return
-                                end
-                            end
-                            
-                            task.spawn(function()
-                                local magnitude = GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), bed)
-                                if magnitude >= 50 and FindTeamBed() and Autowin.Enabled then
-                                    lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
-                                    lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
-                                end
-                            end)
-                            repeat task.wait() until FindEnemyBed() ~= bed or not IsAlive(lplr)
+                    if not success then
+                        notif("Autowin", "Bed approach failed: "..tostring(result), 3)
+                        return false
+                    end
+                    return true
+                end
 
-                            if IsAlive(lplr) then
-                                lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
-                                lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
-                            end
-                            repeat
-                                task.wait()
-                            until IsAlive(lplr)
+                local function mainLoop()
+                    repeat
+                        task.wait()
+                        if not IsAlive(lplr) then continue end
 
-                            task.wait(0.5)
-
-                            lastActionTime = tick()
-                            
-                            while Autowin.Enabled and IsAlive(lplr) do
-                                if (tick() - lastActionTime) >= 0.5 then
-                                    local enemyBed = FindEnemyBed()
-
-                                    if not enemyBed then
-                                        local target = FindTarget(nil, true)
-                                        if target and target.RootPart then
-                                            local attackSuccess = HandlePlayerAttack(target)
-                                            if not attackSuccess then
-                                                -- Reset and retry
-                                                task.wait(0.5)
-                                                continue
-                                            end
-                                        end
-                                    end
-                                end
-                                task.wait(0.1)
-                            end
-
-                            if IsAlive(lplr) and FindTeamBed() and Autowin.Enabled then
-                                lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
-                                lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
-                            end
-                        elseif FindTarget(nil, true) and FindTarget(nil, true).RootPart then
-                            task.wait()
-                            local target = FindTarget(nil, true)
-                            if target and target.RootPart then
-                                local attackSuccess = HandlePlayerAttack(target)
-                                if not attackSuccess then
-                                    -- Reset and retry
-                                    task.wait(0.5)
-                                    return
-                                end
-                            end
-                            if AutowinNotification.Enabled then
-                                notif("Autowin", "Killing " .. target.Player.DisplayName .. " (" .. (target.Player.Team and target.Player.Team.Name or "neutral") .. " Team)", 5)
-                            end
-
-                            if not Autowin.Enabled then return end
-                            if FindTarget(50, true) and FindTarget(50, true).RootPart and IsAlive(lplr) then
+                        -- Find valid target bed
+                        local enemyBed = FindEnemyBed()
+                        if enemyBed then
+                            if handleBedInteraction(enemyBed) then
+                                -- Bed destruction logic
                                 repeat
-                                    target = FindTarget(50, true)
-                                    if not target or not target.RootPart or not IsAlive(lplr) then break end
-                                    local attackSuccess = HandlePlayerAttack(target)
-                                    if not attackSuccess then
-                                        break
-                                    end
                                     task.wait()
-                                until not (FindTarget(50, true) and FindTarget(50, true).RootPart) or (not Autowin.Enabled) or (not IsAlive(lplr))
-                            end
-
-                            if IsAlive(lplr) and FindTeamBed() and Autowin.Enabled then
-                                lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
-                                lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+                                until not enemyBed or not enemyBed.Parent
                             end
                         else
-                            if store.matchState == 2 then return end
-                            lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
-                            lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+                            -- Find and attack players
+                            local target = FindTarget(50, true)
+                            if target and target.RootPart then
+                                -- Player attack logic
+                                local tweenTime = math.clamp(
+                                    (target.RootPart.Position - lplr.Character.HumanoidRootPart.Position).Magnitude / 100,
+                                    0.4, 1.0
+                                )
+                                
+                                playertween = tweenService:Create(
+                                    lplr.Character.HumanoidRootPart,
+                                    TweenInfo.new(tweenTime, Enum.EasingStyle.Linear),
+                                    {CFrame = target.RootPart.CFrame + Vector3.new(0, 1, 0)}
+                                )
+                                
+                                playertween:Play()
+                            end
                         end
-                    end))
-                    
-                    Autowin:Clean(lplr.CharacterAdded:Connect(function()
-                        if (not IsAlive(lplr)) then repeat task.wait() until IsAlive(lplr) end
-                        if (not store.matchState == 2) then return end
-                    end))
-                end)
+
+                        attemptCount += 1
+                        if attemptCount >= MAX_ATTEMPTS then
+                            notif("Autowin", "Max attempts reached, resetting...", 5)
+                            lplr.Character.Humanoid:TakeDamage(lplr.Character.Humanoid.Health)
+                            attemptCount = 0
+                        end
+                    until not Autowin.Enabled or safeExit
+                end
+
+                connection = runService.Heartbeat:Connect(mainLoop)
+                Autowin:Clean(cleanUp)
+
             else
-                pcall(function() if playertween then playertween:Cancel() end end)
-                pcall(function() if bedtween then bedtween:Cancel() end end)
+                -- Cleanup when disabled
+                pcall(function()
+                    if playertween then playertween:Cancel() end
+                    if bedtween then bedtween:Cancel() end
+                end)
             end
         end,
-        Tooltip = "uhh Best autowin only @katware"
+        Tooltip = "Automated bed destruction and player elimination system"
     })
-    Autowindelay = Autowin:CreateSlider({
+
+    -- Configuration items
+    local Autowindelay = Autowin:CreateSlider({
         Name = "Delay",
-        Function = function(value)
-            delay = value
-        end,
         Min = 0,
         Max = 300,
         Default = 0,
         Suffix = "s",
-        Tooltip = "Delay before Start Autowin"
+        Tooltip = "Initial activation delay"
     })
-    AutowinUninject = Autowin:CreateToggle({
+
+    local AutowinUninject = Autowin:CreateToggle({
         Name = "Auto Uninject",
         Function = function(callback)
-            if callback then
-                uninject = true
-            end
+            uninject = callback
         end,
-        Tooltip = "Uninjects katware after a match ends"
+        Tooltip = "Uninject after match completion"
     })
-    AutoLobby = Autowin:CreateToggle({
+
+    local AutoLobby = Autowin:CreateToggle({
         Name = "Auto Lobby",
         Function = function(callback)
-            if callback then
-                lobby = true
-            end
+            lobby = callback
         end,
-        Tooltip = "Auto lobby after a match ends"
+        Tooltip = "Return to lobby after match"
     })
+
+    -- Match end handler
     Autowin:Clean(katwareEvents.MatchEndEvent.Event:Connect(function(winTable)
         if Autowin.Enabled then
-            if (bedwars.Store:getState().Game.myTeam or {}).id == winTable.winningTeamId or lplr.Neutral then
-                notif("Autowin", "Match ended!.", 5)
-                if lobby == true then		
-                    local args = {
-                        [1] = "/bedwars",
-                        [2] = "All"
-                    }
-                    game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(unpack(args))
+            if (bedwars.Store:getState().Game.myTeam or {}).id == winTable.winningTeamId then
+                notif("Autowin", "Match completed successfully", 5)
+                
+                if lobby then
+                    task.wait(2)
+                    game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(
+                        "/bedwars", "All"
+                    )
                 end
-                if uninject == true then
+                
+                if uninject then
+                    task.wait(1)
                     katware:Uninject()
                 end
             end
@@ -9058,6 +9016,7 @@ run(function()
     end))
 end)
 
+run(function()
     BedTP = katware.Categories.Utility:CreateModule({
         Name = "BedTP",
         Function = function(callback)
