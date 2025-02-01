@@ -8951,7 +8951,7 @@ run(function()
 
                                             -- Check if the tween was successful
                                             if playertween and playertween.PlaybackState == Enum.PlaybackState.Completed then
-                                                -- Check if the target is still alive after the tween
+												task.wait(0.5)
                                                 if not IsAlive(target.Player) then
                                                     notif("Autowin", "Target is dead.", 5)
                                                     lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
@@ -9006,11 +9006,11 @@ run(function()
 											lastActionTime = tick() -- Reset the timer after respawn
 										else
 											-- Wait for a short period before checking again
-											task.wait(0.5)
+											task.wait(0.1)
 										end
 									end
 								else
-									task.wait(0.5) -- wait to prevent lag
+									task.wait(0.1) -- wait to prevent lag
 								end
 							end
 
