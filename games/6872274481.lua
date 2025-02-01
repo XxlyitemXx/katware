@@ -8626,56 +8626,50 @@ run(function()
     local MAX_FAILURE_ATTEMPTS = 3
     local COOLDOWN_DURATION = 5
     local lastFailureTime = 0
+	local MIN_RESET_DISTANCE = 75  -- Minimum distance to trigger pre-tween reset
     
-    -- Enhanced failure handling functions
-    local function safeTween(tweenInst, timeout)
-        local completed = false
-        local timeoutConn
-        local completedConn = tweenInst.Completed:Connect(function()
-            completed = true
-            if timeoutConn then timeoutConn:Disconnect() end
-        end)
-        
-        timeoutConn = task.delay(timeout or 5, function()
-            if not completed and tweenInst.PlaybackState == Enum.PlaybackState.Playing then
-                tweenInst:Cancel()
-                notif("Autowin", "Tween timed out, resetting...", 3)
-            end
-        end)
-        
-        return completedConn, timeoutConn
-    end
-
-    local function resetCharacter()
-        pcall(function()
+    -- Enhanced reset function with respawn waiting
+    local function safeReset()
+        local success = pcall(function()
             if IsAlive(lplr) then
-                lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character.Humanoid.Health)
-                lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
-                notif("Autowin", "Resetting character...", 3)
+                -- Store current position for validation
+                local originalPosition = lplr.Character.HumanoidRootPart.Position
+                
+                -- Kill character
+                lplr.Character.Humanoid.Health = 0
+                notif("Autowin", "Resetting character for position sync...", 3)
+                
+                -- Wait for respawn
+                repeat task.wait() until IsAlive(lplr)
+                
+                -- Validate new position
+                local newPosition = lplr.Character.HumanoidRootPart.Position
+                if (newPosition - originalPosition).Magnitude < 10 then
+                    notif("Autowin", "Reset failed to move character!", 3)
+                    return false
+                end
+                
                 return true
             end
         end)
-        return false
-    end
-
-    local function handleCriticalFailure(reason)
-        failureCount += 1
-        notif("Autowin", ("Failure: %s (Attempt %d/%d)"):format(reason, failureCount, MAX_FAILURE_ATTEMPTS), 5)
-        
-        if failureCount >= MAX_FAILURE_ATTEMPTS then
-            notif("Autowin", "Critical failures detected, entering cooldown...", 5)
-            lastFailureTime = tick()
-            failureCount = 0
-            return true
-        end
-        
-        return resetCharacter()
+        return success
     end
 
     local function executeSafeBedTween(bed)
-        local success, bedtween = pcall(function()
+        -- Pre-tween reset for long distances
+        local currentDistance = GetMagnitudeOf2Objects(lplr.Character.HumanoidRootPart, bed)
+        if currentDistance > MIN_RESET_DISTANCE then
+            notif("Autowin", "Long distance detected ("..math.floor(currentDistance).."m), resetting...", 3)
+            if not safeReset() then
+                return false
+            end
+            task.wait(0.2)  -- Extra delay after respawn
+        end
+
+        -- Tween execution with enhanced validation
+        local tweenSuccess, bedtween = pcall(function()
             local tween = tweenService:Create(
-                lplr.Character:WaitForChild("HumanoidRootPart"),
+                lplr.Character.HumanoidRootPart,
                 TweenInfo.new(0.65, Enum.EasingStyle.Linear),
                 {CFrame = CFrame.new(bed.Position) + Vector3.new(4, 1, 6)}
             )
@@ -8688,7 +8682,12 @@ run(function()
             
             repeat task.wait() until not tween or tween.PlaybackState ~= Enum.PlaybackState.Playing
             
-            -- Position validation
+            -- Network position validation
+            if not isnetworkowner(lplr.Character.HumanoidRootPart) then
+                notif("Autowin", "Network ownership lost after tween!", 3)
+                return false
+            end
+            
             local finalDistance = GetMagnitudeOf2Objects(lplr.Character.HumanoidRootPart, bed)
             if finalDistance > 15 then
                 notif("Autowin", "Position desync detected (Δ "..math.floor(finalDistance).."m)", 3)
@@ -8698,7 +8697,7 @@ run(function()
             return true
         end)
         
-        return success and bedtween
+        return tweenSuccess and bedtween
     end
 
     local function attackSequence(target)
@@ -8706,6 +8705,17 @@ run(function()
         local maxAttempts = 3
         
         while attempts < maxAttempts and Autowin.Enabled and IsAlive(lplr) do
+            -- Pre-tween reset check
+            local currentDistance = GetMagnitudeOf2Objects(lplr.Character.HumanoidRootPart, target.RootPart)
+            if currentDistance > MIN_RESET_DISTANCE then
+                notif("Autowin", "Long combat distance ("..math.floor(currentDistance).."m), resetting...", 3)
+                if not safeReset() then
+                    return false
+                end
+                task.wait(0.2)  -- Extra delay after respawn
+            end
+
+            -- Tween execution
             local tweenSuccess = false
             local playertween
             
@@ -8724,21 +8734,27 @@ run(function()
                 tweenSuccess = true
             end)
             
-            if not tweenSuccess then
-                handleCriticalFailure("Player tween failed")
-                return false
-            end
-            
             -- Post-tween validation
-            task.wait(0.2)
-            local currentDistance = GetMagnitudeOf2Objects(lplr.Character.HumanoidRootPart, target.RootPart)
-            
-            if currentDistance < 15 then
-                return true
-            else
+            if tweenSuccess then
+                task.wait(0.2)
+                local finalDistance = GetMagnitudeOf2Objects(lplr.Character.HumanoidRootPart, target.RootPart)
+                local positionDelta = (lplr.Character.HumanoidRootPart.Position - lastKnownPosition).Magnitude
+                
+                if finalDistance > 15 or positionDelta < 1 then
+                    notif("Autowin", "Tween validation failed (Δ "..math.floor(finalDistance).."m)", 3)
+                    tweenSuccess = false
+                end
+            end
+
+            if not tweenSuccess then
                 attempts += 1
                 notif("Autowin", "Attack adjustment "..attempts.."/"..maxAttempts, 3)
+                handleCriticalFailure("Player tween failed")
+            else
+                return true
             end
+            
+            task.wait(0.5)
         end
         
         return false
@@ -8817,7 +8833,7 @@ run(function()
         end,
         Tooltip = "Advanced autowin system with comprehensive failure handling"
     })
-	Autowindelay = Autowin:CreateSlider({
+	local Autowindelay = Autowin:CreateSlider({
 		Name = "Delay",
 		Function = function(value)
 			delay = value
@@ -8828,7 +8844,7 @@ run(function()
 		Suffix = "s",
 		Tooltip = "Delay before Start Autowin"
 	})
-	AutowinUninject = Autowin:CreateToggle({
+	local AutowinUninject = Autowin:CreateToggle({
 		Name = "Auto Uninject",
 		Function = function(callback)
 			if callback then
@@ -8837,7 +8853,7 @@ run(function()
 		end,
 		Tooltip = "Uninjects katware after a match ends"
 	})
-	AutoLobby = Autowin:CreateToggle({
+	local AutoLobby = Autowin:CreateToggle({
 		Name = "Auto Lobby",
 		Function = function(callback)
 			if callback then
