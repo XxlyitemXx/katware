@@ -8810,6 +8810,101 @@ run(function()
         end
         return entity
     end
+
+    local function HandlePlayerAttack()
+        local maxAttempts = 3
+        local attemptCount = 0
+        local success = false
+        
+        while Autowin.Enabled and IsAlive(lplr) and attemptCount < maxAttempts do
+            local target = nil
+            local searchRanges = {25, 45, 80}  -- Progressive search ranges
+            
+            for _, range in ipairs(searchRanges) do
+                target = FindTarget(range, true)
+                if target and target.RootPart then
+                    notif("Autowin", "Target acquired at "..range.." studs", 3)
+                    break
+                end
+                task.wait(0.1)
+            end
+    
+            if not target or not target.RootPart then
+                notif("Autowin", "No targets in range, expanding search...", 3)
+                attemptCount = attemptCount + 1
+                task.wait(0.5)
+                continue
+            end
+    
+            -- Tween execution with dynamic timing
+            local startPos = lplr.Character.HumanoidRootPart.Position
+            local targetPos = target.RootPart.Position
+            local distance = (targetPos - startPos).Magnitude
+            local tweenTime = math.clamp(distance / 125, 0.4, 1.25)
+            
+            if playertween then
+                playertween:Cancel()
+            end
+            
+            playertween = tweenService:Create(
+                lplr.Character.HumanoidRootPart,
+                TweenInfo.new(tweenTime, Enum.EasingStyle.Linear),
+                {CFrame = CFrame.new(targetPos + Vector3.new(0, 1, 0))}
+            )
+            
+            local tweenFailed = false
+            playertween.Completed:Connect(function()
+                if not tweenFailed then
+                    success = true
+                    failedTweenAttempts = 0
+                end
+            end)
+    
+            playertween:Play()
+            
+            -- Improved timeout detection
+            local timeoutTime = tweenTime + 0.35
+            local startTime = tick()
+            
+            repeat
+                task.wait()
+                if (tick() - startTime) > timeoutTime then
+                    tweenFailed = true
+                    notif("Autowin", "Movement timeout, retrying...", 3)
+                    break
+                end
+            until success or not Autowin.Enabled
+    
+            if success then
+                -- Verify final position
+                local finalDistance = (lplr.Character.HumanoidRootPart.Position - targetPos).Magnitude
+                if finalDistance > 15 then
+                    notif("Autowin", "Partial movement ("..math.floor(finalDistance).." studs)", 3)
+                    success = false
+                else
+                    notif("Autowin", "Engaging target", 3)
+                    attemptCount = 0
+                    task.wait(0.25)  -- Allow time for attack
+                    return true  -- Successful engagement
+                end
+            end
+    
+            attemptCount = attemptCount + 1
+            failedTweenAttempts = failedTweenAttempts + 1
+            
+            -- Adaptive cooldown
+            task.wait(math.min(0.75, failedTweenAttempts * 0.15))
+        end
+        
+        if attemptCount >= maxAttempts then
+            notif("Autowin", "Failed to reach target, resetting...", 3)
+            lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character.Humanoid.Health)
+            lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+            repeat task.wait() until IsAlive(lplr)
+        end
+        
+        return false
+    end
 	
 	local function notif(...)
 		katware:CreateNotification(...)
@@ -8915,51 +9010,14 @@ run(function()
 							while Autowin.Enabled and IsAlive(lplr) do
                                 if (tick() - lastActionTime) >= 0.5 then
                                     local enemyBed = FindEnemyBed()
-                                    local target = nil
                                     
-                                    -- First try to find enemy bed
-                                    if enemyBed then
-                                        -- Existing bed destruction logic
-                                        if AutowinNotification.Enabled then
-                                            local bedname = enemyBed:GetAttribute("id") and string.split(enemyBed:GetAttribute("id"), "_")[1] or "unknown"
-                                            notif("Autowin", "Found "..bedname:lower().." team's bed", 3)
+                                    if not enemyBed then
+                                        local attackSuccess = HandlePlayerAttack()
+                                        if not attackSuccess then
+                                            -- Fallback to bed search
+                                            notif("Autowin", "Returning to bed search routine", 3)
+                                            task.wait(0.5)
                                         end
-                                        
-                                        bedtween = tweenService:Create(lplr.Character:WaitForChild("HumanoidRootPart"), TweenInfo.new(0.65), { CFrame = CFrame.new(enemyBed.Position) + Vector3.new(4, 1, 6) })
-                                        bedtween:Play()
-                                        
-                                    else
-                                        -- If no bed found, search for players with progressive range
-                                        local searchRanges = {45, 80}  -- Initial range then expanded range
-                                        for _, range in pairs(searchRanges) do
-                                            target = FindTarget(range, true)
-                                            if target and target.RootPart then
-                                                if AutowinNotification.Enabled then
-                                                    notif("Autowin", "Found target at "..range.." studs, engaging...", 3)
-                                                end
-                                                break
-                                            end
-                                        end
-                                        
-                                        if target and target.RootPart then
-                                            -- Existing player tween logic
-                                            playertween = tweenService:Create(lplr.Character:WaitForChild("HumanoidRootPart"), TweenInfo.new(0.65), { CFrame = target.RootPart.CFrame + Vector3.new(0, 1, 0) })
-                                            playertween:Play()
-                                            
-                                        else
-                                            -- If no targets found in any range
-                                            notif("Autowin", "No targets found, resetting...", 3)
-                                            lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character.Humanoid.Health)
-                                            lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
-                                            repeat task.wait() until IsAlive(lplr)
-                                            lastActionTime = tick()
-                                        end
-                                    end
-
-                                    -- If no targets found at all
-                                    if not enemyBed and not target then
-                                        notif("Autowin", "No objectives found, entering standby...", 3)
-                                        task.wait(1)
                                     end
                                 end
                                 task.wait(0.1)
