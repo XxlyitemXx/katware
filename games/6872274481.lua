@@ -8621,7 +8621,7 @@ end
 local function notif(...)
 	katware:CreateNotification(...)
 end
-run(function()
+--[[run(function()
 	task.wait(1)
     local Autowin = { Enabled = false }
     local AutowinNotification = { Enabled = true }
@@ -8903,7 +8903,7 @@ run(function()
             end
         end
     end))
-end)
+end)]]--
 
 run(function()
     BedTP = katware.Categories.Utility:CreateModule({
