@@ -8853,6 +8853,7 @@ run(function()
     local function notif(...)
         katware:CreateNotification(...)
     end
+<<<<<<< HEAD
 
     Autowin = katware.Categories.Blatant:CreateModule({
         Name = "Autowin",
@@ -8903,6 +8904,12 @@ run(function()
                                 local bedname = bed:GetAttribute("id") and string.split(bed:GetAttribute("id"), "_")[1] or "unknown"
                                 notif("Autowin", "Destroying " .. bedname:lower() .. " team's bed", 5)
                             end
+=======
+	
+	local function notif(...)
+		katware:CreateNotification(...)
+	end
+>>>>>>> parent of def951b (Update 6872274481.lua)
 
                             if bed and IsAlive(lplr) then
                                 local success = HandleBedTween(bed)
@@ -8939,6 +8946,7 @@ run(function()
                             while Autowin.Enabled and IsAlive(lplr) do
                                 if (tick() - lastActionTime) >= 0.5 then
                                     local enemyBed = FindEnemyBed()
+<<<<<<< HEAD
 
                                     if not enemyBed then
                                         local target = FindTarget(nil, true)
@@ -8949,7 +8957,53 @@ run(function()
                                                 task.wait(0.5)
                                                 continue
                                             end
+=======
+                                    local target = nil
+                                    
+                                    -- First try to find enemy bed
+                                    if enemyBed then
+                                        -- Existing bed destruction logic
+                                        if AutowinNotification.Enabled then
+                                            local bedname = enemyBed:GetAttribute("id") and string.split(enemyBed:GetAttribute("id"), "_")[1] or "unknown"
+                                            notif("Autowin", "Found "..bedname:lower().." team's bed", 3)
+>>>>>>> parent of def951b (Update 6872274481.lua)
                                         end
+                                        
+                                        bedtween = tweenService:Create(lplr.Character:WaitForChild("HumanoidRootPart"), TweenInfo.new(0.65), { CFrame = CFrame.new(enemyBed.Position) + Vector3.new(4, 1, 6) })
+                                        bedtween:Play()
+                                        
+                                    else
+                                        -- If no bed found, search for players with progressive range
+                                        local searchRanges = {45, 80}  -- Initial range then expanded range
+                                        for _, range in pairs(searchRanges) do
+                                            target = FindTarget(range, true)
+                                            if target and target.RootPart then
+                                                if AutowinNotification.Enabled then
+                                                    notif("Autowin", "Found target at "..range.." studs, engaging...", 3)
+                                                end
+                                                break
+                                            end
+                                        end
+                                        
+                                        if target and target.RootPart then
+                                            -- Existing player tween logic
+                                            playertween = tweenService:Create(lplr.Character:WaitForChild("HumanoidRootPart"), TweenInfo.new(0.65), { CFrame = target.RootPart.CFrame + Vector3.new(0, 1, 0) })
+                                            playertween:Play()
+                                            
+                                        else
+                                            -- If no targets found in any range
+                                            notif("Autowin", "No targets found, resetting...", 3)
+                                            lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character.Humanoid.Health)
+                                            lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+                                            repeat task.wait() until IsAlive(lplr)
+                                            lastActionTime = tick()
+                                        end
+                                    end
+
+                                    -- If no targets found at all
+                                    if not enemyBed and not target then
+                                        notif("Autowin", "No objectives found, entering standby...", 3)
+                                        task.wait(1)
                                     end
                                 end
                                 task.wait(0.1)
@@ -9141,7 +9195,6 @@ end)
             bedtween:Cancel()
             bedtween = nil
         end
-    end)
 end)
 local function getNearGround(range)
 	range = Vector3.new(3, 3, 3) * (range or 10)
