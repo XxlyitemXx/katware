@@ -8624,260 +8624,463 @@ end
 run(function()
     local Autowin = { Enabled = false }
     local AutowinNotification = { Enabled = true }
-    local delay = 0
-    local Autowindelay
-    local AutowinUninject = { Enabled = false }
-    local uninject = false
-    local AutoLobby = { Enabled = false }
-    local lobby = false
+	local Autolobby = { Enabled = false }
+    local bedtween
+    local playertween
     local lastActionTime = 0
     local failedTweenAttempts = 0
-    local maxDistanceThreshold = 75
-    local activeTweens = {}
-    local connections = {}
-
-    -- Configuration
-    local BED_APPROACH_OFFSET = Vector3.new(4, 1, 6)
-    local MAX_BED_ATTEMPTS = 5
-    local BED_SHIELD_CHECK_INTERVAL = 2
-    local COMBAT_TWEEN_TIMEOUT = 1.2
-    local STUCK_POSITION_THRESHOLD = 1
-
+    local waitTimeAfterFails = 3.6
+    local targetSearchRange = 5 -- Range to search for targets before resetting
+    local tweenTimeout = 1.6 -- Timeout for the tween to be considered as failed
+    local maxBedTweenDistance = 5 -- max distance from bed before assuming tween failed
+    local tweenAttemptDelay = 0.5 -- Delay after tween starts before failure checks
+    local lastKnownPosition = nil -- Store the last known position of the character
+    local positionCheckInterval = 0.2 -- Frequency of position checks
+	
     local function IsAlive(plr)
         plr = plr or lplr
         if not plr.Character then return false end
-        local humanoid = plr.Character:FindFirstChild("Humanoid")
-        return humanoid and humanoid.Health > 0.11
+        if not plr.Character:FindFirstChild("Head") then return false end
+        if not plr.Character:FindFirstChild("Humanoid") then return false end
+        if plr.Character:FindFirstChild("Humanoid").Health < 0.11 then return false end
+        return true
     end
 
-    local function GetNetworkOwnership()
-        if entitylib.isAlive then
-            local root = entitylib.character.RootPart
-            if not isnetworkowner(root) then
-                sethiddenproperty(root, "NetworkOwnershipRule", Enum.NetworkOwnership.Manual)
-                sethiddenproperty(root, "NetworkIsSleeping", false)
-                return isnetworkowner(root)
-            end
-            return true
+    local function GetMagnitudeOf2Objects(part, part2, bypass)
+        local magnitude, partcount = 0, 0
+        if not bypass then 
+            local suc, res = pcall(function() return part.Position end)
+            partcount = suc and partcount + 1 or partcount
+            suc, res = pcall(function() return part2.Position end)
+            partcount = suc and partcount + 1 or partcount
         end
-        return false
+        if partcount > 1 or bypass then 
+            magnitude = bypass and (part - part2).Magnitude or (part.Position - part2.Position).Magnitude
+        end
+        return magnitude
     end
 
-    local function CleanupConnections()
-        for _, connection in pairs(connections) do
-            connection:Disconnect()
+    local function GetTopBlock(position, smart, raycast, customvector)
+        position = position or IsAlive(lplr) and lplr.Character:WaitForChild("HumanoidRootPart").Position
+        if not position then 
+            return nil 
         end
-        table.clear(connections)
-        
-        for _, tween in pairs(activeTweens) do
-            pcall(function() tween:Cancel() end)
+        if raycast and not workspace:Raycast(position, Vector3.new(0, -2000, 0), RaycastParams.new()) then
+            return nil
         end
-        table.clear(activeTweens)
-    end
-
-    local function SafeTweenTo(targetCF, timeout)
-        if not GetNetworkOwnership() then 
-            notif("Autowin", "Network issue, resetting...", 3)
-            lplr.Character:BreakJoints()
-            repeat task.wait() until IsAlive(lplr)
-            return false
-        end
-        
-        local tween = tweenService:Create(
-            lplr.Character.HumanoidRootPart,
-            TweenInfo.new(math.clamp((targetCF.Position - lplr.Character.HumanoidRootPart.Position).Magnitude/100, 0.4, 1.2), Enum.EasingStyle.Linear),
-            {CFrame = targetCF}
-        )
-        
-        table.insert(activeTweens, tween)
-        
-        local success = false
-        tween.Completed:Connect(function()
-            success = true
-            failedTweenAttempts = 0
-        end)
-        
-        tween:Play()
-        local startTime = tick()
-        
-        while tick() - startTime < timeout do
-            if not success then
-                task.wait(0.1)
+        local lastblock = nil
+        for i = 1, 500 do 
+            local newray = workspace:Raycast(lastblock and lastblock.Position or position, customvector or Vector3.new(0.55, 999999, 0.55), RaycastParams.new())
+            local smartest = newray and smart and workspace:Raycast(lastblock and lastblock.Position or position, Vector3.new(0, 5.5, 0), RaycastParams.new()) or not smart
+            if newray and smartest then
+                lastblock = newray
             else
                 break
             end
         end
-        
-        if not success then
-            tween:Cancel()
-            notif("Autowin", "Movement timeout, retrying...", 3)
-            return false
-        end
-        return true
+        return lastblock
     end
 
-    local function SmartBedApproach(bed)
-        local baseCF = CFrame.new(bed.Position) + BED_APPROACH_OFFSET
-        local raycastParams = RaycastParams.new()
-        raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
-        raycastParams.FilterDescendantsInstances = {lplr.Character}
-        
-        for angle = 0, 360, 45 do
-            local testCF = baseCF * CFrame.Angles(0, math.rad(angle), 0) * CFrame.new(0, 0, 5)
-            local ray = workspace:Raycast(testCF.Position, Vector3.new(0, -10, 0), raycastParams)
-            if ray and ray.Instance then
-                return SafeTweenTo(CFrame.new(ray.Position + Vector3.new(0, 1.5, 0)), 1.5)
-            end
-        end
-        return SafeTweenTo(baseCF, 1.5)
-    end
-
-    local function FindOptimalTarget()
-        local targets = {}
-        for _, v in pairs(playersService:GetPlayers()) do
-            if v ~= lplr and IsAlive(v) and v.Team ~= lplr.Team then
-                local distance = GetMagnitudeOf2Objects(lplr.Character.HumanoidRootPart, v.Character.HumanoidRootPart)
-                if distance < 100 then
-                    table.insert(targets, {
-                        Player = v,
-                        Distance = distance,
-                        Health = v.Character.Humanoid.Health
-                    })
+    local function FindEnemyBed(maxdistance, highest)
+        local target = nil
+        local distance = maxdistance or math.huge
+        local whitelistuserteams = {}
+        local badbeds = {}
+        if not lplr:GetAttribute("Team") then return nil end
+        for i, v in pairs(playersService:GetPlayers()) do
+            if v ~= lplr then
+                if not select(2, whitelist:get(v)) then
+                    whitelistuserteams[v:GetAttribute("Team")] = true
                 end
             end
         end
-        
-        table.sort(targets, function(a, b)
-            if a.Health ~= b.Health then return a.Health < b.Health end
-            return a.Distance < b.Distance
-        end)
-        
-        return targets[1] and targets[1].Player or nil
+        for i, v in pairs(collectionService:GetTagged("bed")) do
+                local bedteamstring = string.split(v:GetAttribute("id"), "_")[1]
+                if whitelistuserteams[bedteamstring] ~= nil then
+                   badbeds[v] = true
+                end
+            end
+        for i, v in pairs(collectionService:GetTagged("bed")) do
+            if v:GetAttribute("id") and v:GetAttribute("id") ~= lplr:GetAttribute("Team").."_bed" and badbeds[v] == nil and lplr.Character and lplr.Character.PrimaryPart then
+                if v:GetAttribute("NoBreak") or v:GetAttribute("PlacedByUserId") and v:GetAttribute("PlacedByUserId") ~= 0 then continue end
+                local magdist = GetMagnitudeOf2Objects(lplr.Character.PrimaryPart, v)
+                if magdist < distance then
+                    target = v
+                    distance = magdist
+                end
+            end
+        end
+        local coveredblock = highest and target and GetTopBlock(target.Position, true)
+        if coveredblock then
+            target = coveredblock.Instance
+        end
+        return target
     end
 
-    local function EngageCombat()
-        while Autowin.Enabled and IsAlive(lplr) do
-            local target = FindOptimalTarget()
-            if target then
-                local targetPos = target.Character.HumanoidRootPart.CFrame + Vector3.new(0, 1, 0)
-                
-                if not SafeTweenTo(targetPos, COMBAT_TWEEN_TIMEOUT) then
-                    lplr.Character:BreakJoints()
-                    repeat task.wait() until IsAlive(lplr)
-                    task.wait(0.5)
+    local function FindTeamBed()
+        local bedstate, res = pcall(function()
+            return lplr:GetAttribute('HasBed')
+        end)
+        if bedstate and res then
+            return res
+        end
+        return nil
+    end
+
+    local function FindTarget(dist, blockRaycast, includemobs, healthmethod)
+        local sort, entity = healthmethod and math.huge or dist or math.huge, {}
+        local function abletocalculate() return lplr.Character and lplr.Character:FindFirstChild("HumanoidRootPart") end
+        local sortmethods = {Normal = function(entityroot, entityhealth) return abletocalculate() and GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), entityroot) < sort end, Health = function(entityroot, entityhealth) return abletocalculate() and entityhealth < sort end}
+        local sortmethod = healthmethod and "Health" or "Normal"
+        local function raycasted(entityroot) return abletocalculate() and blockRaycast and workspace:Raycast(entityroot.Position, Vector3.new(0, -2000, 0), RaycastParams.new()) or not blockRaycast end
+        for i,v in pairs(playersService:GetPlayers()) do
+            if v ~= lplr and abletocalculate() and IsAlive(v) and v.Team ~= lplr.Team then
+                if not select(2, whitelist:get(v)) then 
                     continue
                 end
-                
-                local lastValidPos = lplr.Character.HumanoidRootPart.Position
-                task.delay(0.5, function()
-                    if (lastValidPos - lplr.Character.HumanoidRootPart.Position).Magnitude < STUCK_POSITION_THRESHOLD then
-                        notif("Autowin", "Position stuck, resetting...", 3)
-                        lplr.Character:BreakJoints()
-                    end
-                end)
-            else
-                task.wait(0.5)
+                if sortmethods[sortmethod](v.Character.HumanoidRootPart, v.Character:GetAttribute("Health") or v.Character.Humanoid.Health) and (not blockRaycast or raycasted(v.Character.HumanoidRootPart)) then
+                    sort = healthmethod and (v.Character:GetAttribute("Health") or v.Character.Humanoid.Health) or GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), v.Character.HumanoidRootPart)
+                    entity.Player = v
+                    entity.Human = true 
+                    entity.RootPart = v.Character.HumanoidRootPart
+                    entity.Humanoid = v.Character.Humanoid
+                end
             end
         end
+        if includemobs then
+            local maxdistance = dist or math.huge
+            for i,v in pairs(store.blocks) do
+                if abletocalculate() and v.PrimaryPart and GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), v.PrimaryPart) < maxdistance then
+                entity.Player = {Character = v, Name = "PotEntity", DisplayName = "PotEntity", UserId = 1}
+                entity.Human = false
+                entity.RootPart = v.PrimaryPart
+                entity.Humanoid = {Health = 1, MaxHealth = 1}
+                end
+            end
+            for i,v in pairs(collectionService:GetTagged("DiamondGuardian")) do 
+                if v.PrimaryPart and v:FindFirstChild("Humanoid") and v.Humanoid.Health and abletocalculate() then
+                    if sortmethods[sortmethod](v.PrimaryPart, v.Humanoid.Health) and (not blockRaycast or raycasted(v.PrimaryPart)) then
+                    sort = healthmethod and v.Humanoid.Health or GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), v.PrimaryPart)
+                    entity.Player = {Character = v, Name = "DiamondGuardian", DisplayName = "DiamondGuardian", UserId = 1}
+                    entity.Human = false
+                    entity.RootPart = v.PrimaryPart
+                    entity.Humanoid = v.Humanoid
+                    end
+                end
+            end
+            for i,v in pairs(collectionService:GetTagged("GolemBoss")) do
+                if v.PrimaryPart and v:FindFirstChild("Humanoid") and v.Humanoid.Health and abletocalculate() then
+                    if sortmethods[sortmethod](v.PrimaryPart, v.Humanoid.Health) and (not blockRaycast or raycasted(v.PrimaryPart)) then
+                    sort = healthmethod and v.Humanoid.Health or GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), v.PrimaryPart)
+                    entity.Player = {Character = v, Name = "Titan", DisplayName = "Titan", UserId = 1}
+                    entity.Human = false
+                    entity.RootPart = v.PrimaryPart
+                    entity.Humanoid = v.Humanoid
+                    end
+                end
+            end
+            for i,v in pairs(collectionService:GetTagged("Drone")) do
+                local plr = playersService:GetPlayerByUserId(v:GetAttribute("PlayerUserId"))
+                if plr and plr ~= lplr and plr.Team and lplr.Team and plr.Team ~= lplr.Team and select(2, whitelist:get(plr)) and abletocalculate() and v.PrimaryPart and v:FindFirstChild("Humanoid") and v.Humanoid.Health then
+                    if sortmethods[sortmethod](v.PrimaryPart, v.Humanoid.Health) and (not blockRaycast or raycasted(v.PrimaryPart)) then
+                        sort = healthmethod and v.Humanoid.Health or GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), v.PrimaryPart)
+                        entity.Player = {Character = v, Name = "Drone", DisplayName = "Drone", UserId = 1}
+                        entity.Human = false
+                        entity.RootPart = v.PrimaryPart
+                        entity.Humanoid = v.Humanoid
+                    end
+                end
+            end
+            for i,v in pairs(collectionService:GetTagged("Monster")) do
+                if v:GetAttribute("Team") ~= lplr:GetAttribute("Team") and abletocalculate() and v.PrimaryPart and v:FindFirstChild("Humanoid") and v.Humanoid.Health then
+                    if sortmethods[sortmethod](v.PrimaryPart, v.Humanoid.Health) and (not blockRaycast or raycasted(v.PrimaryPart)) then
+                    sort = healthmethod and v.Humanoid.Health or GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), v.PrimaryPart)
+                    entity.Player = {Character = v, Name = "Monster", DisplayName = "Monster", UserId = 1}
+                    entity.Human = false
+                    entity.RootPart = v.PrimaryPart
+                    entity.Humanoid = v.Humanoid
+                    end
+                end
+            end
+        end
+        return entity
     end
+	
+	local function notif(...)
+		vape:CreateNotification(...)
+	end
+	
+	Autowin = vape.Categories.Blatant:CreateModule({
+		Name = "Autowin",
+		Function = function(callback)
+			if callback then
+				task.spawn(function()
+					task.wait(1)
+					if store.matchState == 0 then
+						repeat
+							task.wait()
+						until store.matchState ~= 0 or not Autowin.Enabled
+					end
+					if not vape.Loaded then
+						repeat
+							task.wait()
+						until vape.Loaded or not Autowin.Enabled
+					end
+					if not Autowin.Enabled then
+						return
+					end
+					if IsAlive(lplr) then
+						lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+						lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+					end
+					Autowin:Clean(runService.Heartbeat:Connect(function()
+						pcall(function()
+							local enemyBed = FindEnemyBed()
+							if not isnetworkowner(lplr.Character:WaitForChild("HumanoidRootPart")) and (enemyBed and GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), enemyBed) > 75 or not enemyBed) then
+								if IsAlive(lplr) and FindTeamBed() and Autowin.Enabled and (not store.matchState == 2) then
+									lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+									lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+								end
+							end
+						end)
+					end))
+					Autowin:Clean(lplr.CharacterAdded:Connect(function()
+						if not IsAlive(lplr) then repeat task.wait() until IsAlive(lplr) end
+						local bed = FindEnemyBed()
+						if bed and (bed:GetAttribute("BedShieldEndTime") and bed:GetAttribute("BedShieldEndTime") < workspace:GetServerTimeNow() or not bed:GetAttribute("BedShieldEndTime")) then
+							if AutowinNotification.Enabled then
+								local bedname = bed:GetAttribute("id") and string.split(bed:GetAttribute("id"), "_")[1] or "unknown"
+								notif("Autowin", "Destroying " .. bedname:lower() .. " team's bed", 5)
+							end
 
-    Autowin = katware.Categories.Blatant:CreateModule({
-        Name = "Autowin",
-        Function = function(callback)
-            if callback then
-                CleanupConnections()
-                task.wait(delay)
-                
-                katware:CreateNotification("Autowin", "Starting bed destruction phase", 5)
-                
-                -- Phase 1: Bed Destruction
-                local bedAttempts = 0
-                local bedDestroyed = false
-                
-                connections.bedLoop = runService.Heartbeat:Connect(function()
-                    if bedDestroyed or bedAttempts >= MAX_BED_ATTEMPTS then return end
-                    
-                    local bed = FindEnemyBed()
-                    if not bed then
-                        bedDestroyed = true
-                        katware:CreateNotification("Autowin", "No enemy bed found, starting combat", 5)
-                        return
-                    end
-                    
-                    if bed:GetAttribute("BedShieldEndTime") and bed:GetAttribute("BedShieldEndTime") > workspace:GetServerTimeNow() then
-                        notif("Autowin", "Bed shielded, waiting...", 3)
-                        task.wait(BED_SHIELD_CHECK_INTERVAL)
-                        return
-                    end
-                    
-                    if not SmartBedApproach(bed) then
-                        bedAttempts += 1
-                        notif("Autowin", string.format("Bed approach failed (%d/%d)", bedAttempts, MAX_BED_ATTEMPTS), 3)
-                        lplr.Character:BreakJoints()
-                        repeat task.wait() until IsAlive(lplr)
-                        task.wait(0.5)
-                        return
-                    end
-                    
-                    -- If we reach here, bed should be broken by other script
-                    task.wait(1) -- Allow time for bed destruction
-                    if not FindEnemyBed() then
-                        bedDestroyed = true
-                        katware:CreateNotification("Autowin", "Bed destroyed, starting combat", 5)
-                    end
-                end)
-                
-                -- Phase 2: Player Elimination
-                connections.combatLoop = runService.Heartbeat:Connect(function()
-                    if not bedDestroyed then return end
-                    EngageCombat()
-                end)
-                
-                -- Cleanup on death
-                connections.characterAdded = lplr.CharacterAdded:Connect(function()
-                    if not Autowin.Enabled then return end
-                    task.wait(1) -- Allow respawn time
-                    if bedDestroyed then
-                        EngageCombat()
-                    else
-                        bedAttempts = 0 -- Reset bed attempts on respawn
-                    end
-                end)
-            else
-                CleanupConnections()
-            end
-        end,
-        Tooltip = "The cutiest autowin script!"
-    })
+                            -- Set up the tween
+                            bedtween = tweenService:Create(lplr.Character:WaitForChild("HumanoidRootPart"), TweenInfo.new(0.65, Enum.EasingStyle.Linear, Enum.EasingDirection.In, 0, false, 0), { CFrame = CFrame.new(bed.Position) + Vector3.new(3, 5, 0) })
+                            task.wait(0.1)
+                            bedtween:Play()
 
-    -- UI Elements
-    Autowindelay = Autowin:CreateSlider({
-        Name = "Delay",
-        Function = function(value) delay = value end,
-        Min = 0, Max = 300, Default = 0, Suffix = "s"
-    })
-    
-    AutowinUninject = Autowin:CreateToggle({
-        Name = "Auto Uninject",
-        Function = function(callback) uninject = callback end
-    })
-    
-    AutoLobby = Autowin:CreateToggle({
-        Name = "Auto Lobby",
-        Function = function(callback) lobby = callback end
-    })
+                            -- Monitor the tween for failure
+                            task.delay(tweenTimeout, function()
+                                if bedtween and (bedtween.PlaybackState == Enum.PlaybackState.Playing or bedtween.PlaybackState == Enum.PlaybackState.Delayed) then
+                                    notif("Autowin", "Tween to bed timed out. Resetting.", 5)
+                                    lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+                                    lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+                                    bedtween:Cancel()
+                                end
+                            end)
 
-    Autowin:Clean(katwareEvents.MatchEndEvent.Event:Connect(function(winTable)
-        if Autowin.Enabled and (bedwars.Store:getState().Game.myTeam or {}).id == winTable.winningTeamId then
-            notif("Autowin", "Match completed!", 5)
-            if lobby then
-                game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer("/bedwars", "All")
-            end
-            if uninject then
-                katware:Uninject()
-            end
-        end
-    end))
+                            -- Wait for the tween to complete
+                            bedtween.Completed:Wait()
+
+                            -- Check distance after tweening to the bed
+                            local distanceToBed = GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), bed)
+                            if distanceToBed > 10 then
+                                notif("Autowin", "Failed to reach bed. Distance: " .. tostring(math.floor(distanceToBed)) .. " studs", 5)
+                                lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+                                lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+                                repeat
+                                    task.wait()
+                                until IsAlive(lplr)
+                                return -- Stop further execution for this character respawn
+                            end
+
+							
+							task.spawn(function()
+								task.wait(1.5)
+								local magnitude = GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), bed)
+								if magnitude >= 50 and FindTeamBed() and Autowin.Enabled then
+									lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+									lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+								end
+							end)
+							repeat task.wait() until FindEnemyBed() ~= bed or not IsAlive(lplr)
+
+							-- Reset character after bed is broken
+							if IsAlive(lplr) then
+								lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+								lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+							end
+							repeat
+								task.wait()
+							until IsAlive(lplr)
+
+							-- Wait for 3 seconds after breaking the bed
+							task.wait(3)
+
+							-- Update lastActionTime after respawning and waiting
+							lastActionTime = tick()
+							
+							-- Reset killaura if its not on
+							if not vape.Modules.Killaura.Enabled then
+								vape.Modules.Killaura:Toggle(true)
+							end
+							-- Reset breaker if its not on
+							if not vape.Modules.Breaker.Enabled then
+								vape.Modules.Breaker:Toggle(true)
+							end
+							-- Find and eliminate the closest enemy, waiting 2.7 seconds after the last action
+							while Autowin.Enabled and IsAlive(lplr) do
+                                if (tick() - lastActionTime) >= 2.7 then
+                                    local target = FindTarget(45, true)
+                                    if target and target.RootPart and IsAlive(lplr) then
+                                        if AutowinNotification.Enabled then
+                                            local team = bed:GetAttribute("id") and string.split(bed:GetAttribute("id"), "_")[1] or "unknown"
+                                            notif("Autowin", "Killing " .. team:lower() .. " team's teamates", 5)
+                                        end
+                                        repeat
+                                            target = FindTarget(25, true)
+                                            if not target or not target.RootPart or not IsAlive(lplr) then break end
+                                            -- Check if the target's team is "Neutral"
+                                            if target.Player.Team and target.Player.Team.Name == "Neutral" then
+                                                notif("Autowin", "Target is on Neutral team. Skipping.", 5)
+                                                task.wait(5)
+                                                break
+                                            end
+                                            local startPosition = lplr.Character.HumanoidRootPart.Position
+                                            playertween = tweenService:Create(lplr.Character:WaitForChild("HumanoidRootPart"), TweenInfo.new(0.65), { CFrame = target.RootPart.CFrame + Vector3.new(0, 4, 0) })
+                                            playertween:Play()
+
+                                            -- Monitor the tween for failure
+                                            task.delay(tweenTimeout, function()
+                                                if playertween and (playertween.PlaybackState == Enum.PlaybackState.Playing or playertween.PlaybackState == Enum.PlaybackState.Delayed) then
+                                                    notif("Autowin", "Tween to target timed out. Resetting.", 5)
+                                                    lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+                                                    lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+                                                    playertween:Cancel()
+                                                    repeat
+                                                        task.wait()
+                                                    until IsAlive(lplr)
+                                                    lastActionTime = tick()
+                                                end
+                                            end)
+
+                                            -- Wait for the tween to complete or timeout after 2 seconds
+                                            local tweenStartTime = tick()
+                                            repeat
+                                                task.wait()
+                                            until not playertween or playertween.Completed or (tick() - tweenStartTime) >= tweenTimeout
+
+                                            -- Check if the tween was successful
+                                            if playertween and playertween.PlaybackState == Enum.PlaybackState.Completed then
+                                                -- Check if the target is still alive after the tween
+                                                if not IsAlive(target.Player) then
+                                                    notif("Autowin", "Target is dead.", 5)
+                                                    lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+                                                    lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+                                                    repeat
+                                                        task.wait()
+                                                    until IsAlive(lplr)
+                                                    lastActionTime = tick()  -- Reset the timer after respawn
+                                                    failedTweenAttempts = 0  -- Reset failed attempts after successful kill
+                                                    break  -- Exit the inner repeat loop
+                                                else
+                                                    -- Check the distance to the target after tween (only if it didn't fail)
+                                                    local distance = GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), target.RootPart)
+                                                    if distance > 10 then
+                                                        notif("Autowin", "Failed to reach target. Distance: " .. tostring(math.floor(distance)) .. " studs", 5)
+                                                        lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+                                                        lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+                                                        repeat
+                                                            task.wait()
+                                                        until IsAlive(lplr)
+                                                        lastActionTime = tick()
+                                                        break
+                                                    else
+                                                        -- Reset failed attempts if the player is close enough to the target
+                                                        failedTweenAttempts = 0
+                                                    end
+                                                end
+                                            else
+                                                -- Handle tween failure (timeout)
+                                                notif("Autowin", "Tween to target timed out. Retrying.", 5)
+                                                lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+                                                lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+                                                repeat
+                                                    task.wait()
+                                                until IsAlive(lplr)
+                                                lastActionTime = tick()  -- Reset the timer after respawn
+                                            end
+                                        until not (FindTarget(30, true) and FindTarget(30, true).RootPart) or not Autowin.Enabled or not IsAlive(lplr)
+
+										-- Update lastActionTime after killing an enemy
+										lastActionTime = tick()
+									else
+										-- Reset if no target is found within an extended range
+										local targetInRange = FindTarget(targetSearchRange, true)
+										if not targetInRange or not targetInRange.RootPart then
+											notif("Autowin", "No targets found within " .. targetSearchRange .. " studs. Resetting character.", 5)
+											lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+											lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+											repeat
+												task.wait()
+											until IsAlive(lplr)
+											lastActionTime = tick() -- Reset the timer after respawn
+										else
+											-- Wait for a short period before checking again
+											task.wait(0.5)
+										end
+									end
+								else
+									task.wait(0.5) -- wait to prevent lag
+								end
+							end
+
+							if IsAlive(lplr) and FindTeamBed() and Autowin.Enabled then
+								lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+								lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+							end
+						elseif FindTarget(nil, true) and FindTarget(nil, true).RootPart then
+							task.wait()
+							local target = FindTarget(nil, true)
+							playertween = tweenService:Create(lplr.Character:WaitForChild("HumanoidRootPart"), TweenInfo.new(0.65, Enum.EasingStyle.Linear), { CFrame = target.RootPart.CFrame + Vector3.new(0, 3, 1) })
+							playertween:Play()
+							if AutowinNotification.Enabled then
+								notif("Autowin", "Killing " .. target.Player.DisplayName .. " (" .. (target.Player.Team and target.Player.Team.Name or "neutral") .. " Team)", 5)
+							end
+							playertween.Completed:Wait()
+							if not Autowin.Enabled then return end
+							if FindTarget(200, true) and FindTarget(200, true).RootPart and IsAlive(lplr) then
+								repeat
+									target = FindTarget(200, true)
+									if not target or not target.RootPart or not IsAlive(lplr) then break end
+									playertween = tweenService:Create(lplr.Character:WaitForChild("HumanoidRootPart"), TweenInfo.new(0.65), { CFrame = target.RootPart.CFrame + Vector3.new(0, 3, 1) })
+									playertween:Play()
+									task.wait()
+								until not (FindTarget(200, true) and FindTarget(200, true).RootPart) or (not Autowin.Enabled) or (not IsAlive(lplr))
+							end
+
+							if IsAlive(lplr) and FindTeamBed() and Autowin.Enabled then
+								lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+								lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+							end
+						else
+							if store.matchState == 2 then return end
+							lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+							lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+						end
+					end))
+					
+					Autowin:Clean(lplr.CharacterAdded:Connect(function()
+						if (not IsAlive(lplr)) then repeat task.wait() until IsAlive(lplr) end
+						if (not store.matchState == 2) then return end
+					end))
+				end)
+			else
+				pcall(function() if playertween then playertween:Cancel() end end)
+				pcall(function() if bedtween then bedtween:Cancel() end end)
+			end
+		end,
+		Tooltip = "uhh Best autowin only @katware"
+	})
+
+	Autowin:Clean(vapeEvents.MatchEndEvent.Event:Connect(function(winTable)
+		if Autowin.Enabled then
+			if (bedwars.Store:getState().Game.myTeam or {}).id == winTable.winningTeamId or lplr.Neutral then
+				notif("Autowin", "Match ended!.", 5)
+				loadfile('newvape/games/lobby.lua')()
+				vape:Uninject()
+			end
+		end
+	end))
 end)
 
 run(function()
