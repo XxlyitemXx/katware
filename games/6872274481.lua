@@ -8848,6 +8848,7 @@ run(function()
             end
         end
         return entity
+<<<<<<< HEAD
     end)
 
     local function notif(...)
@@ -8905,6 +8906,9 @@ run(function()
                                 notif("Autowin", "Destroying " .. bedname:lower() .. " team's bed", 5)
                             end
 =======
+=======
+    end
+>>>>>>> parent of def951b (Update 6872274481.lua)
 	
 	local function notif(...)
 		katware:CreateNotification(...)
@@ -8947,6 +8951,7 @@ run(function()
                                 if (tick() - lastActionTime) >= 0.5 then
                                     local enemyBed = FindEnemyBed()
 <<<<<<< HEAD
+<<<<<<< HEAD
 
                                     if not enemyBed then
                                         local target = FindTarget(nil, true)
@@ -8958,6 +8963,8 @@ run(function()
                                                 continue
                                             end
 =======
+=======
+>>>>>>> parent of def951b (Update 6872274481.lua)
                                     local target = nil
                                     
                                     -- First try to find enemy bed
@@ -8966,6 +8973,9 @@ run(function()
                                         if AutowinNotification.Enabled then
                                             local bedname = enemyBed:GetAttribute("id") and string.split(enemyBed:GetAttribute("id"), "_")[1] or "unknown"
                                             notif("Autowin", "Found "..bedname:lower().." team's bed", 3)
+<<<<<<< HEAD
+>>>>>>> parent of def951b (Update 6872274481.lua)
+=======
 >>>>>>> parent of def951b (Update 6872274481.lua)
                                         end
                                         
@@ -9041,6 +9051,7 @@ run(function()
                                 until not (FindTarget(50, true) and FindTarget(50, true).RootPart) or (not Autowin.Enabled) or (not IsAlive(lplr))
                             end
 
+<<<<<<< Updated upstream
                             if IsAlive(lplr) and FindTeamBed() and Autowin.Enabled then
                                 lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
                                 lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
@@ -9057,6 +9068,63 @@ run(function()
                         if (not store.matchState == 2) then return end
                     end))
                 end)
+=======
+					game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(unpack(args))
+				end
+				if uninject == true then
+					katware:Uninject()
+				end
+			end
+		end
+	end))
+end)
+
+
+run(function()
+    local BedTP = {}
+    local TweenSpeed = 0.65  -- Match autowin speed
+    local HeightOffset = 4
+    local tweenTimeout = 2  -- Timeout for tween attempts
+    local maxDistance = 10  -- Maximum allowed distance after tween
+    local bedtween
+	local function IsAlive(plr)
+        plr = plr or lplr
+        if not plr.Character then return false end
+        if not plr.Character:FindFirstChild("Head") then return false end
+        if not plr.Character:FindFirstChild("Humanoid") then return false end
+        if plr.Character:FindFirstChild("Humanoid").Health < 0.11 then return false end
+        return true
+    end
+
+    local function GetMagnitudeOf2Objects(part, part2, bypass)
+        local magnitude, partcount = 0, 0
+        if not bypass then 
+            local suc, res = pcall(function() return part.Position end)
+            partcount = suc and partcount + 1 or partcount
+            suc, res = pcall(function() return part2.Position end)
+            partcount = suc and partcount + 1 or partcount
+        end
+        if partcount > 1 or bypass then 
+            magnitude = bypass and (part - part2).Magnitude or (part.Position - part2.Position).Magnitude
+        end
+        return magnitude
+    end
+
+    local function GetTopBlock(position, smart, raycast, customvector)
+        position = position or IsAlive(lplr) and lplr.Character:WaitForChild("HumanoidRootPart").Position
+        if not position then 
+            return nil 
+        end
+        if raycast and not workspace:Raycast(position, Vector3.new(0, -2000, 0), RaycastParams.new()) then
+            return nil
+        end
+        local lastblock = nil
+        for i = 1, 500 do 
+            local newray = workspace:Raycast(lastblock and lastblock.Position or position, customvector or Vector3.new(0.55, 999999, 0.55), RaycastParams.new())
+            local smartest = newray and smart and workspace:Raycast(lastblock and lastblock.Position or position, Vector3.new(0, 5.5, 0), RaycastParams.new()) or not smart
+            if newray and smartest then
+                lastblock = newray
+>>>>>>> Stashed changes
             else
                 pcall(function() if playertween then playertween:Cancel() end end)
                 pcall(function() if bedtween then bedtween:Cancel() end end)
@@ -9195,6 +9263,7 @@ end)
             bedtween:Cancel()
             bedtween = nil
         end
+    end)
 end)
 local function getNearGround(range)
 	range = Vector3.new(3, 3, 3) * (range or 10)
