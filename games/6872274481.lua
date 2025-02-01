@@ -9195,6 +9195,7 @@ end)
             bedtween:Cancel()
             bedtween = nil
         end
+    end)
 end)
 local function getNearGround(range)
 	range = Vector3.new(3, 3, 3) * (range or 10)
