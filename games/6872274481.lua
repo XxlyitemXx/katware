@@ -8636,7 +8636,7 @@ run(function()
     local failedTweenAttempts = 0
     local waitTimeAfterFails = 1.5
     local targetSearchRange = 30
-    local tweenTimeout = 1.4
+    local tweenTimeout = 0.8
     local maxBedTweenDistance = 20
     local tweenAttemptDelay = 0.5
     local lastKnownPosition = nil
