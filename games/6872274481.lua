@@ -8807,10 +8807,10 @@ run(function()
     end
 	
 	local function notif(...)
-		vape:CreateNotification(...)
+		katware:CreateNotification(...)
 	end
 	
-	Autowin = vape.Categories.Blatant:CreateModule({
+	Autowin = katware.Categories.Blatant:CreateModule({
 		Name = "Autowin",
 		Function = function(callback)
 			if callback then
@@ -8821,10 +8821,10 @@ run(function()
 							task.wait()
 						until store.matchState ~= 0 or not Autowin.Enabled
 					end
-					if not vape.Loaded then
+					if not katware.Loaded then
 						repeat
 							task.wait()
-						until vape.Loaded or not Autowin.Enabled
+						until katware.Loaded or not Autowin.Enabled
 					end
 					if not Autowin.Enabled then
 						return
@@ -8910,12 +8910,12 @@ run(function()
 							lastActionTime = tick()
 							
 							-- Reset killaura if its not on
-							if not vape.Modules.Killaura.Enabled then
-								vape.Modules.Killaura:Toggle(true)
+							if not katware.Modules.Killaura.Enabled then
+								katware.Modules.Killaura:Toggle(true)
 							end
 							-- Reset breaker if its not on
-							if not vape.Modules.Breaker.Enabled then
-								vape.Modules.Breaker:Toggle(true)
+							if not katware.Modules.Breaker.Enabled then
+								katware.Modules.Breaker:Toggle(true)
 							end
 							-- Find and eliminate the closest enemy, waiting 2.7 seconds after the last action
 							while Autowin.Enabled and IsAlive(lplr) do
@@ -9072,12 +9072,12 @@ run(function()
 		Tooltip = "uhh Best autowin only @katware"
 	})
 
-	Autowin:Clean(vapeEvents.MatchEndEvent.Event:Connect(function(winTable)
+	Autowin:Clean(katwareEvents.MatchEndEvent.Event:Connect(function(winTable)
 		if Autowin.Enabled then
 			if (bedwars.Store:getState().Game.myTeam or {}).id == winTable.winningTeamId or lplr.Neutral then
 				notif("Autowin", "Match ended!.", 5)
-				loadfile('newvape/games/lobby.lua')()
-				vape:Uninject()
+				loadfile('newkatware/games/lobby.lua')()
+				katware:Uninject()
 			end
 		end
 	end))
