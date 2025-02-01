@@ -1,6 +1,7 @@
 
 
 print('Starting script...')
+task.wait(4)
 local run = function(func)
 	func()
 end
