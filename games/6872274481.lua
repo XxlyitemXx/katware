@@ -8635,13 +8635,13 @@ run(function()
     local playertween
     local lastActionTime = 0
     local failedTweenAttempts = 0
-    local waitTimeAfterFails = 1.5
+    local waitTimeAfterFails = 0.5 -- Reduced from 1.5
     local targetSearchRange = 30
-    local tweenTimeout = 2
+    local tweenTimeout = 0.8 -- Reduced from 1
     local maxBedTweenDistance = 20
-    local tweenAttemptDelay = 0.5
+    local tweenAttemptDelay = 0.2 -- Reduced from 0.5
     local lastKnownPosition = nil
-    local positionCheckInterval = 0.2
+    local positionCheckInterval = 0.1 -- Reduced from 0.2
 	
     local function IsAlive(plr)
         plr = plr or lplr
@@ -8904,12 +8904,12 @@ run(function()
 								task.wait()
 							until IsAlive(lplr)
 
-							task.wait(1.5)
+							task.wait(0.5) -- Reduced from 1.5
 
 							lastActionTime = tick()
 							
 							while Autowin.Enabled and IsAlive(lplr) do
-                                if (tick() - lastActionTime) >= 1.5 then
+                                if (tick() - lastActionTime) >= 0.5 then -- Reduced from 1.5
                                     local target = FindTarget(45, true)
                                     if target and target.RootPart and IsAlive(lplr) then
                                         if AutowinNotification.Enabled then
@@ -8921,7 +8921,7 @@ run(function()
                                             if not target or not target.RootPart or not IsAlive(lplr) then break end
                                             if target.Player.Team and target.Player.Team.Name == "Spectators" then
                                                 notif("Autowin", "Target is on Neutral team. Skipping.", 5)
-                                                task.wait(5)
+                                                task.wait(0.5) -- Reduced from 5
                                                 break
                                             end
                                             local startPosition = lplr.Character.HumanoidRootPart.Position
@@ -8947,7 +8947,7 @@ run(function()
                                             until not playertween or playertween.Completed or (tick() - tweenStartTime) >= tweenTimeout
 
                                             if playertween and playertween.PlaybackState == Enum.PlaybackState.Completed then
-												task.wait(0.5)
+												task.wait(0.2) -- Reduced from 0.5
                                                 if not IsAlive(target.Player) then
                                                     notif("Autowin", "Target is dead.", 5)
                                                     lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
