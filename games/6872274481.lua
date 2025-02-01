@@ -8537,11 +8537,12 @@ run(function()
 			end
 		for i, v in pairs(collectionService:GetTagged("bed")) do
 			if v:GetAttribute("id") and v:GetAttribute("id") ~= lplr:GetAttribute("Team").."_bed" and badbeds[v] == nil and lplr.Character and lplr.Character.PrimaryPart then
-				if v:GetAttribute("NoBreak") or v:GetAttribute("PlacedByUserId") and v:GetAttribute("PlacedByUserId") ~= 0 then continue end
-				local magdist = GetMagnitudeOf2Objects(lplr.Character.PrimaryPart, v)
-				if magdist < distance then
-					target = v
-					distance = magdist
+				if not (v:GetAttribute("NoBreak") or v:GetAttribute("PlacedByUserId") and v:GetAttribute("PlacedByUserId") ~= 0) then
+					local magdist = GetMagnitudeOf2Objects(lplr.Character.PrimaryPart, v)
+					if magdist < distance then
+						target = v
+						distance = magdist
+					end
 				end
 			end
 		end
@@ -8570,15 +8571,14 @@ run(function()
 		local function raycasted(entityroot) return abletocalculate() and blockRaycast and workspace:Raycast(entityroot.Position, Vector3.new(0, -2000, 0), RaycastParams.new()) or not blockRaycast end
 		for i,v in pairs(playersService:GetPlayers()) do
 			if v ~= lplr and abletocalculate() and IsAlive(v) and v.Team ~= lplr.Team then
-				if not select(2, whitelist:get(v)) then 
-					continue
-				end
-				if sortmethods[sortmethod](v.Character.HumanoidRootPart, v.Character:GetAttribute("Health") or v.Character.Humanoid.Health) and (not blockRaycast or raycasted(v.Character.HumanoidRootPart)) then
-					sort = healthmethod and (v.Character:GetAttribute("Health") or v.Character.Humanoid.Health) or GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), v.Character.HumanoidRootPart)
-					entity.Player = v
-					entity.Human = true 
-					entity.RootPart = v.Character.HumanoidRootPart
-					entity.Humanoid = v.Character.Humanoid
+				if select(2, whitelist:get(v)) then 
+					if sortmethods[sortmethod](v.Character.HumanoidRootPart, v.Character:GetAttribute("Health") or v.Character.Humanoid.Health) and (not blockRaycast or raycasted(v.Character.HumanoidRootPart)) then
+						sort = healthmethod and (v.Character:GetAttribute("Health") or v.Character.Humanoid.Health) or GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), v.Character.HumanoidRootPart)
+						entity.Player = v
+						entity.Human = true 
+						entity.RootPart = v.Character.HumanoidRootPart
+						entity.Humanoid = v.Character.Humanoid
+					end
 				end
 			end
 		end
@@ -8804,42 +8804,42 @@ run(function()
                 local function mainLoop()
                     repeat
                         task.wait()
-                        if not IsAlive(lplr) then continue end
-
-                        -- Find valid target bed
-                        local enemyBed = FindEnemyBed()
-                        if enemyBed then
-                            if handleBedInteraction(enemyBed) then
-                                -- Bed destruction logic
-                                repeat
-                                    task.wait()
-                                until not enemyBed or not enemyBed.Parent
+                        if IsAlive(lplr) then
+                            -- Find valid target bed
+                            local enemyBed = FindEnemyBed()
+                            if enemyBed then
+                                if handleBedInteraction(enemyBed) then
+                                    -- Bed destruction logic
+                                    repeat
+                                        task.wait()
+                                    until not enemyBed or not enemyBed.Parent
+                                end
+                            else
+                                -- Find and attack players
+                                local target = FindTarget(50, true)
+                                if target and target.RootPart then
+                                    -- Player attack logic
+                                    local tweenTime = math.clamp(
+                                        (target.RootPart.Position - lplr.Character.HumanoidRootPart.Position).Magnitude / 100,
+                                        0.4, 1.0
+                                    )
+                                    
+                                    playertween = tweenService:Create(
+                                        lplr.Character.HumanoidRootPart,
+                                        TweenInfo.new(tweenTime, Enum.EasingStyle.Linear),
+                                        {CFrame = target.RootPart.CFrame + Vector3.new(0, 1, 0)}
+                                    )
+                                    
+                                    playertween:Play()
+                                end
                             end
-                        else
-                            -- Find and attack players
-                            local target = FindTarget(50, true)
-                            if target and target.RootPart then
-                                -- Player attack logic
-                                local tweenTime = math.clamp(
-                                    (target.RootPart.Position - lplr.Character.HumanoidRootPart.Position).Magnitude / 100,
-                                    0.4, 1.0
-                                )
-                                
-                                playertween = tweenService:Create(
-                                    lplr.Character.HumanoidRootPart,
-                                    TweenInfo.new(tweenTime, Enum.EasingStyle.Linear),
-                                    {CFrame = target.RootPart.CFrame + Vector3.new(0, 1, 0)}
-                                )
-                                
-                                playertween:Play()
-                            end
-                        end
 
-                        attemptCount += 1
-                        if attemptCount >= MAX_ATTEMPTS then
-                            notif("Autowin", "Max attempts reached, resetting...", 5)
-                            lplr.Character.Humanoid:TakeDamage(lplr.Character.Humanoid.Health)
-                            attemptCount = 0
+                            attemptCount += 1
+                            if attemptCount >= MAX_ATTEMPTS then
+                                notif("Autowin", "Max attempts reached, resetting...", 5)
+                                lplr.Character.Humanoid:TakeDamage(lplr.Character.Humanoid.Health)
+                                attemptCount = 0
+                            end
                         end
                     until not Autowin.Enabled or safeExit
                 end
