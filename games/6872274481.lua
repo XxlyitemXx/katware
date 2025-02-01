@@ -8450,7 +8450,6 @@ run(function()
     })
 end)
 
-end
 run(function()
 	task.wait(1)
     local Autowin = { Enabled = false }
