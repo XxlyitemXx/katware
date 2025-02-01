@@ -8622,6 +8622,7 @@ local function notif(...)
 	katware:CreateNotification(...)
 end
 run(function()
+	task.wait(1)
     local Autowin = { Enabled = false }
     local AutowinNotification = { Enabled = true }
 	local delay = 0
