@@ -8834,6 +8834,12 @@ run(function()
 							task.wait()
 						until katware.Loaded or not Autowin.Enabled
 					end
+					
+					-- Wait until player is not on spectator team
+					repeat
+						task.wait()
+					until lplr.Team and lplr.Team.Name ~= "Spectators" or not Autowin.Enabled
+					
 					if not Autowin.Enabled then
 						return
 					end
