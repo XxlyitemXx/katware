@@ -8848,7 +8848,7 @@ run(function()
             end
         end
         return entity
-    end
+    end)
 
     local function notif(...)
         katware:CreateNotification(...)
