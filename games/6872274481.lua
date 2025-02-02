@@ -8450,7 +8450,7 @@ run(function()
     })
 end)
 
---[[run(function()
+run(function()
 	task.wait(1)
     local Autowin = { Enabled = false }
     local AutowinNotification = { Enabled = true }
@@ -8903,7 +8903,7 @@ end)
             end
         end
     end))
-end)]]--
+end)
 
 run(function()
     BedTP = katware.Categories.Utility:CreateModule({
@@ -9008,7 +9008,7 @@ local function getNearGround(range)
 	table.clear(blocks)
 	return closest
 end
---[[
+
 run(function()
 	local AutoPearl
 	local projectileRemote = {InvokeServer = function() end}
@@ -9148,7 +9148,7 @@ run(function()
 		Suffix = 's'
 	})
 end)
-
+--[[
 run(function()
     local Nuker
     local Range = {Value = 30}
