@@ -8461,7 +8461,7 @@ run(function()
     local failedTweenAttempts = 0
     local waitTimeAfterFails = 5 
     local targetSearchRange = 20
-    local tweenTimeout = 2.9
+    local tweenTimeout = 4
     local maxBedTweenDistance = 25
     local tweenAttemptDelay = 0.5
     local lastKnownPosition = nil
@@ -8646,6 +8646,7 @@ run(function()
 			if callback then
 				task.spawn(function()
 					notif("Autowin", "If ya got stuck or standing still just reset character", 10)
+					notif("Autowin", "If ya got desynced just reset character", 10)
 					if store.matchState == 0 then
 						repeat
 							task.wait()
