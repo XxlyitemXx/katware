@@ -8470,7 +8470,10 @@ run(function()
     local tweenAttemptDelay = 0.2
     local lastKnownPosition = nil
     local positionCheckInterval = 0.1
-
+	
+	local function notif(...)
+		katware:CreateNotification(...)
+	end
     local function IsAlive(plr)
         plr = plr or lplr
         if not plr.Character then return false end
