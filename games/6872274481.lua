@@ -8554,7 +8554,7 @@ run(function()
     local failedTweenAttempts = 0
     local waitTimeAfterFails = 5 
     local targetSearchRange = 20
-    local maxSearchRange = 120
+    local maxSearchRange = 75
     local searchIncrement = 20
     local maxFailedAttempts = 3
     local tweenTimeout = 4
@@ -8739,26 +8739,29 @@ run(function()
     end
 
 	local function handleTargetSearch()
-		local target = FindTarget(targetSearchRange, true)
-		if target and target.RootPart and IsAlive(lplr) then
-			targetSearchRange = 50
-			failedTweenAttempts = 0
-			return target
-		else
-			if targetSearchRange < maxSearchRange then
-				targetSearchRange = math.min(targetSearchRange + searchIncrement, maxSearchRange)
-				notif("Autowin", "Expanding search range to " .. targetSearchRange .. " studs", 3)
-			end
-			
-			failedTweenAttempts += 1
-			if failedTweenAttempts >= maxFailedAttempts then
-				notif("Autowin", "Search failed - resetting position", 3)
-				lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
-				lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
-				handleDesync()
-			end
-		end
-	end
+    local target = FindTarget(targetSearchRange, true)
+    if target and target.RootPart and IsAlive(lplr) then
+        targetSearchRange = 50
+        failedTweenAttempts = 0
+        return target
+    else
+        -- Expand search range gradually
+        if targetSearchRange < maxSearchRange then
+            targetSearchRange = math.min(targetSearchRange + searchIncrement, maxSearchRange)
+            notif("Autowin", "Expanding search range to " .. targetSearchRange .. " studs", 3)
+        else
+            -- Reset if no targets found at max range
+            notif("Autowin", "No targets found - resetting position", 3)
+            if IsAlive(lplr) then
+                lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+                lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+            end
+            targetSearchRange = 20 -- Reset search range
+            return nil
+        end
+    end
+end
+
 
     local function handleDesync()
 		if not isTweening and not isnetworkowner(lplr.Character.HumanoidRootPart) then
@@ -8928,22 +8931,23 @@ run(function()
                                         continue
                                     end
                                     
-                                    local target = handleTargetSearch()
-                                    if target then
-                                        if AutowinNotification.Enabled then
-                                            local team = bed:GetAttribute("id") and string.split(bed:GetAttribute("id"), "_")[1] or "unknown"
-                                            notif("Autowin", "Killing " .. team:lower() .. " team's teamates", 5)
-                                        end
-                                        
-                                        if not tweenToTarget(target) then
-                                            continue
-                                        end
-                                        
-                                        lastActionTime = tick()
-                                    end
-                                end
-                                task.wait(0.1)
-                            end
+                                    if not FindEnemyBed() then
+									local target = handleTargetSearch()
+									if target then
+										if AutowinNotification.Enabled then
+											notif("Autowin", "Found target: " .. target.Player.DisplayName, 3)
+										end
+										
+										if not tweenToTarget(target) then
+											continue
+										end
+										
+										lastActionTime = tick()
+									end
+								end
+								
+								task.wait(0.1)
+							end
 
                             if IsAlive(lplr) and FindTeamBed() and Autowin.Enabled then
                                 lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
