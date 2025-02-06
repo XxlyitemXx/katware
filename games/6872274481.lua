@@ -442,7 +442,6 @@ run(function()
 						entitylib.refreshEntity(v.Character, v.Player)
 					end
 				end
-
 				if plr == lplr then
 					entitylib.start()
 				else
@@ -753,7 +752,7 @@ run(function()
 						attackTable.validate.raycast = attackTable.validate.raycast or {}
 						attackTable.validate.selfPosition.value += CFrame.lookAt(selfpos, targetpos).LookVector * math.max((selfpos - targetpos).Magnitude - 14.399, 0)
 					end
-					
+
 					return call:SendToServer(attackTable, ...)
 				end
 			}
@@ -8639,8 +8638,6 @@ run(function()
         Function = function(callback)
             if callback then
                 task.spawn(function()
-                    notif("Autowin", "If ya got stuck or standing still just reset character", 10)
-                    notif("Autowin", "If ya got desynced just reset character", 10)
                     if store.matchState == 0 then
                         repeat
                             task.wait()
