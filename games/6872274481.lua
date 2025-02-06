@@ -8464,7 +8464,7 @@ run(function()
     local searchIncrement = 20
     local maxFailedAttempts = 3
     local tweenTimeout = 4
-    local maxBedTweenDistance = 25
+    local maxBedTweenDistance = 30
     local tweenAttemptDelay = 0.5
     local lastKnownPosition = nil
     local positionCheckInterval = 0.2
@@ -8686,7 +8686,7 @@ run(function()
                                 notif("Autowin", "Destroying " .. bedname:lower() .. " team's bed", 5)
                             end
 
-                            bedtween = tweenService:Create(lplr.Character:WaitForChild("HumanoidRootPart"), TweenInfo.new(0.65, Enum.EasingStyle.Linear, Enum.EasingDirection.In, 0, false, 0), { CFrame = CFrame.new(bed.Position) + Vector3.new(0, 4, 0) })
+                            bedtween = tweenService:Create(lplr.Character:WaitForChild("HumanoidRootPart"), TweenInfo.new(0.65, Enum.EasingStyle.Linear, Enum.EasingDirection.In, 0, false, 0), { CFrame = CFrame.new(bed.Position) + Vector3.new(0, 10, 0) })
                             task.wait(0.1)
                             bedtween:Play()
 
@@ -9141,12 +9141,7 @@ run(function()
                 repeat task.wait() until IsAlive(lplr)
                 task.wait(0.1)
 
-                bedtween = tweenService:Create(
-                    lplr.Character:WaitForChild("HumanoidRootPart"), 
-                    TweenInfo.new(TweenSpeed, Enum.EasingStyle.Linear), 
-                    { CFrame = CFrame.new(bed.Position) + Vector3.new(0, HeightOffset, 0) }
-                )
-                
+				bedtween = tweenService:Create(lplr.Character:WaitForChild("HumanoidRootPart"), TweenInfo.new(0.65, Enum.EasingStyle.Linear, Enum.EasingDirection.In, 0, false, 0), { CFrame = CFrame.new(bed.Position) + Vector3.new(0, 10, 0) })
                 bedtween:Play()
 
                 task.spawn(function()
