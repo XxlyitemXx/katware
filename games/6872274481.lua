@@ -8734,11 +8734,7 @@ run(function()
         return entity
     end
     
-    local function notif(...)
-        katware:CreateNotification(...)
-    end
-
-	local function handleTargetSearch()
+    local function handleTargetSearch()
     local target = FindTarget(targetSearchRange, true)
     if target and target.RootPart and IsAlive(lplr) then
         targetSearchRange = 50
@@ -8928,26 +8924,25 @@ end
                             while Autowin.Enabled and IsAlive(lplr) do
                                 if (tick() - lastActionTime) >= 1.5 then
                                     if handleDesync() then
-                                        continue
-                                    end
-                                    
-                                    if not FindEnemyBed() then
-									local target = handleTargetSearch()
-									if target then
-										if AutowinNotification.Enabled then
-											notif("Autowin", "Found target: " .. target.Player.DisplayName, 3)
+										continue
+									end	
+									if not FindEnemyBed() then
+										local target = handleTargetSearch()
+										if target then
+											if AutowinNotification.Enabled then
+												notif("Autowin", "Found target: " .. target.Player.DisplayName, 3)
+											end
+											
+											if not tweenToTarget(target) then
+												continue
+											end
+											
+											lastActionTime = tick()
 										end
-										
-										if not tweenToTarget(target) then
-											continue
-										end
-										
-										lastActionTime = tick()
 									end
+									
+									task.wait(0.1)
 								end
-								
-								task.wait(0.1)
-							end
 
                             if IsAlive(lplr) and FindTeamBed() and Autowin.Enabled then
                                 lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
