@@ -6905,7 +6905,6 @@ run(function()
 		Name = 'Breaker',
 		Function = function(callback)
 			if callback then
-				notif('Breaker', 'I just put a temporary fix for bb it might break your own bed sarry I have no idea to fix this shit', 5)
 				for _ = 1, 30 do
 					local part = Instance.new('Part')
 					part.Anchored = true
