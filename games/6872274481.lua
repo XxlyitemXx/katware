@@ -753,11 +753,7 @@ run(function()
 						attackTable.validate.raycast = attackTable.validate.raycast or {}
 						attackTable.validate.selfPosition.value += CFrame.lookAt(selfpos, targetpos).LookVector * math.max((selfpos - targetpos).Magnitude - 14.399, 0)
 					end
-
-					if suc and plr then
-						if not select(2, whitelist:get(plr)) then return end
-					end
-
+					
 					return call:SendToServer(attackTable, ...)
 				end
 			}
@@ -8735,9 +8731,12 @@ run(function()
                                     if not isnetworkowner(lplr.Character.HumanoidRootPart) then
                                         notif("Autowin", "Desync detected - resetting", 3)
                                         lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character.Humanoid.Health)
-                                        task.wait(0.5)
-                                        continue
-                                    end
+                                        repeat
+											task.wait()
+										until IsAlive(lplr)
+										lastActionTime = tick()
+										continue
+									end
 
                                     local target = FindTarget(targetSearchRange, true)
                                     if target and target.RootPart and IsAlive(lplr) then
