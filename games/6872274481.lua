@@ -8564,74 +8564,7 @@ run(function()
     local positionCheckInterval = 0.2
     local isTweening = false
     local postTweenCheckDelay = 0.5
-	local function handleDesync()
-		if not isTweening and not isnetworkowner(lplr.Character.HumanoidRootPart) then
-			notif("Autowin", "Desync detected - attempting recovery", 3)
-			
-			-- Force reset character
-			lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character.Humanoid.Health)
-			
-			-- Wait for respawn
-			repeat task.wait() until IsAlive(lplr)
-			task.wait(0.2) -- Small delay to ensure character is fully loaded
-			
-			-- Reset all states
-			isTweening = false
-			targetSearchRange = 20
-			failedTweenAttempts = 0
-			lastActionTime = tick()
-			
-			-- Cancel any existing tweens
-			if playertween then playertween:Cancel() end
-			if bedtween then bedtween:Cancel() end
-			
-			return true
-		end
-		return false
-	end
 	
-	
-	local function tweenToTarget(target)
-		if not target or not target.RootPart or not IsAlive(lplr) then return false end
-		
-		-- Store initial positions
-		local startPos = lplr.Character.HumanoidRootPart.Position
-		local targetPos = target.RootPart.Position
-		
-		isTweening = true
-		playertween = tweenService:Create(
-			lplr.Character:WaitForChild("HumanoidRootPart"),
-			TweenInfo.new(0.65, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
-			{CFrame = target.RootPart.CFrame + Vector3.new(0, 1.5, 0)}
-		)
-		
-		-- Set up completion handler
-		playertween.Completed:Connect(function()
-			isTweening = false
-			task.wait(postTweenCheckDelay)
-			
-			-- Verify final position
-			local finalDist = GetMagnitudeOf2Objects(lplr.Character.HumanoidRootPart, target.RootPart)
-			if finalDist > 15 then
-				notif("Autowin", "Tween failed - position mismatch", 3)
-				handleDesync()
-				return false
-			end
-		end)
-		
-		-- Set up timeout handler
-		task.delay(tweenTimeout, function()
-			if playertween and playertween.PlaybackState == Enum.PlaybackState.Playing then
-				notif("Autowin", "Tween timeout - forcing reset", 3)
-				playertween:Cancel()
-				handleDesync()
-				return false
-			end
-		end)
-		
-		playertween:Play()
-		return true
-	end
     local function IsAlive(plr)
         plr = plr or lplr
         if not plr.Character then return false end
@@ -8821,13 +8754,84 @@ run(function()
 			failedTweenAttempts += 1
 			if failedTweenAttempts >= maxFailedAttempts then
 				notif("Autowin", "Search failed - resetting position", 3)
+				if IsAlive(lplr) then
+					lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+					lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+				end
 				handleDesync()
 				return nil
 			end
 		end
 		return nil
 	end
-    
+    local function handleDesync()
+		if not isTweening and not isnetworkowner(lplr.Character.HumanoidRootPart) then
+			notif("Autowin", "Desync detected - attempting recovery", 3)
+			
+			-- Force reset character
+			lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character.Humanoid.Health)
+			
+			-- Wait for respawn
+			repeat task.wait() until IsAlive(lplr)
+			task.wait(0.2) -- Small delay to ensure character is fully loaded
+			
+			-- Reset all states
+			isTweening = false
+			targetSearchRange = 20
+			failedTweenAttempts = 0
+			lastActionTime = tick()
+			
+			-- Cancel any existing tweens
+			if playertween then playertween:Cancel() end
+			if bedtween then bedtween:Cancel() end
+			
+			return true
+		end
+		return false
+	end
+	
+	
+	local function tweenToTarget(target)
+		if not target or not target.RootPart or not IsAlive(lplr) then return false end
+		
+		-- Store initial positions
+		local startPos = lplr.Character.HumanoidRootPart.Position
+		local targetPos = target.RootPart.Position
+		
+		isTweening = true
+		playertween = tweenService:Create(
+			lplr.Character:WaitForChild("HumanoidRootPart"),
+			TweenInfo.new(0.65, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+			{CFrame = target.RootPart.CFrame + Vector3.new(0, 1.5, 0)}
+		)
+		
+		-- Set up completion handler
+		playertween.Completed:Connect(function()
+			isTweening = false
+			task.wait(postTweenCheckDelay)
+			
+			-- Verify final position
+			local finalDist = GetMagnitudeOf2Objects(lplr.Character.HumanoidRootPart, target.RootPart)
+			if finalDist > 15 then
+				notif("Autowin", "Tween failed - position mismatch", 3)
+				handleDesync()
+				return false
+			end
+		end)
+		
+		-- Set up timeout handler
+		task.delay(tweenTimeout, function()
+			if playertween and playertween.PlaybackState == Enum.PlaybackState.Playing then
+				notif("Autowin", "Tween timeout - forcing reset", 3)
+				playertween:Cancel()
+				handleDesync()
+				return false
+			end
+		end)
+		
+		playertween:Play()
+		return true
+	end
     Autowin = katware.Categories.Blatant:CreateModule({
         Name = "Autowin",
         Function = function(callback)
