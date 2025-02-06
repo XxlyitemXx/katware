@@ -8689,15 +8689,19 @@ run(function()
                             end)
 
                             bedtween.Completed:Wait()
-							local bedStillExists = FindEnemyBed()
+							task.wait(8)
+                            local bedStillExists = FindEnemyBed()
                             if bedStillExists and bedStillExists == bed then
-                                notif("Autowin", "Failed to break bed - retrying", 3)
-                                lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
-                                lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
-                                repeat
-                                    task.wait()
-                                until IsAlive(lplr)
-                                return
+                                local distanceToBed = GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), bed)
+                                if distanceToBed > 10 then
+                                    notif("Autowin", "Failed to reach bed. Distance: " .. tostring(math.floor(distanceToBed)) .. " studs", 5)
+                                    lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+                                    lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+                                    repeat
+                                        task.wait()
+                                    until IsAlive(lplr)
+                                    return
+                                end
                             end
                             local distanceToBed = GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), bed)
                             if distanceToBed > 10 then
