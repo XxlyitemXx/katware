@@ -9161,7 +9161,7 @@ run(function()
                     BedTP:Toggle(false)
                     return
                 end]]--
-w
+
                 notif("BedTP", "Successfully teleported to enemy bed!", 3)
                 BedTP:Toggle(false)
             else
