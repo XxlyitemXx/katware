@@ -8735,28 +8735,29 @@ run(function()
     end
     
     local function handleTargetSearch()
-    local target = FindTarget(targetSearchRange, true)
-    if target and target.RootPart and IsAlive(lplr) then
-        targetSearchRange = 50
-        failedTweenAttempts = 0
-        return target
-    else
-        -- Expand search range gradually
-        if targetSearchRange < maxSearchRange then
-            targetSearchRange = math.min(targetSearchRange + searchIncrement, maxSearchRange)
-            notif("Autowin", "Expanding search range to " .. targetSearchRange .. " studs", 3)
+        local target = FindTarget(targetSearchRange, true)
+        if target and target.RootPart and IsAlive(lplr) then
+            targetSearchRange = 50
+            failedTweenAttempts = 0
+            return target
         else
-            -- Reset if no targets found at max range
-            notif("Autowin", "No targets found - resetting position", 3)
-            if IsAlive(lplr) then
-                lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
-                lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+            -- Expand search range gradually
+            if targetSearchRange < maxSearchRange then
+                targetSearchRange = math.min(targetSearchRange + searchIncrement, maxSearchRange)
+                notif("Autowin", "Expanding search range to " .. targetSearchRange .. " studs", 3)
+            else
+                -- Reset if no targets found at max range
+                notif("Autowin", "No targets found - resetting position", 3)
+                if IsAlive(lplr) then
+                    lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+                    lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+                end
+                targetSearchRange = 20 -- Reset search range
+                return nil
             end
-            targetSearchRange = 20 -- Reset search range
-            return nil
         end
     end
-end
+end)
 
 
     local function handleDesync()
