@@ -8738,58 +8738,13 @@ run(function()
         katware:CreateNotification(...)
     end
 
-	local function handleDesync()
-		if not isTweening and not isnetworkowner(lplr.Character.HumanoidRootPart) then
-			notif("Autowin", "Desync detected - attempting recovery", 3)
-			
-			-- Force reset character
-			if IsAlive(lplr) then
-				lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character.Humanoid.Health)
-				lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
-			end
-			
-			-- Wait for respawn
-			repeat task.wait() until IsAlive(lplr)
-			task.wait(0.2)
-			
-			-- Reset all states and force immediate search
-			isTweening = false
-			targetSearchRange = 20
-			failedTweenAttempts = 0
-			lastActionTime = 0 -- Force immediate search
-			
-			-- Cancel any existing tweens
-			if playertween then playertween:Cancel() end
-			if bedtween then bedtween:Cancel() end
-			
-			return true
-		end
-		return false
-	end
-	
-	local function handleTargetSearch(FindTarget, targetSearchRange, maxSearchRange, searchIncrement, maxFailedAttempts)
-		-- Try initial search
+	local function handleTargetSearch()
 		local target = FindTarget(targetSearchRange, true)
-		
-		-- If no target found, do expanding radius search
-		if not target or not target.RootPart then
-			local currentRange = targetSearchRange
-			while currentRange <= maxSearchRange do
-				target = FindTarget(currentRange, true)
-				if target and target.RootPart then
-					break
-				end
-				currentRange = currentRange + searchIncrement
-				task.wait(0.1) -- Small delay between searches
-			end
-		end
-		
 		if target and target.RootPart and IsAlive(lplr) then
-			targetSearchRange = 20 -- Reset search range on success
+			targetSearchRange = 80
 			failedTweenAttempts = 0
-			return target, targetSearchRange, failedTweenAttempts
+			return target
 		else
-			-- No target found, increase range for next search
 			if targetSearchRange < maxSearchRange then
 				targetSearchRange = math.min(targetSearchRange + searchIncrement, maxSearchRange)
 				notif("Autowin", "Expanding search range to " .. targetSearchRange .. " studs", 3)
@@ -8798,61 +8753,77 @@ run(function()
 			failedTweenAttempts += 1
 			if failedTweenAttempts >= maxFailedAttempts then
 				notif("Autowin", "Search failed - resetting position", 3)
+				if IsAlive(lplr) then
+					lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+					lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+				end
 				handleDesync()
-				targetSearchRange = 20
-				failedTweenAttempts = 0
-				lastActionTime = 0 -- Force immediate new search
+				return nil
 			end
 		end
-		return nil, targetSearchRange, failedTweenAttempts
+		return nil
+	end
+
+    local function handleDesync()
+		if not isTweening and not isnetworkowner(lplr.Character.HumanoidRootPart) then
+			notif("Autowin", "Desync detected - attempting recovery", 3)
+			
+			lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character.Humanoid.Health)
+			
+			repeat task.wait() until IsAlive(lplr)
+			task.wait(0.2)
+			
+			isTweening = false
+			targetSearchRange = 20
+			failedTweenAttempts = 0
+			lastActionTime = tick()
+			
+			if playertween then playertween:Cancel() end
+			if bedtween then bedtween:Cancel() end
+			
+			return true
+		end
+		return false
 	end
 	
-	local function tweenToTarget(target, tweenService, postTweenCheckDelay, tweenTimeout)
+	local function tweenToTarget(target)
 		if not target or not target.RootPart or not IsAlive(lplr) then return false end
 		
+		local startPos = lplr.Character.HumanoidRootPart.Position
+		local targetPos = target.RootPart.Position
+		
 		isTweening = true
-		
-		-- Cancel any existing tweens
-		if playertween then playertween:Cancel() end
-		
 		playertween = tweenService:Create(
 			lplr.Character:WaitForChild("HumanoidRootPart"),
 			TweenInfo.new(0.65, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
 			{CFrame = target.RootPart.CFrame + Vector3.new(0, 1.5, 0)}
 		)
 		
-		local tweenComplete = false
-		
 		playertween.Completed:Connect(function()
 			isTweening = false
-			tweenComplete = true
 			task.wait(postTweenCheckDelay)
 			
-			if IsAlive(lplr) then
-				if not target.RootPart or not target.Player or not IsAlive(target.Player) then
-					-- Target is gone, force new search
-					lastActionTime = 0
-					return
+			local finalDist = GetMagnitudeOf2Objects(lplr.Character.HumanoidRootPart, target.RootPart)
+			if finalDist > 15 then
+				notif("Autowin", "Tween failed - position mismatch", 3)
+				if IsAlive(lplr) then
+					lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+					lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
 				end
-				
-				local finalDist = GetMagnitudeOf2Objects(lplr.Character.HumanoidRootPart, target.RootPart)
-				if finalDist > 15 then
-					notif("Autowin", "Tween failed - position mismatch", 3)
-					handleDesync()
-					lastActionTime = 0 -- Force immediate new search
-					return false
-				end
+				handleDesync()
+				return false
 			end
 		end)
 		
-		-- Set up timeout handler
 		task.delay(tweenTimeout, function()
-			if not tweenComplete and playertween and playertween.PlaybackState == Enum.PlaybackState.Playing then
+			if playertween and playertween.PlaybackState == Enum.PlaybackState.Playing then
 				notif("Autowin", "Tween timeout - forcing reset", 3)
 				playertween:Cancel()
-				isTweening = false
+				if IsAlive(lplr) then
+					lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+					lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+				end
 				handleDesync()
-				lastActionTime = 0 -- Force immediate new search
 				return false
 			end
 		end)
@@ -8955,31 +8926,24 @@ run(function()
 
                             lastActionTime = tick()
 
-							while Autowin.Enabled and IsAlive(lplr) do
-								if (tick() - lastActionTime) >= 1.5 or lastActionTime == 0 then
-									if handleDesync() then
-										task.wait(0.1)
-										continue
-									end
-                                    local target
-									target, targetSearchRange, failedTweenAttempts = handleTargetSearch(
-										FindTarget,
-										targetSearchRange,
-										maxSearchRange,
-										searchIncrement,
-										maxFailedAttempts
-									)
+                            while Autowin.Enabled and IsAlive(lplr) do
+                                if (tick() - lastActionTime) >= 1.5 then
+                                    if handleDesync() then
+                                        continue
+                                    end
+                                    
+                                    local target = handleTargetSearch()
                                     if target then
                                         if AutowinNotification.Enabled then
                                             local team = bed:GetAttribute("id") and string.split(bed:GetAttribute("id"), "_")[1] or "unknown"
                                             notif("Autowin", "Killing " .. team:lower() .. " team's teamates", 5)
                                         end
                                         
-                                        if tweenToTarget(target, tweenService, postTweenCheckDelay, tweenTimeout) then
-											lastActionTime = tick()
-										else
-											lastActionTime = 0 -- Force immediate new search if tween fails
-										end
+                                        if not tweenToTarget(target) then
+                                            continue
+                                        end
+                                        
+                                        lastActionTime = tick()
                                     end
                                 end
                                 task.wait(0.1)
