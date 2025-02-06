@@ -8459,6 +8459,8 @@ run(function()
     local tweenAttemptDelay = 0.5
     local lastKnownPosition = nil
     local positionCheckInterval = 0.2
+    local isTweening = false
+    local postTweenCheckDelay = 0.5
 
     local function IsAlive(plr)
         plr = plr or lplr
@@ -8727,16 +8729,14 @@ run(function()
                             lastActionTime = tick()
 
                             while Autowin.Enabled and IsAlive(lplr) do
-                                if (tick() - lastActionTime) >= 3 then
-                                    if not isnetworkowner(lplr.Character.HumanoidRootPart) then
-                                        notif("Autowin", "Desync detected - resetting", 3)
+                                if (tick() - lastActionTime) >= 0.5 then
+                                    if not isTweening and not isnetworkowner(lplr.Character.HumanoidRootPart) then
+                                        notif("Autowin", "Bad desync detected - resetting", 3)
                                         lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character.Humanoid.Health)
-                                        repeat
-											task.wait()
-										until IsAlive(lplr)
-										lastActionTime = tick()
-										continue
-									end
+                                        repeat task.wait() until IsAlive(lplr)
+                                        lastActionTime = tick()
+                                        continue
+                                    end
 
                                     local target = FindTarget(targetSearchRange, true)
                                     if target and target.RootPart and IsAlive(lplr) then
@@ -8756,12 +8756,18 @@ run(function()
                                                 break
                                             end
                                             local startPosition = lplr.Character.HumanoidRootPart.Position
+                                            isTweening = true
                                             playertween = tweenService:Create(
                                                 lplr.Character:WaitForChild("HumanoidRootPart"), 
                                                 TweenInfo.new(0.65, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
                                                 {CFrame = target.RootPart.CFrame + Vector3.new(0, 1.5, 0)}
                                             )
                                             playertween:Play()
+
+                                            playertween.Completed:Connect(function()
+                                                isTweening = false
+                                                task.wait(postTweenCheckDelay)
+                                            end)
 
                                             task.delay(tweenTimeout, function()
                                                 if playertween and (playertween.PlaybackState == Enum.PlaybackState.Playing or playertween.PlaybackState == Enum.PlaybackState.Delayed) then
