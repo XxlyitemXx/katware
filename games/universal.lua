@@ -1,4 +1,3 @@
-print("loading univeral.lua")
 
 local loadstring = function(...)
 	local res, err = loadstring(...)
@@ -7870,5 +7869,3 @@ run(function()
         Darker = true
     })
 end)
-
-print('Loaded univeral.lua')

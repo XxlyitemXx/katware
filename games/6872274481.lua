@@ -1,7 +1,4 @@
-
-
-print('Starting script...')
-task.wait(4)
+print('Start loading script...')
 local run = function(func)
 	func()
 end
