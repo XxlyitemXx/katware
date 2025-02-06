@@ -8639,6 +8639,7 @@ run(function()
         Name = "Autowin",
         Function = function(callback)
             if callback then
+				notif("Autowin", "Might not work perfectly in the mode that has more than 1 bed!", 5)
                 task.spawn(function()
                     if store.matchState == 0 then
                         repeat
