@@ -8753,15 +8753,11 @@ run(function()
 			failedTweenAttempts += 1
 			if failedTweenAttempts >= maxFailedAttempts then
 				notif("Autowin", "Search failed - resetting position", 3)
-				if IsAlive(lplr) then
-					lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
-					lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
-				end
+				lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+				lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
 				handleDesync()
-				return nil
 			end
 		end
-		return nil
 	end
 
     local function handleDesync()
