@@ -9155,13 +9155,13 @@ run(function()
 
                 bedtween.Completed:Wait()
 
-                local distanceToBed = GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), bed)
+                --[[local distanceToBed = GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), bed)
                 if distanceToBed > maxDistance then
                     notif("BedTP", "Failed to reach bed! Distance: " .. tostring(math.floor(distanceToBed)) .. " studs", 3)
                     BedTP:Toggle(false)
                     return
-                end
-
+                end]]--
+w
                 notif("BedTP", "Successfully teleported to enemy bed!", 3)
                 BedTP:Toggle(false)
             else
