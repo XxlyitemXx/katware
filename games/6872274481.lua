@@ -8944,7 +8944,7 @@ end)
 									
 									task.wait(0.1)
 								end
-
+							end
                             if IsAlive(lplr) and FindTeamBed() and Autowin.Enabled then
                                 lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
                                 lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
