@@ -8729,7 +8729,7 @@ run(function()
                             lastActionTime = tick()
 
                             while Autowin.Enabled and IsAlive(lplr) do
-                                if (tick() - lastActionTime) >= 0.5 then
+                                if (tick() - lastActionTime) >= 1.2 then
                                     if not isTweening and not isnetworkowner(lplr.Character.HumanoidRootPart) then
                                         notif("Autowin", "Bad desync detected - resetting", 3)
                                         lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character.Humanoid.Health)
