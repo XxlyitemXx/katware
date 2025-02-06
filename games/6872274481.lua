@@ -5106,7 +5106,7 @@ run(function()
 				for i, v in store.inventory.hotbar do
 					if v.item and v.item.itemType == tool.itemType then slot = i - 1 break end
 				end
-	
+
 				if hotbarSwitch(slot) then
 					if inputService:IsMouseButtonPressed(0) then 
 						event:Fire() 
@@ -5334,7 +5334,7 @@ run(function()
 		local suc, read = pcall(function() 
 			return isfile(File.Value) and httpService:JSONDecode(readfile(File.Value)) 
 		end)
-	
+
 		if suc and read then
 			local items = {}
 			for _, v in read do 
@@ -8729,7 +8729,7 @@ run(function()
                             lastActionTime = tick()
 
                             while Autowin.Enabled and IsAlive(lplr) do
-                                if (tick() - lastActionTime) >= 1.2 then
+                                if (tick() - lastActionTime) >= 1.5 then
                                     if not isTweening and not isnetworkowner(lplr.Character.HumanoidRootPart) then
                                         notif("Autowin", "Bad desync detected - resetting", 3)
                                         lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character.Humanoid.Health)
@@ -8740,7 +8740,7 @@ run(function()
 
                                     local target = FindTarget(targetSearchRange, true)
                                     if target and target.RootPart and IsAlive(lplr) then
-                                        targetSearchRange = 20
+                                        targetSearchRange = 20  -- Reset search range on successful target find
                                         failedTweenAttempts = 0
 
                                         if AutowinNotification.Enabled then
@@ -8831,8 +8831,9 @@ run(function()
                                             end
                                         until not (FindTarget(30, true) and FindTarget(30, true).RootPart) or not Autowin.Enabled or not IsAlive(lplr)
 
-                                        lastActionTime = tick()
+                                        lastActionTime = tick()  -- Update last action time after target loop
                                     else
+                                        -- No target found, increase search range
                                         if targetSearchRange < maxSearchRange then
                                             targetSearchRange = math.min(targetSearchRange + searchIncrement, maxSearchRange)
                                             notif("Autowin", "Increased search range to "..targetSearchRange.." studs", 3)
@@ -8843,7 +8844,7 @@ run(function()
                                         if failedTweenAttempts >= maxFailedAttempts then
                                             notif("Autowin", "Max failed attempts reached - resetting", 3)
                                             lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
-                                            targetSearchRange = 20
+                                            targetSearchRange = 20  -- Reset search range
                                             failedTweenAttempts = 0
                                             task.wait(1)
                                         end
@@ -8905,7 +8906,7 @@ run(function()
                 pcall(function() if bedtween then bedtween:Cancel() end end)
             end
         end,
-        Tooltip = "the cutiest autowin ever"
+        Tooltip = "the cutiest autowin ever (Might got desynced issue in long map)"
     })
     AutoLobby = Autowin:CreateToggle({
         Name = "AutoLobby",
@@ -9153,13 +9154,6 @@ run(function()
                 end)
 
                 bedtween.Completed:Wait()
-
-                --[[local distanceToBed = GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), bed)
-                if distanceToBed > maxDistance then
-                    notif("BedTP", "Failed to reach bed! Distance: " .. tostring(math.floor(distanceToBed)) .. " studs", 3)
-                    BedTP:Toggle(false)
-                    return
-                end]]--
 
                 notif("BedTP", "Successfully teleported to enemy bed!", 3)
                 BedTP:Toggle(false)
