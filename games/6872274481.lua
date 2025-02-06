@@ -8741,7 +8741,7 @@ run(function()
 	local function handleTargetSearch()
 		local target = FindTarget(targetSearchRange, true)
 		if target and target.RootPart and IsAlive(lplr) then
-			targetSearchRange = 80
+			targetSearchRange = 50
 			failedTweenAttempts = 0
 			return target
 		else
@@ -8774,7 +8774,7 @@ run(function()
 			task.wait(0.2)
 			
 			isTweening = false
-			targetSearchRange = 20
+			targetSearchRange = 30
 			failedTweenAttempts = 0
 			lastActionTime = tick()
 			
