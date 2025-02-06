@@ -8590,29 +8590,6 @@ run(function()
 		return false
 	end
 	
-	local function handleTargetSearch()
-		local target = FindTarget(targetSearchRange, true)
-		if target and target.RootPart and IsAlive(lplr) then
-			-- Reset search parameters on successful find
-			targetSearchRange = 20
-			failedTweenAttempts = 0
-			return target
-		else
-			-- Expand search if no target found
-			if targetSearchRange < maxSearchRange then
-				targetSearchRange = math.min(targetSearchRange + searchIncrement, maxSearchRange)
-				notif("Autowin", "Expanding search range to " .. targetSearchRange .. " studs", 3)
-			end
-			
-			failedTweenAttempts += 1
-			if failedTweenAttempts >= maxFailedAttempts then
-				notif("Autowin", "Search failed - resetting position", 3)
-				handleDesync()
-				return nil
-			end
-		end
-		return nil
-	end
 	
 	local function tweenToTarget(target)
 		if not target or not target.RootPart or not IsAlive(lplr) then return false end
@@ -8827,6 +8804,29 @@ run(function()
     local function notif(...)
         katware:CreateNotification(...)
     end
+	local function handleTargetSearch()
+		local target = FindTarget(targetSearchRange, true)
+		if target and target.RootPart and IsAlive(lplr) then
+			-- Reset search parameters on successful find
+			targetSearchRange = 20
+			failedTweenAttempts = 0
+			return target
+		else
+			-- Expand search if no target found
+			if targetSearchRange < maxSearchRange then
+				targetSearchRange = math.min(targetSearchRange + searchIncrement, maxSearchRange)
+				notif("Autowin", "Expanding search range to " .. targetSearchRange .. " studs", 3)
+			end
+			
+			failedTweenAttempts += 1
+			if failedTweenAttempts >= maxFailedAttempts then
+				notif("Autowin", "Search failed - resetting position", 3)
+				handleDesync()
+				return nil
+			end
+		end
+		return nil
+	end
     
     Autowin = katware.Categories.Blatant:CreateModule({
         Name = "Autowin",
