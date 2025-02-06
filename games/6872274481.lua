@@ -8703,16 +8703,6 @@ run(function()
                                     return
                                 end
                             end
-                            local distanceToBed = GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), bed)
-                            if distanceToBed > 10 then
-                                notif("Autowin", "Failed to reach bed. Distance: " .. tostring(math.floor(distanceToBed)) .. " studs", 5)
-                                lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
-                                lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
-                                repeat
-                                    task.wait()
-                                until IsAlive(lplr)
-                                return
-                            end
 
                             task.spawn(function()
                                 task.wait(0.1)
