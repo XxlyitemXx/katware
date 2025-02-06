@@ -1,3 +1,6 @@
+print('Thanks to @vaperoblox !!!')
+print('Check out the original script here: https://github.com/7GrandDadPGN/VapeV4ForRoblox/')
+print('This tiny project wouldnt be possible without vapeV4!')
 
 local loadstring = function(...)
 	local res, err = loadstring(...)

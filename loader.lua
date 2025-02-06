@@ -9,9 +9,6 @@ end
 local delfile = delfile or function(file)
 	writefile(file, '')
 end
-print('Thanks to @vaperoblox !!!')
-print('Check out the original script here: https://github.com/7GrandDadPGN/VapeV4ForRoblox/')
-print('This tiny project wouldnt be possible without vapeV4!')
 local function downloadFile(path, func)
 	if not isfile(path) then
 		local suc, res = pcall(function()
