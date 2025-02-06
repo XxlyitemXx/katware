@@ -8689,7 +8689,7 @@ run(function()
                             end)
 
                             bedtween.Completed:Wait()
-							task.wait(8)
+							task.wait(5)
                             local bedStillExists = FindEnemyBed()
                             if bedStillExists and bedStillExists == bed then
                                 local distanceToBed = GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), bed)
