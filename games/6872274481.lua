@@ -8741,18 +8741,16 @@ run(function()
             failedTweenAttempts = 0
             return target
         else
-            -- Expand search range gradually
             if targetSearchRange < maxSearchRange then
                 targetSearchRange = math.min(targetSearchRange + searchIncrement, maxSearchRange)
                 notif("Autowin", "Expanding search range to " .. targetSearchRange .. " studs", 3)
             else
-                -- Reset if no targets found at max range
                 notif("Autowin", "No targets found - resetting position", 3)
                 if IsAlive(lplr) then
                     lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
                     lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
                 end
-                targetSearchRange = 20 -- Reset search range
+                targetSearchRange = 20
                 return nil
             end
         end
@@ -8830,7 +8828,7 @@ run(function()
         Name = "Autowin",
         Function = function(callback)
             if callback then
-				notif("Autowin", "Might not work perfectly in the mode that has more than 1 bed!", 5)
+				notif("Autowin", "Might not work perfectly If high ping!", 5)
                 task.spawn(function()
                     if store.matchState == 0 then
                         repeat
@@ -8997,7 +8995,7 @@ run(function()
                 pcall(function() if bedtween then bedtween:Cancel() end end)
             end
         end,
-        Tooltip = "the cutiest autowin ever (Might got desynced issue in long map)"
+        Tooltip = "the cutiest autowin ever (Might got desynced issue in high ping)"
     })
     AutoLobby = Autowin:CreateToggle({
         Name = "AutoLobby",
@@ -9441,7 +9439,6 @@ run(function()
 
                 TexturePack:Clean(workspace.Camera.Viewmodel.ChildAdded:Connect(function(tool)
                     if tool:IsA("Accessory") then
-                        -- Clone and attach model logic from original
                         for _, part in tool:GetDescendants() do
                             if part:IsA("BasePart") then
                                 part.Transparency = 1
