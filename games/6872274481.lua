@@ -9013,11 +9013,7 @@ run(function()
                 notif("Autowin", "Match ended!", 5)
                 if lobby then
                     notif("Autowin", "Lobbying", 5)
-                local args = {
-                    [1] = "/bedwars",
-                    [2] = "All"
-                }
-                    game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(unpack(args))
+					replicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer('/bedwars', 'All')
                 end
             end
         end
