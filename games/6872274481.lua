@@ -4635,7 +4635,7 @@ run(function()
 								sendMessage('Death', (killer.DisplayName or killer.Name), 'my gaming chair subscription expired :( | <obj>')
 							end
 						elseif killer == lplr and Toggles.Kill.Enabled then
-							sendMessage('Kill', (killed.DisplayName or killed.Name), 'vxp on top | <obj>')
+							sendMessage('Kill', (killed.DisplayName or killed.Name), 'katware on top | <obj>')
 						end
 					end
 				end))
@@ -4651,7 +4651,7 @@ run(function()
 					local myTeam = bedwars.Store:getState().Game.myTeam
 					if myTeam and myTeam.id == winstuff.winningTeamId or lplr.Neutral then
 						if Toggles.Win.Enabled then 
-							sendMessage('Win', nil, 'yall garbage') 
+							sendMessage('Win', nil, 'kw >>>>>> ') 
 						end
 					end
 				end))
