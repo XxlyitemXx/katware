@@ -4618,10 +4618,10 @@ run(function()
 			if callback then
 				AutoToxic:Clean(katwareEvents.BedwarsBedBreak.Event:Connect(function(bedTable)
 					if Toggles.BedDestroyed.Enabled and bedTable.brokenBedTeam.id == lplr:GetAttribute('Team') then
-						sendMessage('BedDestroyed', (bedTable.player.DisplayName or bedTable.player.Name), 'how dare you >:( | <obj>')
+						sendMessage('BedDestroyed', (bedTable.player.DisplayName or bedTable.player.Name), 'how dare you??!')
 					elseif Toggles.Bed.Enabled and bedTable.player.UserId == lplr.UserId then
 						local team = bedwars.QueueMeta[store.queueType].teams[tonumber(bedTable.brokenBedTeam.id)]
-						sendMessage('Bed', team and team.displayName:lower() or 'white', 'nice bed lul | <obj>')
+						sendMessage('Bed', team and team.displayName:lower() or 'white', "I'm not hacking just my cat on my keyboard")
 					end
 				end))
 				AutoToxic:Clean(katwareEvents.EntityDeathEvent.Event:Connect(function(deathTable)
@@ -4632,26 +4632,26 @@ run(function()
 						if killed == lplr then
 							if (not dead) and killer ~= lplr and Toggles.Death.Enabled then
 								dead = true
-								sendMessage('Death', (killer.DisplayName or killer.Name), 'my gaming chair subscription expired :( | <obj>')
+								sendMessage('Death', (killer.DisplayName or killer.Name), 'nn you suck')
 							end
 						elseif killer == lplr and Toggles.Kill.Enabled then
-							sendMessage('Kill', (killed.DisplayName or killed.Name), 'katware on top | <obj>')
+							sendMessage('Kill', (killed.DisplayName or killed.Name), 'Lol EZ')
 						end
 					end
 				end))
 				AutoToxic:Clean(katwareEvents.MatchEndEvent.Event:Connect(function(winstuff)
 					if GG.Enabled then
 						if textChatService.ChatVersion == Enum.ChatVersion.TextChatService then
-							textChatService.ChatInputBarConfiguration.TargetTextChannel:SendAsync('gg')
+							textChatService.ChatInputBarConfiguration.TargetTextChannel:SendAsync('EZ NN')
 						else
-							replicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer('gg', 'All')
+							replicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer('LOOOOL NN EZZZZZ', 'All')
 						end
 					end
 					
 					local myTeam = bedwars.Store:getState().Game.myTeam
 					if myTeam and myTeam.id == winstuff.winningTeamId or lplr.Neutral then
 						if Toggles.Win.Enabled then 
-							sendMessage('Win', nil, 'kw >>>>>> ') 
+							sendMessage('Win', nil, 'kw >>>>>> vw') 
 						end
 					end
 				end))
