@@ -155,92 +155,85 @@ run(function()
 		end
 	})
 end)
+
 run(function()
-    local SetEmote = {}
-    local SetEmoteList = {}
-    local oldemote
-    local emo2 = {}
-    local emoting = false
-
-    -- Function to check if player is alive
-    local function IsAlive(plr)
-        plr = plr or lplr
-        if not plr.Character then return false end
-        if not plr.Character:FindFirstChild("Head") then return false end
-        if not plr.Character:FindFirstChild("Humanoid") then return false end
-        if plr.Character:FindFirstChild("Humanoid").Health < 0.11 then return false end
-        return true
-    end
-
-    SetEmote = katware.Categories.Utility:CreateModule({
-        Name = 'SetEmote',
-        Function = function(callback)
-            if callback then
-                -- Store original emote
-                oldemote = lplr:GetAttribute('EmoteTypeSlot1')
-                -- Set new emote
-                lplr:SetAttribute('EmoteTypeSlot1', emo2[SetEmoteList.Value])
-
-                -- Handle emote animation
-                SetEmote:Clean(lplr.PlayerGui.ChildAdded:Connect(function(v)
-                    local anim
-                    if tostring(v) == 'RoactTree' and IsAlive(lplr) and not emoting then 
-                        v:WaitForChild('1'):WaitForChild('1')
-                        if not v['1']:IsA('ImageButton') then 
-                            return 
-                        end
-                        v['1'].Visible = false
-                        emoting = true
-
-                        -- Call emote server event
-                        bedwars.Client:Get('Emote'):CallServer({
-                            emoteType = lplr:GetAttribute('EmoteTypeSlot1')
-                        })
-
-                        local oldpos = lplr.Character:WaitForChild("HumanoidRootPart").Position 
-
-                        -- Special handling for nightmare emote
-                        if tostring(lplr:GetAttribute('EmoteTypeSlot1')):lower():find('nightmare') then 
-                            anim = Instance.new('Animation')
-                            anim.AnimationId = 'rbxassetid://9191822700'
-                            anim = lplr.Character:WaitForChild("Humanoid").Animator:LoadAnimation(anim)
-                            
-                            task.spawn(function()
-                                repeat 
-                                    anim:Play()
-                                    anim.Completed:Wait()
-                                until not anim
-                            end)
-                        end
-
-                        -- Wait until player moves or dies
-                        repeat 
-                            task.wait() 
-                        until ((lplr.Character:WaitForChild("HumanoidRootPart").Position - oldpos).Magnitude >= 0.3 or not IsAlive(lplr))
-
-                        -- Clean up animation
-                        pcall(function() 
-                            if anim then
-                                anim:Stop() 
-                            end
-                        end)
-                        anim = nil
-                        emoting = false
-
-                        -- Cancel emote server event
-                        bedwars.Client:Get('EmoteCancelled'):CallServer({
-                            emoteType = lplr:GetAttribute('EmoteTypeSlot1')
-                        })
-                    end
-                end))
-            else
-                -- Restore original emote when disabled
-                if oldemote then 
-                    lplr:SetAttribute('EmoteTypeSlot1', oldemote)
-                    oldemote = nil 
-                end
-            end
-        end,
-        Tooltip = 'Sets your emote animation'
-    })
+    local anim
+	local asset
+	local lastPosition
+    local NightmareEmote
+	NightmareEmote = katware.Categories.World:CreateModule({
+		Name = "NightmareEmote",
+		Function = function(call)
+			if call then
+				local l__GameQueryUtil__8
+				if (not shared.CheatEngineMode) then 
+					l__GameQueryUtil__8 = require(game:GetService("ReplicatedStorage")['rbxts_include']['node_modules']['@easy-games']['game-core'].out).GameQueryUtil 
+				else
+					local backup = {}; function backup:setQueryIgnored() end; l__GameQueryUtil__8 = backup;
+				end
+				local l__TweenService__9 = game:GetService("TweenService")
+				local player = game:GetService("Players").LocalPlayer
+				local p6 = player.Character
+				
+				if not p6 then NightmareEmote:Toggle() return end
+				
+				local v10 = game:GetService("ReplicatedStorage"):WaitForChild("Assets"):WaitForChild("Effects"):WaitForChild("NightmareEmote"):Clone();
+				asset = v10
+				v10.Parent = game.Workspace
+				lastPosition = p6.PrimaryPart and p6.PrimaryPart.Position or Vector3.new()
+				
+				task.spawn(function()
+					while asset ~= nil do
+						local currentPosition = p6.PrimaryPart and p6.PrimaryPart.Position
+						if currentPosition and (currentPosition - lastPosition).Magnitude > 0.1 then
+							asset:Destroy()
+							asset = nil
+							NightmareEmote:Toggle()
+							break
+						end
+						lastPosition = currentPosition
+						v10:SetPrimaryPartCFrame(p6.LowerTorso.CFrame + Vector3.new(0, -2, 0));
+						task.wait()
+					end
+				end)
+				
+				local v11 = v10:GetDescendants();
+				local function v12(p8)
+					if p8:IsA("BasePart") then
+						l__GameQueryUtil__8:setQueryIgnored(p8, true);
+						p8.CanCollide = false;
+						p8.Anchored = true;
+					end;
+				end;
+				for v13, v14 in ipairs(v11) do
+					v12(v14, v13 - 1, v11);
+				end;
+				local l__Outer__15 = v10:FindFirstChild("Outer");
+				if l__Outer__15 then
+					l__TweenService__9:Create(l__Outer__15, TweenInfo.new(1.5, Enum.EasingStyle.Linear, Enum.EasingDirection.Out, -1), {
+						Orientation = l__Outer__15.Orientation + Vector3.new(0, 360, 0)
+					}):Play();
+				end;
+				local l__Middle__16 = v10:FindFirstChild("Middle");
+				if l__Middle__16 then
+					l__TweenService__9:Create(l__Middle__16, TweenInfo.new(12.5, Enum.EasingStyle.Linear, Enum.EasingDirection.Out, -1), {
+						Orientation = l__Middle__16.Orientation + Vector3.new(0, -360, 0)
+					}):Play();
+				end;
+                anim = Instance.new("Animation")
+				anim.AnimationId = "rbxassetid://9191822700"
+				anim = p6.Humanoid:LoadAnimation(anim)
+				anim:Play()
+			else 
+                if anim then 
+					anim:Stop()
+					anim = nil
+				end
+				if asset then
+					asset:Destroy() 
+					asset = nil
+				end
+			end
+		end
+	})
 end)
