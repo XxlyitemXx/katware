@@ -8958,7 +8958,32 @@ run(function()
                             if AutowinNotification.Enabled then
                                 notif("Autowin", "Killing " .. target.Player.DisplayName .. " (" .. (target.Player.Team and target.Player.Team.Name or "neutral") .. " Team)", 5)
                             end
+
+                            task.delay(tweenTimeout, function()
+                                if playertween and (playertween.PlaybackState == Enum.PlaybackState.Playing or playertween.PlaybackState == Enum.PlaybackState.Delayed) then
+                                    notif("Autowin", "Tween to target timed out. Resetting.", 5)
+                                    lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+                                    lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+                                    playertween:Cancel()
+                                end
+                            end)
+
                             playertween.Completed:Wait()
+                            task.wait(5)
+                            
+                            if target and target.RootPart and IsAlive(lplr) then
+                                local distanceToTarget = GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), target.RootPart)
+                                if distanceToTarget > 15 then
+                                    notif("Autowin", "Failed to reach target. Distance: " .. tostring(math.floor(distanceToTarget)) .. " studs", 5)
+                                    lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+                                    lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+                                    repeat
+                                        task.wait()
+                                    until IsAlive(lplr)
+                                    return
+                                end
+                            end
+
                             if not Autowin.Enabled then return end
                             if FindTarget(80, true) and FindTarget(80, true).RootPart and IsAlive(lplr) then
                                 repeat
@@ -9288,7 +9313,7 @@ run(function()
 		switchItem(item.tool)
 		local meta = bedwars.ProjectileMeta.telepearl
 		local calc = prediction.SolveTrajectory(pos, meta.launchVelocity, meta.gravitationalAcceleration, spot, Vector3.zero, workspace.Gravity, 0, 0)
-	
+
 		if calc then
 			local dir = CFrame.lookAt(pos, calc).LookVector * meta.launchVelocity
 			bedwars.ProjectileController:createLocalProjectile(meta, 'telepearl', 'telepearl', pos, nil, dir, {drawDurationSeconds = 1})
