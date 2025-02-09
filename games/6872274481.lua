@@ -680,35 +680,37 @@ run(function()
 	})
 
 	local remoteNames = {
-		--AckKnockback = debug.getproto(debug.getproto(Knit.Controllers.KnockbackController.KnitStart, 1), 1),
-		--AfkStatus = debug.getproto(Knit.Controllers.AfkController.KnitStart, 1),
+		AckKnockback = debug.getproto(debug.getproto(Knit.Controllers.KnockbackController.KnitStart, 1), 1),
+		AfkStatus = debug.getproto(Knit.Controllers.AfkController.KnitStart, 1),
 		AttackEntity = Knit.Controllers.SwordController.sendServerRequest,
+		BeePickup = Knit.Controllers.BeeNetController.trigger,
 		--ConsumeBattery = debug.getproto(debug.getproto(Knit.Controllers.BatteryController.KnitStart, 1), 1),
-		--CannonAim = debug.getproto(Knit.Controllers.CannonController.startAiming, 5),
+		CannonAim = debug.getproto(Knit.Controllers.CannonController.startAiming, 5),
 		CannonLaunch = Knit.Controllers.CannonHandController.launchSelf,
-		--ConsumeItem = debug.getproto(Knit.Controllers.ConsumeController.onEnable, 1),
+		ConsumeItem = debug.getproto(Knit.Controllers.ConsumeController.onEnable, 1),
 		ConsumeSoul = Knit.Controllers.GrimReaperController.consumeSoul,
-		--ConsumeTreeOrb = debug.getproto(Knit.Controllers.EldertreeController.createTreeOrbInteraction, 1),
-		--DepositPinata = debug.getproto(debug.getproto(Knit.Controllers.PiggyBankController.KnitStart, 2), 5),
-		--DragonBreath = debug.getproto(Knit.Controllers.VoidDragonController.KnitStart, 4),
-		--DragonEndFly = debug.getproto(Knit.Controllers.VoidDragonController.flapWings, 1),
+		ConsumeTreeOrb = debug.getproto(Knit.Controllers.EldertreeController.createTreeOrbInteraction, 1),
+		DepositPinata = debug.getproto(debug.getproto(Knit.Controllers.PiggyBankController.KnitStart, 2), 5),
+		DragonBreath = debug.getproto(Knit.Controllers.VoidDragonController.KnitStart, 4),
+		DragonEndFly = debug.getproto(Knit.Controllers.VoidDragonController.flapWings, 1),
 		DragonFly = Knit.Controllers.VoidDragonController.flapWings,
 		DropItem = Knit.Controllers.ItemDropController.dropItemInHand,
-		--EquipItem = debug.getproto(require(replicatedStorage.TS.entity.entities['inventory-entity']).InventoryEntity.equipItem, 3),
+		EquipItem = debug.getproto(require(replicatedStorage.TS.entity.entities['inventory-entity']).InventoryEntity.equipItem, 3),
 		FireProjectile = debug.getupvalue(Knit.Controllers.ProjectileController.launchProjectileWithValues, 2),
 		GroundHit = Knit.Controllers.FallDamageController.KnitStart,
 		GuitarHeal = Knit.Controllers.GuitarController.performHeal,
 		--HannahKill = debug.getproto(debug.getproto(Knit.Controllers.HannahController.KnitStart, 2), 1),
-		HarvestCrop = Knit.Controllers.CropController.KnitStart,
-		--KaliyahPunch = debug.getproto(debug.getproto(Knit.Controllers.DragonSlayerController.KnitStart, 2), 1),
-		--MageSelect = debug.getproto(Knit.Controllers.MageController.registerTomeInteraction, 1),
-		--MinerDig = debug.getproto(Knit.Controllers.MinerController.setupMinerPrompts, 1),
+		HarvestCrop = debug.getproto(debug.getproto(Knit.Controllers.CropController.KnitStart, 4), 1),
+		KaliyahPunch = debug.getproto(debug.getproto(Knit.Controllers.DragonSlayerController.KnitStart, 2), 1),
+		MageSelect = debug.getproto(Knit.Controllers.MageController.registerTomeInteraction, 1),
+		MinerDig = debug.getproto(Knit.Controllers.MinerController.setupMinerPrompts, 1),
 		PickupItem = Knit.Controllers.ItemDropController.checkForPickup,
-		--PickupMetal = debug.getproto(debug.getproto(Knit.Controllers.MetalDetectorController.KnitStart, 1), 2),
+		PickupMetal = debug.getproto(debug.getproto(Knit.Controllers.MetalDetectorController.KnitStart, 1), 2),
 		ReportPlayer = require(lplr.PlayerScripts.TS.controllers.global.report['report-controller']).default.reportPlayer,
-		--ResetCharacter = debug.getproto(Knit.Controllers.ResetController.createBindable, 1),
+		ResetCharacter = debug.getproto(Knit.Controllers.ResetController.createBindable, 1),
 		SpawnRaven = Knit.Controllers.RavenController.spawnRaven,
-		SummonerClawAttack = Knit.Controllers.SummonerClawController.attack
+		SummonerClawAttack = Knit.Controllers.SummonerClawController.attack,
+		WarlockTarget = debug.getproto(Knit.Controllers.WarlockStaffController.KnitStart, 3)
 	}
 
 	local function dumpRemote(tab)
@@ -2358,14 +2360,16 @@ run(function()
 	local Killaura
 	local Targets
 	local Sort
-	local Range
+	local SwingRange
+	local AttackRange
 	local UpdateRate
 	local AngleSlider
 	local MaxTargets
 	local Mouse
 	local Swing
 	local GUI
-	local BoxColor
+	local BoxSwingColor
+	local BoxAttackColor
 	local ParticleTexture
 	local ParticleColor1
 	local ParticleColor2
@@ -2481,7 +2485,7 @@ run(function()
 					store.KillauraTarget = nil
 					if sword then
 						local plrs = entitylib.AllPosition({
-							Range = Range.Value,
+							Range = SwingRange.Value,
 							Wallcheck = Targets.Walls.Enabled or nil,
 							Part = 'RootPart',
 							Players = Targets.Players.Enabled,
@@ -2500,7 +2504,10 @@ run(function()
 								local angle = math.acos(localfacing:Dot((delta * Vector3.new(1, 0, 1)).Unit))
 								if angle > (math.rad(AngleSlider.Value) / 2) then continue end
 
-								table.insert(attacked, v)
+								table.insert(attacked, {
+									Entity = v,
+									Check = delta.Magnitude > AttackRange.Value and BoxSwingColor or BoxAttackColor
+								})
 								targetinfo.Targets[v] = tick() + 1
 
 								if not Attacking then
@@ -2518,6 +2525,8 @@ run(function()
 										end
 									end
 								end
+
+								if delta.Magnitude > AttackRange.Value then continue end
 
 								local actualRoot = v.Character.PrimaryPart
 								if actualRoot then
@@ -2545,21 +2554,21 @@ run(function()
 					end
 
 					for i, v in Boxes do
-						v.Adornee = attacked[i] and attacked[i].RootPart or nil
+						v.Adornee = attacked[i] and attacked[i].Entity.RootPart or nil
 						if v.Adornee then
-							v.Color3 = Color3.fromHSV(BoxColor.Hue, BoxColor.Sat, BoxColor.Value)
-							v.Transparency = 1 - BoxColor.Opacity
+							v.Color3 = Color3.fromHSV(attacked[i].Check.Hue, attacked[i].Check.Sat, attacked[i].Check.Value)
+							v.Transparency = 1 - attacked[i].Check.Opacity
 						end
 					end
 
 					for i, v in Particles do
-						v.Position = attacked[i] and attacked[i].RootPart.Position or Vector3.new(9e9, 9e9, 9e9)
+						v.Position = attacked[i] and attacked[i].Entity.RootPart.Position or Vector3.new(9e9, 9e9, 9e9)
 						v.Parent = attacked[i] and gameCamera or nil
 					end
 
 					if Face.Enabled and attacked[1] then
-						local vec = attacked[1].RootPart.Position * Vector3.new(1, 0, 1)
-						entitylib.character.RootPart.CFrame = CFrame.lookAt(entitylib.character.RootPart.Position, Vector3.new(vec.X, entitylib.character.RootPart.Position.Y, vec.Z))
+						local vec = attacked[1].Entity.RootPart.Position * Vector3.new(1, 0, 1)
+						entitylib.character.RootPart.CFrame = CFrame.lookAt(entitylib.character.RootPart.Position, Vector3.new(vec.X, entitylib.character.RootPart.Position.Y + 0.001, vec.Z))
 					end
 
 					task.wait(#attacked > 0 and #attacked * 0.02 or 1 / UpdateRate.Value)
@@ -2600,7 +2609,16 @@ run(function()
 			table.insert(methods, i)
 		end
 	end
-	Range = Killaura:CreateSlider({
+	SwingRange = Killaura:CreateSlider({
+		Name = 'Swing range',
+		Min = 1,
+		Max = 18,
+		Default = 18,
+		Suffix = function(val)
+			return val == 1 and 'stud' or 'studs'
+		end
+	})
+	AttackRange = Killaura:CreateSlider({
 		Name = 'Attack range',
 		Min = 1,
 		Max = 18,
@@ -2638,7 +2656,8 @@ run(function()
 	Killaura:CreateToggle({
 		Name = 'Show target',
 		Function = function(callback)
-			BoxColor.Object.Visible = callback
+			BoxSwingColor.Object.Visible = callback
+			BoxAttackColor.Object.Visible = callback
 			if callback then
 				for i = 1, 10 do
 					local box = Instance.new('BoxHandleAdornment')
@@ -2658,7 +2677,14 @@ run(function()
 			end
 		end
 	})
-	BoxColor = Killaura:CreateColorSlider({
+	BoxSwingColor = Killaura:CreateColorSlider({
+		Name = 'Target Color',
+		Darker = true,
+		DefaultHue = 0.6,
+		DefaultOpacity = 0.5,
+		Visible = false
+	})
+	BoxAttackColor = Killaura:CreateColorSlider({
 		Name = 'Attack Color',
 		Darker = true,
 		DefaultOpacity = 0.5,
@@ -3101,7 +3127,7 @@ run(function()
 						Players = Targets.Players.Enabled,
 						NPCs = Targets.NPCs.Enabled,
 						Wallcheck = Targets.Walls.Enabled,
-						Origin = entitylib.isAlive and entitylib.character.RootPart.Position or Vector3.zero
+						Origin = entitylib.isAlive and (shootpos or entitylib.character.RootPart.Position) or Vector3.zero
 					})
 	
 					if plr then
@@ -4210,12 +4236,48 @@ run(function()
 				task.wait(0.1)
 			until not AutoKit.Enabled
 		end,
+		beekeeper = function()
+			kitCollection('bee', function(v)
+				bedwars.Client:Get(remotes.BeePickup):SendToServer({beeId = v:GetAttribute('BeeId')})
+			end, 18, false)
+		end,
 		bigman = function()
 			kitCollection('treeOrb', function(v)
 				if bedwars.Client:Get(remotes.ConsumeTreeOrb):CallServer({treeOrbSecret = v:GetAttribute('TreeOrbSecret')}) then
 					v:Destroy()
 				end
 			end, 12, false)
+		end,
+		block_kicker = function()
+			local old = bedwars.BlockKickerKitController.getKickBlockProjectileOriginPosition
+			bedwars.BlockKickerKitController.getKickBlockProjectileOriginPosition = function(...)
+				local origin, dir = select(2, ...)
+				local plr = entitylib.EntityMouse({
+					Part = 'RootPart',
+					Range = 1000,
+					Origin = origin,
+					Players = true,
+					Wallcheck = true
+				})
+	
+				if plr then
+					local calc = prediction.SolveTrajectory(origin, 100, 20, plr.RootPart.Position, plr.RootPart.Velocity, workspace.Gravity, plr.HipHeight, plr.Jumping and 42.6 or nil)
+	
+					if calc then
+						for i, v in debug.getstack(2) do
+							if v == dir then
+								debug.setstack(2, i, CFrame.lookAt(origin, calc).LookVector)
+							end
+						end
+					end
+				end
+	
+				return old(...)
+			end
+	
+			AutoKit:Clean(function()
+				bedwars.BlockKickerKitController.getKickBlockProjectileOriginPosition = old
+			end)
 		end,
 		cat = function()
 			local old = bedwars.CatController.leap
@@ -4257,7 +4319,7 @@ run(function()
 		farmer_cletus = function()
 			kitCollection('HarvestableCrop', function(v)
 				if bedwars.Client:Get(remotes.HarvestCrop):CallServer({position = bedwars.BlockController:getBlockPosition(v.Position)}) then
-					bedwars.GameAnimationUtil.playAnimation(lplr.Character, bedwars.AnimationType.PUNCH)
+					bedwars.GameAnimationUtil:playAnimation(lplr.Character, bedwars.AnimationType.PUNCH)
 					bedwars.SoundManager:playSound(bedwars.SoundList.CROP_HARVEST)
 				end
 			end, 10, false)
@@ -4302,6 +4364,11 @@ run(function()
 					billboard:Destroy()
 				end
 			end, 30, true)
+		end,
+		jailor = function()
+			kitCollection('jailor_soul', function(v)
+				bedwars.JailorController:collectEntity(lplr, v, 'JailorSoul')
+			end, 20, false)
 		end,
 		grim_reaper = function()
 			kitCollection(bedwars.GrimReaperController.soulsByPosition, function(v)
@@ -4353,7 +4420,6 @@ run(function()
 		pinata = function()
 			kitCollection(lplr.Name..':pinata', function(v)
 				if getItem('candy') then
-					
 					bedwars.Client:Get(remotes.DepositPinata):CallServer(v)
 				end
 			end, 6, true)
@@ -4383,11 +4449,10 @@ run(function()
 					Sort = sortmethods.Health
 				})
 	
-				if plr then
+				if plr and (not Legit.Enabled or (lplr.Character:GetAttribute('Health') or 0) > 0) then
 					local localPosition = entitylib.character.RootPart.Position
 					local shootDir = CFrame.lookAt(localPosition, plr.RootPart.Position).LookVector
 					localPosition += shootDir * math.max((localPosition - plr.RootPart.Position).Magnitude - 16, 0)
-	
 	
 					bedwars.Client:Get(remotes.SummonerClawAttack):SendToServer({
 						position = localPosition,
@@ -4442,6 +4507,7 @@ run(function()
 						Part = 'RootPart',
 						Players = true
 					})
+	
 					if plr then
 						bedwars.Client:Get(remotes.DragonBreath):SendToServer({
 							player = lplr,
@@ -4449,6 +4515,33 @@ run(function()
 						})
 					end
 				end
+				task.wait(0.1)
+			until not AutoKit.Enabled
+		end,
+		warlock = function()
+			local lastTarget
+			repeat
+				if store.hand.tool and store.hand.tool.Name == 'warlock_staff' then
+					local plr = entitylib.EntityPosition({
+						Range = 30,
+						Part = 'RootPart',
+						Players = true,
+						NPCs = true
+					})
+	
+					if plr and plr.Character ~= lastTarget then
+						if not bedwars.Client:Get(remotes.WarlockTarget):CallServer({
+							target = plr.Character
+						}) then
+							plr = nil
+						end
+					end
+	
+					lastTarget = plr and plr.Character
+				else
+					lastTarget = nil
+				end
+	
 				task.wait(0.1)
 			until not AutoKit.Enabled
 		end,
@@ -4486,9 +4579,16 @@ run(function()
 		Tooltip = 'Automatically uses kit abilities.'
 	})
 	Legit = AutoKit:CreateToggle({Name = 'Legit Range'})
+	local sortTable = {}
 	for i in AutoKitFunctions do
-		Toggles[i] = AutoKit:CreateToggle({
-			Name = bedwars.BedwarsKitMeta[i].name,
+		table.insert(sortTable, i)
+	end
+	table.sort(sortTable, function(a, b)
+		return bedwars.BedwarsKitMeta[a].name < bedwars.BedwarsKitMeta[b].name
+	end)
+	for _, v in sortTable do
+		Toggles[v] = AutoKit:CreateToggle({
+			Name = bedwars.BedwarsKitMeta[v].name,
 			Default = true
 		})
 	end
@@ -9674,6 +9774,89 @@ run(function()
 	LimitItem = AutoSuffocate:CreateToggle({
 		Name = 'Limit to Items',
 		Default = true
+	})
+end)
+run(function()
+	local ArmorSwitch
+	local Mode
+	local Targets
+	local Range
+	
+	local function getBestArmor(slot)
+		local closest, mag = nil, 0
+	
+		for _, item in store.inventory.inventory.items do
+			local meta = item and bedwars.ItemMeta[item.itemType] or {}
+	
+			if meta.armor and meta.armor.slot == slot then
+				local newmag = (meta.armor.damageReductionMultiplier or 0)
+	
+				if newmag > mag then
+					closest, mag = item, newmag
+				end
+			end
+		end
+	
+		return closest
+	end
+	
+	ArmorSwitch = katware.Categories.Inventory:CreateModule({
+		Name = 'ArmorSwitch',
+		Function = function(callback)
+			if callback then
+				if Mode.Value == 'Toggle' then
+					repeat
+						local state = entitylib.EntityPosition({
+							Part = 'RootPart',
+							Range = Range.Value,
+							Players = Targets.Players.Enabled,
+							NPCs = Targets.NPCs.Enabled,
+							Wallcheck = Targets.Walls.Enabled
+						}) and true or false
+	
+						for i = 0, 2 do
+							if (store.inventory.inventory.armor[i + 1] ~= 'empty') ~= state and ArmorSwitch.Enabled then
+								bedwars.Store:dispatch({
+									type = 'InventorySetArmorItem',
+									item = store.inventory.inventory.armor[i + 1] == 'empty' and state and getBestArmor(i) or nil,
+									armorSlot = i
+								})
+								katwareEvents.InventoryChanged.Event:Wait()
+							end
+						end
+						task.wait(0.1)
+					until not ArmorSwitch.Enabled
+				else
+					ArmorSwitch:Toggle()
+					for i = 0, 2 do
+						bedwars.Store:dispatch({
+							type = 'InventorySetArmorItem',
+							item = store.inventory.inventory.armor[i + 1] == 'empty' and getBestArmor(i) or nil,
+							armorSlot = i
+						})
+						katwareEvents.InventoryChanged.Event:Wait()
+					end
+				end
+			end
+		end,
+		Tooltip = 'Puts on / takes off armor when toggled for baiting.'
+	})
+	Mode = ArmorSwitch:CreateDropdown({
+		Name = 'Mode',
+		List = {'Toggle', 'On Key'}
+	})
+	Targets = ArmorSwitch:CreateTargets({
+		Players = true,
+		NPCs = true
+	})
+	Range = ArmorSwitch:CreateSlider({
+		Name = 'Range',
+		Min = 1,
+		Max = 30,
+		Default = 30,
+		Suffix = function(val)
+			return val == 1 and 'stud' or 'studs'
+		end
 	})
 end)
 
