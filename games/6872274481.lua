@@ -2323,7 +2323,7 @@ run(function()
 	Value = InfiniteFly:CreateSlider({
 		Name = 'Speed',
 		Min = 1,
-		Max = 23,
+		Max = 150,
 		Default = 23,
 		Suffix = function(val) 
 			return val == 1 and 'stud' or 'studs' 
