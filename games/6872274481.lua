@@ -2009,7 +2009,7 @@ run(function()
 	Value = Fly:CreateSlider({
 		Name = 'Speed',
 		Min = 1,
-		Max = 23,
+		Max = 100,
 		Default = 23,
 		Suffix = function(val)
 			return val == 1 and 'stud' or 'studs'
@@ -2323,7 +2323,7 @@ run(function()
 	Value = InfiniteFly:CreateSlider({
 		Name = 'Speed',
 		Min = 1,
-		Max = 150,
+		Max = 23,
 		Default = 23,
 		Suffix = function(val) 
 			return val == 1 and 'stud' or 'studs' 
