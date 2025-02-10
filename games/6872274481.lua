@@ -9543,7 +9543,10 @@ run(function()
 end)
 
 run(function()
-    local TexturePack = katware.Categories.Render:CreateModule({
+    local TexturePack
+    local PackDropdown
+    
+    TexturePack = katware.Categories.Render:CreateModule({
         Name = 'TexturePack',
         Function = function(callback)
             if callback then
@@ -9554,7 +9557,7 @@ run(function()
                     ["Garbage"] = "rbxassetid://14336548540"
                 }
                 
-                local loaded = game:GetObjects(assetMap[TexturePack.Selected.Value])
+                local loaded = game:GetObjects(assetMap[PackDropdown.Value])
                 local mainAsset = loaded[1]
                 mainAsset.Parent = replicatedStorage
 
@@ -9590,9 +9593,11 @@ run(function()
         Tooltip = "Replaces default tool models with custom textures"
     })
     
-    TexturePack:CreateDropdown({
+    -- Create dropdown before using its value
+    PackDropdown = TexturePack:CreateDropdown({
         Name = "Pack",
         List = {"Realistic Pack", "32x Pack", "16x Pack", "Garbage"},
+        Default = "Realistic Pack", -- Add a default value
         Function = function(val)
             if TexturePack.Enabled then
                 TexturePack:Toggle()
