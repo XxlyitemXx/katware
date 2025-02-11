@@ -8886,9 +8886,16 @@ run(function()
 		
 		isTweening = true
 		playertween = tweenService:Create(
-			lplr.Character:WaitForChild("HumanoidRootPart"),
-			TweenInfo.new(0.65, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
-			{CFrame = target.RootPart.CFrame + Vector3.new(0, 1.5, 0)}
+			lplr.Character:WaitForChild("HumanoidRootPart"), 
+			TweenInfo.new(
+				0.85, 
+				Enum.EasingStyle.Quad, 
+				Enum.EasingDirection.InOut, 
+				0, 
+				false, 
+				0 
+			), 
+			{ CFrame = target.RootPart.CFrame + Vector3.new(0, 1, 0) } 
 		)
 		
 		playertween.Completed:Connect(function()
@@ -8967,7 +8974,18 @@ run(function()
                                 notif("Autowin", "Destroying " .. bedname:lower() .. " team's bed", 5)
                             end
 
-                            bedtween = tweenService:Create(lplr.Character:WaitForChild("HumanoidRootPart"), TweenInfo.new(0.65, Enum.EasingStyle.Linear, Enum.EasingDirection.In, 0, false, 0), { CFrame = CFrame.new(bed.Position) + Vector3.new(0, 10, 0) })
+                            bedtween = tweenService:Create(
+								lplr.Character:WaitForChild("HumanoidRootPart"), 
+								TweenInfo.new(
+									0.85, 
+									Enum.EasingStyle.Quad, 
+									Enum.EasingDirection.InOut, 
+									0, 
+									false, 
+									0 
+								), 
+								{ CFrame = CFrame.new(bed.Position) + Vector3.new(0, 7, 0) } 
+							)
                             task.wait(0.1)
                             bedtween:Play()
 
@@ -9050,10 +9068,17 @@ run(function()
                             task.wait()
                             local target = FindTarget(nil, true)
                             playertween = tweenService:Create(
-                                lplr.Character:WaitForChild("HumanoidRootPart"), 
-                                TweenInfo.new(0.65, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
-                                {CFrame = target.RootPart.CFrame + Vector3.new(0, 1.5, 0)}
-                            )
+								lplr.Character:WaitForChild("HumanoidRootPart"), 
+								TweenInfo.new(
+									0.85, 
+									Enum.EasingStyle.Quad, 
+									Enum.EasingDirection.InOut, 
+									0, 
+									false, 
+									0 
+								), 
+								{ CFrame = target.RootPart.CFrame + Vector3.new(0, 1, 0) } 
+							)
                             playertween:Play()
                             if AutowinNotification.Enabled then
                                 notif("Autowin", "Killing " .. target.Player.DisplayName .. " (" .. (target.Player.Team and target.Player.Team.Name or "neutral") .. " Team)", 5)
@@ -9090,10 +9115,17 @@ run(function()
                                     target = FindTarget(80, true)
                                     if not target or not target.RootPart or not IsAlive(lplr) then break end
                                     playertween = tweenService:Create(
-                                        lplr.Character:WaitForChild("HumanoidRootPart"), 
-                                        TweenInfo.new(0.65, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
-                                        {CFrame = target.RootPart.CFrame + Vector3.new(0, 1.5, 0)}
-                                    )
+										lplr.Character:WaitForChild("HumanoidRootPart"), 
+										TweenInfo.new(
+											0.85, 
+											Enum.EasingStyle.Quad, 
+											Enum.EasingDirection.InOut, 
+											0, 
+											false, 
+											0 
+										), 
+										{ CFrame = target.RootPart.CFrame + Vector3.new(0, 1, 0) } 
+									)
                                     playertween:Play()
                                     task.wait()
                                 until not (FindTarget(80, true) and FindTarget(80, true).RootPart) or (not Autowin.Enabled) or (not IsAlive(lplr))
