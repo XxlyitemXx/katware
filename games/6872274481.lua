@@ -9192,6 +9192,27 @@ run(function()
     local positionCheckInterval = 0.2
     local postTweenCheckDelay = 4
     local maxAllowedDistance = 15
+	local baseTweenSpeed = 0.65 
+	local maxTweenSpeed = 1.2
+	local pingThreshold = 140 
+	local maxPingConsideration = 350 
+
+	local function calculateTweenSpeed()
+		local ping = stats.Network.ServerStatsItem["Data Ping"]:GetValue()
+		if ping <= pingThreshold then
+			return baseTweenSpeed
+		end
+		local pingDelta = math.clamp(ping - pingThreshold, 0, maxPingConsideration - pingThreshold)
+		local speedMultiplier = 1 + (pingDelta / (maxPingConsideration - pingThreshold))
+		
+		local tweenSpeed = math.clamp(baseTweenSpeed * speedMultiplier, baseTweenSpeed, maxTweenSpeed)
+
+		if AutowinNotification.Enabled then
+			notif("Autowin", "Ping: " .. math.floor(ping) .. "ms | Tween Speed: " .. string.format("%.2f", tweenSpeed) .. "s", 3)
+		end
+
+		return tweenSpeed
+	end
 
     local function IsAlive(plr)
         plr = plr or lplr
@@ -9409,10 +9430,13 @@ run(function()
 							end
 
                             bedtween = tweenService:Create(
-                                lplr.Character:WaitForChild("HumanoidRootPart"), 
-                                TweenInfo.new(0.85), 
-                                { CFrame = bed.CFrame + Vector3.new(0, 7, 0) }
-                            )
+										lplr.Character:WaitForChild("HumanoidRootPart"), 
+										TweenInfo.new(
+											calculateTweenSpeed(), 
+											Enum.EasingStyle.Linear
+										), 
+										{ CFrame = bed.CFrame + Vector3.new(0, 7, 0) }
+									)
                             bedtween:Play()
 
                             task.spawn(function()
@@ -9467,13 +9491,9 @@ run(function()
 							repeat
 								task.wait()
 							until IsAlive(lplr)
-
-							task.wait(3)
-
 							lastActionTime = tick()
-					
 							while Autowin.Enabled and IsAlive(lplr) do
-                                if (tick() - lastActionTime) >= 2.7 then
+                                if (tick() - lastActionTime) >= 1.5 then
                                     local searchRange = 45
                                     local maxSearchRange = 120
                                     local rangeIncrement = 15
@@ -9512,10 +9532,13 @@ run(function()
                                             end
                                             local startPosition = lplr.Character.HumanoidRootPart.Position
                                             playertween = tweenService:Create(
-                                                lplr.Character:WaitForChild("HumanoidRootPart"), 
-                                                TweenInfo.new(0.65), 
-                                                { CFrame = target.RootPart.CFrame + Vector3.new(0, 0, 0) }
-                                            )
+															lplr.Character:WaitForChild("HumanoidRootPart"), 
+															TweenInfo.new(
+																calculateTweenSpeed(),
+																Enum.EasingStyle.Linear
+															), 
+															{ CFrame = target.RootPart.CFrame + Vector3.new(0, 0, 0) }
+														)
                                             playertween:Play()
 
                                             task.spawn(function()
@@ -9599,7 +9622,14 @@ run(function()
 						elseif FindTarget(nil, true) and FindTarget(nil, true).RootPart then
 							task.wait()
 							local target = FindTarget(nil, true)
-							playertween = tweenService:Create(lplr.Character:WaitForChild("HumanoidRootPart"), TweenInfo.new(0.65, Enum.EasingStyle.Linear), { CFrame = target.RootPart.CFrame + Vector3.new(0, 0, 0) })
+							playertween = tweenService:Create(
+								lplr.Character:WaitForChild("HumanoidRootPart"), 
+								TweenInfo.new(
+									calculateTweenSpeed(),
+									Enum.EasingStyle.Linear
+								), 
+								{ CFrame = target.RootPart.CFrame + Vector3.new(0, 0, 0) }
+							)
 							playertween:Play()
 							if AutowinNotification.Enabled then
 								notif("Autowin", "Killing " .. target.Player.DisplayName .. " (" .. (target.Player.Team and target.Player.Team.Name or "neutral") .. " Team)", 5)
@@ -9610,7 +9640,14 @@ run(function()
 								repeat
 									target = FindTarget(20, true)
 									if not target or not target.RootPart or not IsAlive(lplr) then break end
-									playertween = tweenService:Create(lplr.Character:WaitForChild("HumanoidRootPart"), TweenInfo.new(0.65), { CFrame = target.RootPart.CFrame + Vector3.new(0, 0, 0) })
+									playertween = tweenService:Create(
+										lplr.Character:WaitForChild("HumanoidRootPart"), 
+										TweenInfo.new(
+											calculateTweenSpeed(),
+											Enum.EasingStyle.Linear
+										), 
+										{ CFrame = target.RootPart.CFrame + Vector3.new(0, 0, 0) }
+									)
 									playertween:Play()
 									task.wait()
 								until not (FindTarget(20, true) and FindTarget(20, true).RootPart) or (not Autowin.Enabled) or (not IsAlive(lplr))
