@@ -9413,16 +9413,16 @@ run(function()
                         lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
                     end
                     Autowin:Clean(runService.Heartbeat:Connect(function()
-                        pcall(function()
-                            local enemyBed = FindEnemyBed()
-                            if not isnetworkowner(lplr.Character:WaitForChild("HumanoidRootPart")) and (enemyBed and GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), enemyBed) > 75 or not enemyBed) then
-                                if IsAlive(lplr) and FindTeamBed() and Autowin.Enabled and (not store.matchState == 2) then
-                                    lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
-                                    lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
-                                end
-                            end
-                        end)
-                    end))
+						pcall(function()
+							local enemyBed = FindEnemyBed()
+							if enemyBed and not isnetworkowner(lplr.Character:WaitForChild("HumanoidRootPart")) and GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), enemyBed) > 75 then
+								if IsAlive(lplr) and FindTeamBed() and Autowin.Enabled and (not store.matchState == 2) then
+									lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+									lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+								end
+							end
+						end)
+					end))
                     Autowin:Clean(lplr.CharacterAdded:Connect(function()
                         if not IsAlive(lplr) then repeat task.wait() until IsAlive(lplr) end
                         local bed = FindEnemyBed()

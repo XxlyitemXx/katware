@@ -237,3 +237,27 @@ run(function()
 		end
 	})
 end)
+run(function()
+    local LevelModule = katware.Categories.Utility:CreateModule({
+        Name = 'PlayerLevel',
+        Function = function(callback)
+            if callback then
+                katware:CreateNotification('PlayerLevel', 'Level set (client-sided)', 3)
+                lplr:SetAttribute('PlayerLevel', Level.Value)
+            end
+        end,
+        Tooltip = 'Sets your displayed player level'
+    })
+    
+    Level = LevelModule:CreateSlider({
+        Name = 'Level',
+        Min = 1,
+        Max = 100,
+        Default = 100,
+        Function = function(val)
+            if LevelModule.Enabled then
+                lplr:SetAttribute('PlayerLevel', val)
+            end
+        end
+    })
+end)
