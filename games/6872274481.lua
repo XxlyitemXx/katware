@@ -9199,8 +9199,8 @@ run(function()
 	local maxPingConsideration = 350 
 
 	local function calculateTweenSpeed()
-		local ping = stats:GetValueString("Data Ping"):split(" ")[1]
-    	ping = tonumber(ping) or 0
+		local ping = lplr:GetNetworkPing() * 1000
+
 		if ping <= pingThreshold then
 			return baseTweenSpeed
 		end
