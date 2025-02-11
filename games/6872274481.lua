@@ -9629,7 +9629,7 @@ run(function()
 	Autowin:Clean(katwareEvents.MatchEndEvent.Event:Connect(function(winTable)
 		if Autowin.Enabled then
 			if (bedwars.Store:getState().Game.myTeam or {}).id == winTable.winningTeamId or lplr.Neutral then
-				notif("Autowin", "Match ended!, 5)
+				notif("Autowin", "Match ended!", 5)
 			end
 		end
 	end))
