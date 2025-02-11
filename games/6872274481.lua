@@ -9361,10 +9361,10 @@ run(function()
     end
 	
 	local function notif(...)
-		vape:CreateNotification(...)
+		katware:CreateNotification(...)
 	end
 	
-	Autowin = vape.Categories.Blatant:CreateModule({
+	Autowin = katware.Categories.Blatant:CreateModule({
 		Name = "Autowin",
 		Function = function(callback)
 			if callback then
@@ -9374,10 +9374,10 @@ run(function()
 							task.wait()
 						until store.matchState ~= 0 or not Autowin.Enabled
 					end
-					if not vape.Loaded then
+					if not katware.Loaded then
 						repeat
 							task.wait()
-						until vape.Loaded or not Autowin.Enabled
+						until katware.Loaded or not Autowin.Enabled
 					end
 					if not Autowin.Enabled then
 						return
@@ -9616,11 +9616,10 @@ run(function()
 		Tooltip = "the cutiest autowin ever"
 	})
 
-	Autowin:Clean(vapeEvents.MatchEndEvent.Event:Connect(function(winTable)
+	Autowin:Clean(katwareEvents.MatchEndEvent.Event:Connect(function(winTable)
 		if Autowin.Enabled then
 			if (bedwars.Store:getState().Game.myTeam or {}).id == winTable.winningTeamId or lplr.Neutral then
-				notif("Autowin", "Match ended! Lobbying & Uninjecting Vape.", 5)
-				vape:Uninject() -- Uninject Vape
+				notif("Autowin", "Match ended! Lobbying & Uninjecting katware.", 5)
 			end
 		end
 	end))
