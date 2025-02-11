@@ -9464,12 +9464,37 @@ run(function()
 					
 							while Autowin.Enabled and IsAlive(lplr) do
                                 if (tick() - lastActionTime) >= 2.7 then
-                                    local target = FindTarget(45, true)
+                                    -- Start with initial search range
+                                    local searchRange = 45
+                                    local maxSearchRange = 120 -- Maximum range to search before resetting
+                                    local rangeIncrement = 15 -- How much to increase range each time
+                                    
+                                    local target = nil
+                                    repeat
+                                        target = FindTarget(searchRange, true)
+                                        
+                                        if not target or not target.RootPart then
+                                            -- No target found at current range, increase and try again
+                                            searchRange = searchRange + rangeIncrement
+                                            if searchRange > maxSearchRange then
+                                                -- Exceeded max range, reset character
+                                                notif("Autowin", "No targets found within " .. maxSearchRange .. " studs. Resetting to search further.", 5)
+                                                lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+                                                lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+                                                repeat task.wait() until IsAlive(lplr)
+                                                lastActionTime = tick()
+                                                searchRange = 45 -- Reset search range
+                                            end
+                                            task.wait(0.1) -- Small delay before next search
+                                        end
+                                    until target and target.RootPart or not Autowin.Enabled or not IsAlive(lplr)
+
                                     if target and target.RootPart and IsAlive(lplr) then
                                         if AutowinNotification.Enabled then
                                             local team = bed:GetAttribute("id") and string.split(bed:GetAttribute("id"), "_")[1] or "unknown"
-                                            notif("Autowin", "Killing " .. team:lower() .. " team's teamates", 5)
+                                            notif("Autowin", "Targeting " .. team:lower() .. " team player at " .. math.floor(GetMagnitudeOf2Objects(lplr.Character:WaitForChild("HumanoidRootPart"), target.RootPart)) .. " studs", 5)
                                         end
+
                                         repeat
                                             target = FindTarget(25, true)
                                             if not target or not target.RootPart or not IsAlive(lplr) then break end
@@ -9545,28 +9570,13 @@ run(function()
                                             end
                                         until not (FindTarget(30, true) and FindTarget(30, true).RootPart) or not Autowin.Enabled or not IsAlive(lplr)
 
-										-- Update lastActionTime after killing an enemy
-										lastActionTime = tick()
-									else
-										-- Reset if no target is found within an extended range
-										local targetInRange = FindTarget(targetSearchRange, true)
-										if not targetInRange or not targetInRange.RootPart then
-											notif("Autowin", "No targets found within " .. targetSearchRange .. " studs. Resetting character.", 5)
-											lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
-											lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
-											repeat
-												task.wait()
-											until IsAlive(lplr)
-											lastActionTime = tick() -- Reset the timer after respawn
-										else
-											-- Wait for a short period before checking again
-											task.wait(0.5)
-										end
-									end
-								else
-									task.wait(0.5) -- wait to prevent lag
-								end
-							end
+                                        -- Update lastActionTime after killing an enemy
+                                        lastActionTime = tick()
+                                    end
+                                else
+                                    task.wait(0.5) -- wait to prevent lag
+                                end
+                            end
 
 							if IsAlive(lplr) and FindTeamBed() and Autowin.Enabled then
 								lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
@@ -9619,7 +9629,7 @@ run(function()
 	Autowin:Clean(katwareEvents.MatchEndEvent.Event:Connect(function(winTable)
 		if Autowin.Enabled then
 			if (bedwars.Store:getState().Game.myTeam or {}).id == winTable.winningTeamId or lplr.Neutral then
-				notif("Autowin", "Match ended! Lobbying & Uninjecting katware.", 5)
+				notif("Autowin", "Match ended!, 5)
 			end
 		end
 	end))
