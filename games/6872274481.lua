@@ -9196,7 +9196,8 @@ run(function()
 	local baseTweenSpeed = 0.65 
 	local maxTweenSpeed = 1.2
 	local pingThreshold = 140 
-	local maxPingConsideration = 350 
+	local maxPingConsideration = 350
+	local baseActionDelay = 1.5
 
 	local function calculateTweenSpeed()
 		local ping = lplr:GetNetworkPing() * 1000
@@ -9495,7 +9496,10 @@ run(function()
 							until IsAlive(lplr)
 							lastActionTime = tick()
 							while Autowin.Enabled and IsAlive(lplr) do
-                                if (tick() - lastActionTime) >= 1.5 then
+								local currentTweenSpeed = calculateTweenSpeed()
+								local actionDelay = baseActionDelay + (currentTweenSpeed - baseTweenSpeed)
+								
+								if (tick() - lastActionTime) >= actionDelay then
                                     local searchRange = 45
                                     local maxSearchRange = 120
                                     local rangeIncrement = 15
