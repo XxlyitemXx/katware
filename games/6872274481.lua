@@ -8883,7 +8883,7 @@ run(function()
 		
 		local startPos = lplr.Character.HumanoidRootPart.Position
 		local targetPos = target.RootPart.Position
-		task.wait(1)
+		task.wait(0.5)
 		isTweening = true
 		playertween = tweenService:Create(
 			lplr.Character:WaitForChild("HumanoidRootPart"), 
@@ -8973,7 +8973,7 @@ run(function()
                                 local bedname = bed:GetAttribute("id") and string.split(bed:GetAttribute("id"), "_")[1] or "unknown"
                                 notif("Autowin", "Destroying " .. bedname:lower() .. " team's bed", 5)
                             end
-							task.wait(1)
+							task.wait(0.5)
                             bedtween = tweenService:Create(
 								lplr.Character:WaitForChild("HumanoidRootPart"), 
 								TweenInfo.new(
