@@ -9731,7 +9731,7 @@ run(function()
 							lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
 							lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
 						end
-					end))
+					end)
 					
 					Autowin:Clean(lplr.CharacterAdded:Connect(function()
 						if (not IsAlive(lplr)) then repeat task.wait() until IsAlive(lplr) end
