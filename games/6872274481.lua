@@ -24,6 +24,7 @@ local collectionService = cloneref(game:GetService('CollectionService'))
 local contextActionService = cloneref(game:GetService('ContextActionService'))
 local coreGui = cloneref(game:GetService('CoreGui'))
 local starterGui = cloneref(game:GetService('StarterGui'))
+local stats = game:GetService("Stats")
 
 local isnetworkowner = function(part)
 	return true
@@ -9198,7 +9199,8 @@ run(function()
 	local maxPingConsideration = 350 
 
 	local function calculateTweenSpeed()
-		local ping = stats.Network.ServerStatsItem["Data Ping"]:GetValue()
+		local ping = stats:GetValueString("Data Ping"):split(" ")[1]
+    	ping = tonumber(ping) or 0
 		if ping <= pingThreshold then
 			return baseTweenSpeed
 		end
