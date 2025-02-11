@@ -9366,14 +9366,31 @@ run(function()
     local function createTween(target, offset)
         return tweenService:Create(
             lplr.Character:WaitForChild("HumanoidRootPart"),
-            TweenInfo.new(
-                0.85,
-                Enum.EasingStyle.Quad,
-                Enum.EasingDirection.InOut
-            ),
-            { CFrame = target.CFrame + (offset or Vector3.new(0, 7, 0)) }
+			TweenInfo.new(
+				0.65,                           -- Duration
+				Enum.EasingStyle.Linear,        -- Linear style
+				Enum.EasingDirection.In,        -- In direction
+				0,                              -- No repeat
+				false,                          -- Don't reverse
+				0                               -- No delay
+			), 
+            { CFrame = target.CFrame + (offset or Vector3.new(0, 4, 0)) }
         )
     end
+	local function createBedTween(bed)
+		return tweenService:Create(
+			lplr.Character:WaitForChild("HumanoidRootPart"), 
+			TweenInfo.new(
+				0.65,                           -- Duration
+				Enum.EasingStyle.Linear,        -- Linear style
+				Enum.EasingDirection.In,        -- In direction
+				0,                              -- No repeat
+				false,                          -- Don't reverse
+				0                               -- No delay
+			), 
+			{ CFrame = CFrame.new(bed.Position) + Vector3.new(0, 6, 0) }
+		)
+	end
 
     local function validatePosition(current, target, maxDist)
         local dist = GetMagnitudeOf2Objects(current, target)
@@ -9419,15 +9436,25 @@ run(function()
             return nil
         end
     end
-
+	local function createPlayerTween(target)
+		return tweenService:Create(
+			lplr.Character:WaitForChild("HumanoidRootPart"),
+			TweenInfo.new(
+				0.85,
+				Enum.EasingStyle.Quad,
+				Enum.EasingDirection.InOut
+			),
+			{ CFrame = target.RootPart.CFrame + Vector3.new(0, 1, 0) }
+		)
+	end
     local function tweenToTarget(target)
-        if not target or not target.RootPart or not IsAlive(lplr) then return false end
-        
-        local startPos = lplr.Character.HumanoidRootPart.Position
-        task.wait(0.1)
-        
-        playertween = createTween(target.RootPart, Vector3.new(0, 1, 0))
-        playertween:Play()
+		if not target or not target.RootPart or not IsAlive(lplr) then return false end
+		
+		local startPos = lplr.Character.HumanoidRootPart.Position
+		task.wait(0.1)
+		
+		playertween = createPlayerTween(target)  -- Use the player-specific tween
+		playertween:Play()
         
         -- Monitor tween
         task.delay(tweenTimeout, function()
@@ -9453,16 +9480,16 @@ run(function()
     end
 
     local function handleBedDestruction(bed)
-        if not bed then return false end
-        
-        local bedname = bed:GetAttribute("id") and string.split(bed:GetAttribute("id"), "_")[1] or "unknown"
-        if AutowinNotification.Enabled then
-            notif("Autowin", "Destroying " .. bedname:lower() .. " team's bed", 5)
-        end
-        
-        task.wait(0.5)  -- Pre-tween delay
-        bedtween = createTween(bed)
-        bedtween:Play()
+		if not bed then return false end
+		
+		local bedname = bed:GetAttribute("id") and string.split(bed:GetAttribute("id"), "_")[1] or "unknown"
+		if AutowinNotification.Enabled then
+			notif("Autowin", "Destroying " .. bedname:lower() .. " team's bed", 5)
+		end
+		
+		task.wait(0.5)  -- Pre-tween delay
+		bedtween = createBedTween(bed)  -- Use the specific bed tween
+		bedtween:Play()
         
         task.delay(tweenTimeout, function()
             if bedtween and bedtween.PlaybackState == Enum.PlaybackState.Playing then
