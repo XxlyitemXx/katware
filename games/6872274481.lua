@@ -9054,28 +9054,85 @@ run(function()
                             lastActionTime = tick()
 
                             while Autowin.Enabled and IsAlive(lplr) do
-                                if (tick() - lastActionTime) >= 1.5 then
-                                    if handleDesync() then
+								if (tick() - lastActionTime) >= baseActionDelay then
+									if handleDesync() then
 										continue
-									end	
+									end
+									
 									if not FindEnemyBed() then
-										local target = handleTargetSearch()
-										if target then
+										local target = FindTarget(20, true)
+										if target and target.RootPart and IsAlive(lplr) then
 											if AutowinNotification.Enabled then
 												notif("Autowin", "Found target: " .. target.Player.DisplayName, 3)
 											end
 											
-											if not tweenToTarget(target) then
-												continue
-											end
+											repeat
+												target = FindTarget(20, true)
+												if not target or not target.RootPart or not IsAlive(lplr) then break end
+												
+												playertween = tweenService:Create(
+													lplr.Character:WaitForChild("HumanoidRootPart"), 
+													TweenInfo.new(
+														calculateTweenSpeed(),
+														Enum.EasingStyle.Linear
+													), 
+													{ CFrame = target.RootPart.CFrame + Vector3.new(0, 1, 0) }
+												)
+												
+												isTweening = true
+												playertween:Play()
+												
+												task.delay(tweenTimeout, function()
+													if isTweening and playertween and playertween.PlaybackState == Enum.PlaybackState.Playing then
+														notif("Autowin", "Tween timeout - forcing reset", 3)
+														playertween:Cancel()
+														if IsAlive(lplr) then
+															lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+															lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+														end
+														handleDesync()
+													end
+												end)
+												
+												playertween.Completed:Connect(function()
+													isTweening = false
+													task.wait(0.1)
+													
+													if IsAlive(lplr) and target.RootPart then
+														local finalDist = GetMagnitudeOf2Objects(lplr.Character.HumanoidRootPart, target.RootPart)
+														if finalDist > 15 then
+															notif("Autowin", "Tween failed - position mismatch", 3)
+															if IsAlive(lplr) then
+																lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+																lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+															end
+															handleDesync()
+														end
+													end
+												end)
+												
+												task.wait(0.1)
+											until not (FindTarget(20, true) and FindTarget(20, true).RootPart) or not Autowin.Enabled or not IsAlive(lplr)
 											
 											lastActionTime = tick()
+										else
+											if targetSearchRange < maxSearchRange then
+												targetSearchRange = math.min(targetSearchRange + searchIncrement, maxSearchRange)
+												notif("Autowin", "Expanding search range to " .. targetSearchRange .. " studs", 3)
+											else
+												notif("Autowin", "No targets found - resetting position", 3)
+												if IsAlive(lplr) then
+													lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+													lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
+												end
+												targetSearchRange = 20
+											end
 										end
 									end
-									
-									task.wait(0.1)
 								end
-                            end
+								task.wait(0.1)
+							end
+							
 
                             if IsAlive(lplr) and FindTeamBed() and Autowin.Enabled then
                                 lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
