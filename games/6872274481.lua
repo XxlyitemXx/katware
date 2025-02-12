@@ -8644,7 +8644,7 @@ run(function()
         Default = "Shield"
     })
 end)
-run(function()
+--[[run(function()
 	--NEWER VERSION
     local Autowin = { Enabled = false }
     local AutowinNotification = { Enabled = true }
@@ -9280,7 +9280,7 @@ run(function()
             end
         end
     end))
-end)
+end)]]
 run(function()
 	--OLD VERSION
     local Autowin = { Enabled = false }
@@ -9584,13 +9584,13 @@ run(function()
 		playertween:Play()
 		return true
 	end
-	
+
     local function notif(...)
         katware:CreateNotification(...)
     end
     
     Autowin = katware.Categories.Blatant:CreateModule({
-        Name = "Autowin (Old Version!)",
+        Name = "Autowin",
         Function = function(callback)
             if callback then
                 task.spawn(function()
