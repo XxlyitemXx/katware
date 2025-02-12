@@ -8644,7 +8644,8 @@ run(function()
         Default = "Shield"
     })
 end)
---[[run(function()
+run(function()
+	--NEWER VERSION
     local Autowin = { Enabled = false }
     local AutowinNotification = { Enabled = true }
     local bedtween
@@ -8665,7 +8666,12 @@ end)
     local positionCheckInterval = 0.2
     local isTweening = false
     local postTweenCheckDelay = 0.5
-	
+    local baseTweenSpeed = 0.65 
+    local maxTweenSpeed = 1.2
+    local pingThreshold = 140 
+    local maxPingConsideration = 350
+    local baseActionDelay = 1.5
+
     local function IsAlive(plr)
         plr = plr or lplr
         if not plr.Character then return false end
@@ -8843,13 +8849,14 @@ end)
             return target
         else
             if targetSearchRange < maxSearchRange then
+				task.wait(0.5)
                 targetSearchRange = math.min(targetSearchRange + searchIncrement, maxSearchRange)
                 notif("Autowin", "Expanding search range to " .. targetSearchRange .. " studs", 3)
             else
                 notif("Autowin", "No targets found - resetting position", 3)
                 if IsAlive(lplr) then
-                    lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
                     lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
+                    lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
                 end
                 targetSearchRange = 20
                 return nil
@@ -8889,12 +8896,8 @@ end)
 		playertween = tweenService:Create(
 			lplr.Character:WaitForChild("HumanoidRootPart"), 
 			TweenInfo.new(
-				0.85, 
-				Enum.EasingStyle.Quad, 
-				Enum.EasingDirection.InOut, 
-				0, 
-				false, 
-				0 
+				calculateTweenSpeed(),
+				Enum.EasingStyle.Linear
 			), 
 			{ CFrame = target.RootPart.CFrame + Vector3.new(0, 1, 0) } 
 		)
@@ -8932,6 +8935,23 @@ end)
 		return true
 	end
 
+	local function calculateTweenSpeed()
+        local ping = lplr:GetNetworkPing() * 1000
+
+        if ping <= pingThreshold then
+            return baseTweenSpeed
+        end
+        local pingDelta = math.clamp(ping - pingThreshold, 0, maxPingConsideration - pingThreshold)
+        local speedMultiplier = 1 + (pingDelta / (maxPingConsideration - pingThreshold))
+        
+        local tweenSpeed = math.clamp(baseTweenSpeed * speedMultiplier, baseTweenSpeed, maxTweenSpeed)
+
+        if AutowinNotification.Enabled then
+            notif("Autowin", "Ping: " .. math.floor(ping) .. "ms | Tween Speed: " .. string.format("%.2f", tweenSpeed) .. "s", 3)
+        end
+        print("tweenSpeed: " .. tweenSpeed)    
+        return tweenSpeed
+    end
     Autowin = katware.Categories.Blatant:CreateModule({
         Name = "Autowin",
         Function = function(callback)
@@ -8978,14 +8998,10 @@ end)
                             bedtween = tweenService:Create(
 								lplr.Character:WaitForChild("HumanoidRootPart"), 
 								TweenInfo.new(
-									0.85, 
-									Enum.EasingStyle.Quad, 
-									Enum.EasingDirection.InOut, 
-									0, 
-									false, 
-									0 
+									calculateTweenSpeed(),
+									Enum.EasingStyle.Linear
 								), 
-								{ CFrame = CFrame.new(bed.Position) + Vector3.new(0, 7, 0) } 
+								{ CFrame = bed.CFrame + Vector3.new(0, 3, 0) }
 							)
                             task.wait(0.1)
                             bedtween:Play()
@@ -9071,12 +9087,8 @@ end)
                             playertween = tweenService:Create(
 								lplr.Character:WaitForChild("HumanoidRootPart"), 
 								TweenInfo.new(
-									0.85, 
-									Enum.EasingStyle.Quad, 
-									Enum.EasingDirection.InOut, 
-									0, 
-									false, 
-									0 
+									calculateTweenSpeed(),
+									Enum.EasingStyle.Linear
 								), 
 								{ CFrame = target.RootPart.CFrame + Vector3.new(0, 1, 0) } 
 							)
@@ -9118,12 +9130,8 @@ end)
                                     playertween = tweenService:Create(
 										lplr.Character:WaitForChild("HumanoidRootPart"), 
 										TweenInfo.new(
-											0.85, 
-											Enum.EasingStyle.Quad, 
-											Enum.EasingDirection.InOut, 
-											0, 
-											false, 
-											0 
+											calculateTweenSpeed(),
+											Enum.EasingStyle.Linear
 										), 
 										{ CFrame = target.RootPart.CFrame + Vector3.new(0, 1, 0) } 
 									)
@@ -9176,8 +9184,9 @@ end)
             end
         end
     end))
-end)]]
+end)
 run(function()
+	--OLD VERSION
     local Autowin = { Enabled = false }
     local AutowinNotification = { Enabled = true }
     local bedtween
@@ -9392,7 +9401,7 @@ run(function()
     end
     
     Autowin = katware.Categories.Blatant:CreateModule({
-        Name = "Autowin",
+        Name = "Autowin (Old Version!)",
         Function = function(callback)
             if callback then
                 task.spawn(function()
