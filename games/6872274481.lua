@@ -9568,7 +9568,7 @@ run(function()
 			end
 		end)
 		
-		task.delay(tweenTimeout, function()
+		--[[task.delay(tweenTimeout, function()
 			if playertween and playertween.PlaybackState == Enum.PlaybackState.Playing then
 				notif("Autowin", "Tween timeout - forcing reset", 3)
 				playertween:Cancel()
@@ -9579,7 +9579,7 @@ run(function()
 				handleDesync()
 				return false
 			end
-		end)
+		end)]]
 		
 		playertween:Play()
 		return true
@@ -10152,14 +10152,14 @@ run(function()
 				bedtween = tweenService:Create(lplr.Character:WaitForChild("HumanoidRootPart"), TweenInfo.new(0.65, Enum.EasingStyle.Linear, Enum.EasingDirection.In, 0, false, 0), { CFrame = CFrame.new(bed.Position) + Vector3.new(0, 10, 0) })
                 bedtween:Play()
 
-                task.spawn(function()
+                --[[task.spawn(function()
                     task.wait(tweenTimeout)
                     if bedtween and (bedtween.PlaybackState == Enum.PlaybackState.Playing or bedtween.PlaybackState == Enum.PlaybackState.Delayed) then
                         notif("BedTP", "Tween to bed timed out!", 3)
                         bedtween:Cancel()
                         BedTP:Toggle(false)
                     end
-                end)
+                end)]]
 
                 bedtween.Completed:Wait()
 
