@@ -9642,14 +9642,14 @@ run(function()
                             task.wait(0.1)
                             bedtween:Play()
 
-                            task.delay(tweenTimeout, function()
+                            --[[task.delay(tweenTimeout, function()
                                 if bedtween and (bedtween.PlaybackState == Enum.PlaybackState.Playing or bedtween.PlaybackState == Enum.PlaybackState.Delayed) then
                                     notif("Autowin", "Tween to bed timed out. Resetting.", 5)
                                     lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
                                     lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
                                     bedtween:Cancel()
                                 end
-                            end)
+                            end)]]
 
                             bedtween.Completed:Wait()
 							task.wait(5)
@@ -9741,7 +9741,7 @@ run(function()
                                             isTweening = true
                                             playertween:Play()
 
-                                            task.delay(tweenTimeout, function()
+                                            --[[task.delay(tweenTimeout, function()
                                                 if isTweening and playertween and (playertween.PlaybackState == Enum.PlaybackState.Playing or playertween.PlaybackState == Enum.PlaybackState.Delayed) then
                                                     notif("Autowin", "Tween to target timed out. Resetting.", 5)
                                                     if IsAlive(lplr) then
@@ -9750,7 +9750,7 @@ run(function()
                                                     end
                                                     playertween:Cancel()
                                                 end
-                                            end)
+                                            end)]]
 
                                             playertween.Completed:Connect(function()
                                                 isTweening = false
@@ -9824,7 +9824,7 @@ run(function()
                             isTweening = true
                             playertween:Play()
 
-                            task.delay(tweenTimeout, function()
+                            --[[task.delay(tweenTimeout, function()
                                 if isTweening and playertween and (playertween.PlaybackState == Enum.PlaybackState.Playing or playertween.PlaybackState == Enum.PlaybackState.Delayed) then
                                     notif("Autowin", "Tween to target timed out. Resetting.", 5)
                                     if IsAlive(lplr) then
@@ -9833,7 +9833,7 @@ run(function()
                                     end
                                     playertween:Cancel()
                                 end
-                            end)
+                            end)]]
 
                             playertween.Completed:Connect(function()
                                 isTweening = false
@@ -9860,7 +9860,7 @@ run(function()
                                     isTweening = true
                                     playertween:Play()
 
-                                    task.delay(tweenTimeout, function()
+                                    --[[task.delay(tweenTimeout, function()
                                         if isTweening and playertween and (playertween.PlaybackState == Enum.PlaybackState.Playing or playertween.PlaybackState == Enum.PlaybackState.Delayed) then
                                             notif("Autowin", "Tween to target timed out. Resetting.", 5)
                                             if IsAlive(lplr) then
@@ -9869,7 +9869,7 @@ run(function()
                                             end
                                             playertween:Cancel()
                                         end
-                                    end)
+                                    end)]]
 
                                     playertween.Completed:Connect(function()
                                         isTweening = false
