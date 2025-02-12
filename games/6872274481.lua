@@ -9098,7 +9098,7 @@ run(function()
 													isTweening = false
 												end)
 												
-												task.wait(0.1) // Small delay between tweens
+												task.wait(0.1)
 											until not (FindTarget(20, true) and FindTarget(20, true).RootPart) or not Autowin.Enabled or not IsAlive(lplr)
 										end
 									end
