@@ -9320,7 +9320,7 @@ run(function()
             notif("Autowin", "Ping: " .. math.floor(ping) .. "ms | Tween Speed: " .. string.format("%.2f", tweenSpeed) .. "s", 3)
         end
         print("tweenSpeed: " .. tweenSpeed)    
-        return tweenSpeed
+        return baseTweenSpeed
     end
 
     local function IsAlive(plr)
