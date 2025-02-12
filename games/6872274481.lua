@@ -9844,9 +9844,9 @@ run(function()
                             end
                             playertween.Completed:Wait()
                             if not Autowin.Enabled then return end
-                            if FindTarget(20, true) and FindTarget(20, true).RootPart and IsAlive(lplr) then
+                            if FindTarget(60, true) and FindTarget(60, true).RootPart and IsAlive(lplr) then
                                 repeat
-                                    target = FindTarget(20, true)
+                                    target = FindTarget(60, true)
                                     if not target or not target.RootPart or not IsAlive(lplr) then break end
                                     playertween = tweenService:Create(
                                         lplr.Character:WaitForChild("HumanoidRootPart"), 
@@ -9876,7 +9876,7 @@ run(function()
                                     end)
 
                                     task.wait()
-                                until not (FindTarget(20, true) and FindTarget(20, true).RootPart) or (not Autowin.Enabled) or (not IsAlive(lplr))
+                                until not (FindTarget(60, true) and FindTarget(60, true).RootPart) or (not Autowin.Enabled) or (not IsAlive(lplr))
                             end
 
                             if IsAlive(lplr) and FindTeamBed() and Autowin.Enabled then
@@ -9900,9 +9900,9 @@ run(function()
 							end
 							playertween.Completed:Wait()
 							if not Autowin.Enabled then return end
-							if FindTarget(20, true) and FindTarget(20, true).RootPart and IsAlive(lplr) then
+							if FindTarget(60, true) and FindTarget(60, true).RootPart and IsAlive(lplr) then
 								repeat
-									target = FindTarget(20, true)
+									target = FindTarget(60, true)
 									if not target or not target.RootPart or not IsAlive(lplr) then break end
 									playertween = tweenService:Create(
 										lplr.Character:WaitForChild("HumanoidRootPart"), 
@@ -9914,7 +9914,7 @@ run(function()
 									)
 									playertween:Play()
 									task.wait()
-								until not (FindTarget(20, true) and FindTarget(20, true).RootPart) or (not Autowin.Enabled) or (not IsAlive(lplr))
+								until not (FindTarget(60, true) and FindTarget(60, true).RootPart) or (not Autowin.Enabled) or (not IsAlive(lplr))
 							end
 						else
 							if store.matchState == 2 then return end
