@@ -9053,7 +9053,7 @@ run(function()
 
                             lastActionTime = tick()
 
-                            while Autowin.Enabled and IsAlive(lplr) do
+							while Autowin.Enabled and IsAlive(lplr) do
 								if (tick() - lastActionTime) >= baseActionDelay then
 									if handleDesync() then
 										continue
@@ -9096,37 +9096,10 @@ run(function()
 												
 												playertween.Completed:Connect(function()
 													isTweening = false
-													task.wait(0.1)
-													
-													if IsAlive(lplr) and target.RootPart then
-														local finalDist = GetMagnitudeOf2Objects(lplr.Character.HumanoidRootPart, target.RootPart)
-														if finalDist > 15 then
-															notif("Autowin", "Tween failed - position mismatch", 3)
-															if IsAlive(lplr) then
-																lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
-																lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
-															end
-															handleDesync()
-														end
-													end
 												end)
 												
-												task.wait(0.1)
+												task.wait(0.1) // Small delay between tweens
 											until not (FindTarget(20, true) and FindTarget(20, true).RootPart) or not Autowin.Enabled or not IsAlive(lplr)
-											
-											lastActionTime = tick()
-										else
-											if targetSearchRange < maxSearchRange then
-												targetSearchRange = math.min(targetSearchRange + searchIncrement, maxSearchRange)
-												notif("Autowin", "Expanding search range to " .. targetSearchRange .. " studs", 3)
-											else
-												notif("Autowin", "No targets found - resetting position", 3)
-												if IsAlive(lplr) then
-													lplr.Character:WaitForChild("Humanoid"):TakeDamage(lplr.Character:WaitForChild("Humanoid").Health)
-													lplr.Character:WaitForChild("Humanoid"):ChangeState(Enum.HumanoidStateType.Dead)
-												end
-												targetSearchRange = 20
-											end
 										end
 									end
 								end
